@@ -16,7 +16,6 @@ return new class extends Migration
             $table->integer('ra_score');
             $table->text('ra_comment')->nullable();
             $table->timestamps();
-
             $table->foreignId('p_id')->constrained('products')->onDelete('cascade');
             $table->foreignId('cus_id')->constrained('customers')->onDelete('cascade');
         });

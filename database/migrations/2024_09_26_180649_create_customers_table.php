@@ -14,12 +14,15 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->id(); // Đổi tên cột id thành cus_id
             $table->string('cus_name'); // Thêm cột cus_name kiểu string
+            $table->string('cus_familyname'); // Thêm cột cus_familyname kiểu string
             $table->string('cus_email'); // Thêm cột cus_email kiểu string
             $table->string('cus_sdt'); // Thêm cột cus_sdt kiểu string
             $table->string('cus_password'); // Thêm cột cus_password kiểu string
-            $table->string('cus_address'); // Thêm cột cus_address kiểu string
+            $table->string('cus_address')->nullable(); // Thêm cột cus_address kiểu string
             $table->integer('cus_points'); // Thêm cột cus_points kiểu integer
             $table->string('cus_sex'); // Thêm cột cus_sex kiểu string
+            $table->string('cus_birthday'); // Thêm cột cus_image kiểu string
+            $table->string('cus_image')->nullable(); // Thêm cột cus_image kiểu string
             $table->timestamps();
         });
     }

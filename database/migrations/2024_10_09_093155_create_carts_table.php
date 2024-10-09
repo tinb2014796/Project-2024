@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
-            $table->id(); // Tự động tăng, dùng làm khóa chính
-            $table->string('c_name');
-            $table->string('c_image');
+        Schema::create('carts', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('customer_id')->constrained('customers');
+            $table->foreignId('product_id')->constrained('products');
+            $table->integer('quantity');
+            $table->string('discount')->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('carts');
     }
 };

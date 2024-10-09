@@ -1,25 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Grid, Box, Typography, Paper, Button, Checkbox, TextField, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import SearchIcon from '@mui/icons-material/Search';
+import { usePage, router } from "@inertiajs/react";
 
 const Cart = () => {
-  const [quantity, setQuantity] = useState(1);
-  const price = 325000;
+  const { carts } = usePage().props;
+  console.log(carts);
 
-  const handleIncrease = () => {
-    setQuantity(prevQuantity => prevQuantity + 1);
-  };
-
-  const handleDecrease = () => {
-    if (quantity > 1) {
-      setQuantity(prevQuantity => prevQuantity - 1);
-    }
-  };
-
-  const totalAmount = quantity * price;
+const deleteCart = (id) => {
+  router.delete(`/user/cart/product/${id}`);
+  console.log(id);
+}
 
   return (
     <>
@@ -60,37 +54,39 @@ const Cart = () => {
             <Grid item xs={2}><Typography variant="subtitle1">Thao Tác</Typography></Grid>
           </Grid>
           
-          <Grid item container xs={12} alignItems="center">
-            <Grid item xs={1}><Checkbox /></Grid>
-            <Grid item xs={5}>
-              <Box display="flex" alignItems="center">
-                <img src="/images/banphim.webp" alt="Bàn phím" style={{ width: 80, height: 80, marginRight: 16 }} />
-                <Box>
-                  <Typography variant="body1">Bàn Phím Cơ Máy Tính Gaming K550 Pro Full Led 7 Chế Độ Hi...</Typography>
-                  <Typography variant="body2">Phân Loại Hàng: Đen,Blue Switch</Typography>
-                  <Typography variant="body2" color="error">Đổi ý miễn phí 15 ngày</Typography>
+          {carts.map((item, index) => (
+            <Grid key={index} item container xs={12} alignItems="center">
+              <Grid item xs={1}><Checkbox /></Grid>
+              <Grid item xs={5}>
+                <Box display="flex" alignItems="center">
+                  <img src={item.product.images[0].ip_image} alt={item.product.p_name} style={{ width: 80, height: 80, marginRight: 16 }} />
+                  <Box>
+                    <Typography variant="body1">{item.product.p_name}</Typography>
+                    <Typography variant="body2">{item.product.p_description}</Typography>
+                  </Box>
                 </Box>
-              </Box>
+              </Grid>
+              <Grid item xs={1}>
+                <Typography variant="body1">₫{parseFloat(item.product.p_selling).toLocaleString()}</Typography>
+              </Grid>
+              <Grid item xs={2}>
+                <Box display="flex" alignItems="center">
+                  <IconButton size="small"><RemoveIcon /></IconButton>
+                  <TextField value={item.quantity} size="small" sx={{ width: 40, mx: 1 }} readOnly />
+                  <IconButton size="small"><AddIcon /></IconButton>
+                </Box>
+              </Grid>
+              <Grid item xs={1}>
+                <Typography variant="body1" color="error">
+                  ₫{(parseFloat(item.product.p_selling) * item.quantity).toLocaleString()}
+                </Typography>
+              </Grid>
+              <Grid item xs={2}>
+                <Button variant="text" color="error" onClick={() => deleteCart(item.id)}>Xóa</Button>
+                <Button variant="text" color="primary">Tìm sản phẩm tương tự</Button>
+              </Grid>
             </Grid>
-            <Grid item xs={1}>
-              <Typography variant="body2" sx={{ textDecoration: 'line-through' }}>₫598.000</Typography>
-              <Typography variant="body1">₫{price.toLocaleString()}</Typography>
-            </Grid>
-            <Grid item xs={2}>
-              <Box display="flex" alignItems="center">
-                <IconButton size="small" onClick={handleDecrease}><RemoveIcon /></IconButton>
-                <TextField value={quantity} size="small" sx={{ width: 40, mx: 1 }} readOnly />
-                <IconButton size="small" onClick={handleIncrease}><AddIcon /></IconButton>
-              </Box>
-            </Grid>
-            <Grid item xs={1}>
-              <Typography variant="body1" color="error">₫{totalAmount.toLocaleString()}</Typography>
-            </Grid>
-            <Grid item xs={2}>
-              <Button variant="text" color="error">Xóa</Button>
-              <Button variant="text" color="primary">Tìm sản phẩm tương tự</Button>
-            </Grid>
-          </Grid>
+          ))}
           
           <Grid item xs={12}>
             <Box bgcolor="#f5f5f5" p={2}>

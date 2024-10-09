@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('p_name');
             $table->decimal('p_selling', 15, 2);
             $table->integer('p_quantity');
-            $table->string('p_image');
             $table->text('p_description');
             $table->decimal('p_purchase', 15, 2);
             $table->timestamps();

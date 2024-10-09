@@ -15,8 +15,17 @@ class PageController extends Controller
         $categories = Category::all();
         $brands = Brand::all();
         $saleOffs = SaleOff::all();
-        $products = ProductS::all();
+        $products = ProductS::with('images')->get();
         return Inertia::render('Admin/Products', compact('categories', 'brands', 'saleOffs', 'products'));
+    }
+
+    public function detailProduct($id)
+    {
+        $product = ProductS::with('images')->find($id);
+        $categories = Category::all();
+        $brands = Brand::all();
+        $saleOffs = SaleOff::all();
+        return Inertia::render('Admin/DetailProduct', compact('product', 'categories', 'brands', 'saleOffs'));
     }
     public function dashboard()
     {
@@ -30,28 +39,5 @@ class PageController extends Controller
     {
         return Inertia::render('Admin/Customers');
     }
-//     public function detailProduct()
-//     {
-//         return Inertia::render('Auth/DetailProduct');
-//     }   
-//     public function cart()
-//     {
-//         return Inertia::render('Auth/Cart');
-//     }   
-//     public function repay()
-//     {
-//         return Inertia::render('Auth/Repay');
-//     }
-//     public function report()
-//     {
-//         return Inertia::render('Auth/Report');
-//     }
-//     public function pay()
-//     {
-//         return Inertia::render('Auth/Pay');
-//     }
-//     public function user()
-//     {
-//         return Inertia::render('Auth/User');
-//     }
+    
 }

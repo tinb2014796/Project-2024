@@ -15,12 +15,15 @@ class CategorySeeder extends Seeder
     {
         DB::table('categories')->insert([
             'c_name' => 'noi',
+            'c_image' => 'noi.jpg',
         ]);
         DB::table('categories')->insert([
             'c_name' => 'Ly',
+            'c_image' => 'ly.jpg',
         ]);
         DB::table('categories')->insert([
             'c_name' => 'Chen',
+            'c_image' => 'chen.jpg',
         ]);
     }
 }

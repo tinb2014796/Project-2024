@@ -6,6 +6,8 @@ use App\Models\Products;
 use Illuminate\Http\Request;
 use App\Http\Requests\ProductsRequest;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use App\Models\ImageProduct;
 
 class ProductsController extends Controller
 {
@@ -22,16 +24,19 @@ class ProductsController extends Controller
      */
     public function createProduct(Request $request)
     {
-        $products = new Products();
-        $products->p_name = $request->p_name;
-        $products->p_selling = $request->p_selling;
-        $products->p_purchase = $request->p_purchase;
-        $products->p_quantity = $request->p_quantity;
-        $products->p_description = $request->p_description;
-        $products->c_id = $request->c_id;
-        $products->b_id = $request->b_id;
-        $products->s_id = $request->s_id;
+        $products = Products::create([
+            'p_name' => $request->p_name,
+            'p_selling' => $request->p_selling,
+            'p_purchase' => $request->p_purchase,
+            'p_quantity' => $request->p_quantity,
+            'p_description' => $request->p_description,
+            'c_id' => $request->c_id,
+            'b_id' => $request->b_id,
+            's_id' => $request->s_id,
+        ]);
 
+        
+    
         //Lấy file ảnh từ request
         $file = $request->file('p_image');
         
@@ -43,8 +48,12 @@ class ProductsController extends Controller
         
         // Tạo URL đầy đủ cho ảnh
         $imageUrl = asset('images/'.$file_name);
-        $products->p_image = $imageUrl;
-        $products->save();
+        
+        ImageProduct::create([
+            'p_id' => $products->id,
+            'ip_image' => $imageUrl,
+        ]);
+       
         return redirect()->back();
     }
 
@@ -98,6 +107,23 @@ class ProductsController extends Controller
         
         $products->save();
         return redirect()->back()->with('success', 'Cập nhật sản phẩm thành công');
+    }
+
+    public function addProductImage(Request $request)
+    {
+        $image = $request->file('image');
+        $product_id = $request->product_id;
+
+        $file_name = time().'_'.$image->getClientOriginalName();
+        $image->move(public_path('images'), $file_name);
+        $imageUrl = asset('images/'.$file_name);
+
+        ImageProduct::create([
+            'p_id' => $product_id,
+            'ip_image' => $imageUrl,
+        ]);
+
+        return redirect()->back()->with('success', 'Thêm hình ảnh thành công');
     }
 
     /**

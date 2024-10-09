@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
-            $table->id(); // Tự động tăng, dùng làm khóa chính
-            $table->string('c_name');
-            $table->string('c_image');
+        Schema::create('image_products', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('p_id')->constrained('products')->onDelete('cascade');
+            $table->string('ip_image');
             $table->timestamps();
         });
     }
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('image_products');
     }
 };
