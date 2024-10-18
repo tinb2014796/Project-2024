@@ -46,7 +46,7 @@ const ProductDetail = () => {
       formData.append('image', selectedImage);
       formData.append('product_id', product.id);
 
-      router.post('/add-product-image', formData, {
+      router.post('/admin/add-product-image', formData, {
         preserveState: true,
         preserveScroll: true,
         onSuccess: handleCloseAddImageModal,
@@ -55,13 +55,13 @@ const ProductDetail = () => {
   };
 
   const handleDeleteProduct = () => {
-    router.delete(`/products/delete/${product.id}`, {
-      onSuccess: () => router.visit('/products'),
+    router.delete(`/admin/products/delete/${product.id}`, {
+      onSuccess: () => router.visit('/admin/products'),
     });
   };
 
   const handleEditProduct = (editedProduct) => {
-    router.post(`/products/edit/${product.id}`, editedProduct, {
+    router.post(`/admin/products/edit/${product.id}`, editedProduct, {
       preserveState: true,
       preserveScroll: true,
       onSuccess: () => setEditModalOpen(false),

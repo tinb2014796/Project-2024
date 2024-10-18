@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Button, Modal, TextField, Select, MenuItem, FormControl, InputLabel, Grid
 } from '@mui/material';
-import { usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 
 export default function AddProductModal({ open, onClose, newProduct, onInputChange, onSubmit, categories, brands, saleOffs }) {
   const [previewImage, setPreviewImage] = useState(null);

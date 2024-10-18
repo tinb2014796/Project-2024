@@ -20,8 +20,8 @@ return new class extends Migration
             $table->decimal('p_purchase', 15, 2);
             $table->timestamps();
             $table->foreignId('c_id')->constrained('categories')->onDelete('cascade');
-            $table->foreignId('b_id')->constrained('brands')->onDelete('cascade');
-            $table->foreignId('s_id')->constrained('sale_offs')->onDelete('cascade');
+            $table->foreignId('b_id')->constrained('brands')->onDelete('cascade')->nullable();
+            $table->foreignId('s_id')->constrained('sale_offs')->onDelete('cascade')->nullable();
 
        
         });

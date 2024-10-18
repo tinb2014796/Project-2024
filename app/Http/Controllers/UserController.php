@@ -18,11 +18,12 @@ class UserController extends Controller
     {
         $customer = $request->session()->get('customer');
         $products = Products::with('images')->get();
+        $categories = Category::all();
         if($customer){
            
-            return Inertia::render('User/Home', compact('products','customer'));
+            return Inertia::render('User/Home', compact('products','customer','categories'));
         }
-        return Inertia::render('User/Home', compact('products'));
+        return Inertia::render('User/Home', compact('products','categories'));
     }
     public function detailProduct($id)
     {
@@ -47,9 +48,14 @@ class UserController extends Controller
     {
         return Inertia::render('User/Report');
     }
-    public function pay()
+    public function pay(Request $request)
     {
-        return Inertia::render('User/Pay');
+        $customer = $request->customer_id;
+        $customer = Customer::find($customer);
+        $cart = $request->all();
+        $products = Products::with('images')->get();
+        return Inertia::render('User/Pay', compact('cart', 'products','customer'));
+
     }
     public function user()
     {

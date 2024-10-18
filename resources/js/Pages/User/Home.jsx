@@ -7,18 +7,15 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import { usePage } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
 
-const categories = [
-  { name: 'Đồ xuân hè', productCount: 21, image: 'https://product.hstatic.net/200000881795/product/binh-giu-nhiet-mixi-3-600x900_905c84e2677a4f8c998e0de5cb3aa9d8.jpg' },
-  
-];
+
 
 function CategoryItem({ category }) {
   return (
     <Paper elevation={0} sx={{ textAlign: 'center', p: 2 }}>
       <Box
         component="img"
-        src={category.image}
-        alt={category.name}
+        src={category.c_image}
+        alt={category.c_name}
         sx={{
           width: 100,
           height: 100,
@@ -69,7 +66,7 @@ function InfoItem({ icon, title, description }) {
 }
 
 function Home() {
-    const { products} = usePage().props;
+    const { products, categories } = usePage().props;
   return (
     <Box sx={{ p: 4 }}>
       <Typography 

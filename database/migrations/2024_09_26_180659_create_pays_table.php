@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('pays', function (Blueprint $table) {
             $table->id(); // Đổi tên cột id thành pa_id
-            $table->string('pa_type'); // Thêm cột pa_type kiểu string
+            $table->string('pa_type'); 
+            $table->string('pa_status');
+            // Thêm cột pa_type kiểu string
             $table->timestamps();
         });
     }

@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id(); // Đổi tên cột id thành or_id
             $table->dateTime('or_date'); // Thêm cột or_date kiểu dateTime
             $table->decimal('or_total', 15, 2); // Thêm cột or_total kiểu decimal
-            $table->string('or_status'); // Thêm cột or_status kiểu string
+            $table->string('or_status');
+            $table->string('or_note'); // Thêm cột or_status kiểu string
             $table->timestamps();
             $table->foreignId('cus_id')->constrained('customers')->onDelete('cascade');
             $table->foreignId('pa_id')->constrained('pays')->onDelete('cascade');

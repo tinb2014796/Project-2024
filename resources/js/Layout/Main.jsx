@@ -6,10 +6,10 @@ import { Category as CategoryIcon, ShoppingCart as ShoppingCartIcon, Receipt as 
 const drawerWidth = 240;
 
 const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, link: '/', active: true },
-    { text: 'Sản phẩm', icon: <ShoppingCartIcon />, link: '/products', active: false },
-    { text: 'Đơn hàng', icon: <ReceiptIcon />, link: '/orders', active: false },
-    { text: 'Người dùng', icon: <PersonIcon />, link: '/user', active: false },
+    { text: 'Dashboard', icon: <DashboardIcon />, link: '/admin', active: true },
+    { text: 'Sản phẩm', icon: <ShoppingCartIcon />, link: '/admin/products', active: false },
+    { text: 'Đơn hàng', icon: <ReceiptIcon />, link: '/admin/orders', active: false },
+    { text: 'Người dùng', icon: <PersonIcon />, link: '/admin/user', active: false },
 ];
 
 

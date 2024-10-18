@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Box, Typography, Button, Table, TableBody, TableCell, 
-  TableContainer, TableHead, TableRow, Paper, Avatar,
-  Modal, TextField, Select, MenuItem, FormControl, InputLabel,
-  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
+  TableContainer, TableHead, TableRow, Paper, Avatar
 } from '@mui/material';
 import { router, usePage, Link } from "@inertiajs/react";
 import AddProductModal from '../../Components/AddProductModal';
@@ -12,8 +10,6 @@ export default function Products() {
   const { products: initialProducts, categories, brands, saleOffs } = usePage().props;
   console.log(initialProducts);
   const [products, setProducts] = useState(initialProducts);
-  const [openCategoryModal, setOpenCategoryModal] = useState(false);
-  const [newCategory, setNewCategory] = useState('');
   const [openAddProductModal, setOpenAddProductModal] = useState(false);
   const [newProduct, setNewProduct] = useState({
     p_name: '',
@@ -31,26 +27,8 @@ export default function Products() {
     setProducts(initialProducts);
   }, [initialProducts]);
 
-  const handleOpenCategoryModal = () => setOpenCategoryModal(true);
-  const handleCloseCategoryModal = () => setOpenCategoryModal(false);
   const handleOpenAddProductModal = () => setOpenAddProductModal(true);
   const handleCloseAddProductModal = () => setOpenAddProductModal(false);
-
-  const handleAddCategory = () => {
-    if (newCategory && !categories.includes(newCategory)) {
-      setCategories([...categories, newCategory]);
-      setNewCategory('');
-    }
-    handleCloseCategoryModal();
-  };
-
-  const handleInputChange = (event) => {
-    const { name, value } = event.target;
-    setNewProduct(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
-  };
 
   const handleAddProduct = (event) => {
     event.preventDefault();
@@ -58,7 +36,7 @@ export default function Products() {
     for (const key in newProduct) {
       formData.append(key, newProduct[key]);
     }
-    router.post('/products/create', formData, {
+    router.post('/admin/products/create', formData, {
       forceFormData: true,
       preserveState: true,
       preserveScroll: true,
@@ -79,17 +57,26 @@ export default function Products() {
     });
   };
 
+  // Thêm hàm handleInputChange
+  const handleInputChange = (event) => {
+    const { name, value, type, files } = event.target;
+    setNewProduct(prevState => ({
+      ...prevState,
+      [name]: type === 'file' ? files[0] : value
+    }));
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>Sản phẩm</Typography>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
         <Box>
-          <Button variant="contained" color="secondary" onClick={handleOpenCategoryModal} sx={{ mr: 1 }}>Quản lý danh mục</Button>
+          <Button variant="contained" color="secondary" onClick={() => router.visit('/admin/categories')} sx={{ mr: 1 }}>Quản lý danh mục</Button>
           <Button variant="contained" color="primary" onClick={handleOpenAddProductModal}>Thêm sản phẩm</Button>
         </Box>
         <Box>
           <Button variant="outlined" sx={{ mr: 1 }}>Bộ lọc</Button>
-          <Button variant="outlined">Tải xuống tất cả</Button>
+          <Button variant="outlined">Tải xung tất cả</Button>
         </Box>
       </Box>
       <TableContainer component={Paper}>
@@ -109,7 +96,7 @@ export default function Products() {
           </TableHead>
           <TableBody>
             {products.map((product) => (
-              <TableRow key={product.id} onClick={() => router.visit(`/detail-product/${product.id}`)}>
+              <TableRow key={product.id} onClick={() => router.visit(`/admin/detail-product/${product.id}`)}>
                 <TableCell>
                   <Avatar src={product.images && product.images.length > 0 && product.images[0].ip_image ? product.images[0].ip_image : 'https://via.placeholder.com/150'} />
                 </TableCell>
@@ -131,48 +118,6 @@ export default function Products() {
         <Typography>Trang 1 / 10</Typography>
         <Button variant="outlined">Tiếp</Button>
       </Box>
-
-      <Modal
-        open={openCategoryModal}
-        onClose={handleCloseCategoryModal}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 400,
-          bgcolor: 'background.paper',
-          boxShadow: 24,
-          p: 4,
-        }}>
-          <Typography id="modal-modal-title" variant="h6" component="h2" sx={{ mb: 2 }}>
-            Quản lý danh mục
-          </Typography>
-          <Box sx={{ mb: 2 }}>
-            {categories.map((category, index) => (
-              <Typography key={index}>{category}</Typography>
-            ))}
-          </Box>
-          <TextField
-            fullWidth
-            label="Danh mục mới"
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button onClick={handleAddCategory} variant="contained" color="primary">
-              Thêm danh mục
-            </Button>
-            <Button onClick={handleCloseCategoryModal} variant="contained" color="secondary">
-              Đóng
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
 
       <AddProductModal
         open={openAddProductModal}

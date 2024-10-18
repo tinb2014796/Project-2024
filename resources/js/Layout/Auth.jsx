@@ -54,7 +54,7 @@ export default function Main({ children }) {
                 <Container maxWidth="lg">
                     <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
                         <Typography variant="h6" component="div">
-                            <img src="/images/1727972789_3.jpg" alt="MIXISHOP" height="40" />
+                            {/* <img src="/images/1727972789_3.jpg" alt="MIXISHOP" height="40" /> */}
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <Button color="inherit" component={Link} href="/user/home">Trang chủ</Button>
@@ -120,7 +120,7 @@ export default function Main({ children }) {
                             {customer ? (
                                 <Typography variant="h6" component="div">{customer.cus_name}</Typography>
                             ) : (
-                                <Typography variant="h6" component="div">Con co Co Cai Cang Cong Cong </Typography>
+                                <Typography variant="h6" component="div"> </Typography>
                             )}
                         </Box>
                     </Toolbar>

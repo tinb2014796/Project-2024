@@ -79,15 +79,21 @@ class CustomerController extends Controller
      */
     public function edit(Customer $customer)
     {
-        //
+        
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Customer $customer)
+    public function updateAddress(Request $request, Customer $customer)
     {
-        //
+        $customer = $request->customer_id;
+        $customer = Customer::find($customer);
+        $customer->cus_address = $request->address;
+        $customer->cus_sdt = $request->phone;
+        $customer->save();
+        return redirect()->back()->with('success', 'Địa chỉ đã được cập nhật');
+
     }
 
     /**
