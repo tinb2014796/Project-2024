@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('reports', function (Blueprint $table) {
             $table->id(); // Đổi tên cột id thành r_id
-            $table->decimal('r_revenue', 15, 2); // Thêm cột r_revenue kiểu decimal
-            $table->decimal('r_expense', 15, 2); // Thêm cột r_expense kiểu decimal
+            $table->decimal('r_revenue', 15, 0); // Thêm cột r_revenue kiểu decimal
+            $table->decimal('r_expense', 15, 0); // Thêm cột r_expense kiểu decimal
             $table->dateTime('r_start'); // Thêm cột r_start kiểu dateTime
             $table->dateTime('r_end'); // Thêm cột r_end kiểu dateTime
             $table->timestamps();

@@ -1,15 +1,17 @@
 import React from 'react';
 import { Link, usePage } from "@inertiajs/react";
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Typography, Box, InputBase, IconButton, Avatar } from '@mui/material';
-import { Dashboard as DashboardIcon, Widgets as WidgetsIcon, ViewQuilt as LayoutIcon, BarChart as ChartIcon, Brush as UIElementsIcon, Assignment as FormsIcon, TableChart as TablesIcon, Event as CalendarIcon, Photo as GalleryIcon, ViewKanban as KanbanIcon, Mail as MailboxIcon, Pages as PagesIcon, Search as SearchIcon } from '@mui/icons-material';
-import { Category as CategoryIcon, ShoppingCart as ShoppingCartIcon, Receipt as ReceiptIcon, Person as PersonIcon } from '@mui/icons-material';
+import { Dashboard as DashboardIcon, Widgets as WidgetsIcon, ViewQuilt as LayoutIcon, BarChart as ChartIcon, Brush as UIElementsIcon, Assignment as FormsIcon, TableChart as TablesIcon, Event as CalendarIcon, Photo as GalleryIcon, ViewKanban as KanbanIcon, Mail as MailboxIcon, Pages as PagesIcon, Search as SearchIcon, Discount as DiscountIcon } from '@mui/icons-material';
+import { Category as CategoryIcon, ShoppingCart as ShoppingCartIcon, Receipt as ReceiptIcon, Person as PersonIcon, DeliveryDining as DeliveryDiningIcon, LocalOffer as LocalOfferIcon } from '@mui/icons-material';
 const drawerWidth = 240;
 
 const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, link: '/admin', active: true },
+    { text: 'Dashboard', icon: <DashboardIcon />, link: '/admin/home', active: true },
     { text: 'Sản phẩm', icon: <ShoppingCartIcon />, link: '/admin/products', active: false },
     { text: 'Đơn hàng', icon: <ReceiptIcon />, link: '/admin/orders', active: false },
     { text: 'Người dùng', icon: <PersonIcon />, link: '/admin/user', active: false },
+    { text: 'Đơn giao hàng', icon: <DeliveryDiningIcon />, link: '/admin/delivery', active: false },
+    { text: 'Khuyến mãi', icon: <DiscountIcon />, link: '/admin/sale-off', active: false },
 ];
 
 

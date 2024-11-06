@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('ratings', function (Blueprint $table) {
             $table->id();
-            $table->integer('ra_score');
+            $table->string('ra_score');
             $table->text('ra_comment')->nullable();
+            $table->string('ra_reply')->nullable()->cascadeOnDelete();
+            $table->string('ra_cus_reply')->nullable()->cascadeOnDelete();
             $table->timestamps();
+
             $table->foreignId('p_id')->constrained('products')->onDelete('cascade');
             $table->foreignId('cus_id')->constrained('customers')->onDelete('cascade');
         });

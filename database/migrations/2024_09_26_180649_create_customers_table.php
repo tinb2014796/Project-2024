@@ -19,6 +19,9 @@ return new class extends Migration
             $table->string('cus_sdt'); // Thêm cột cus_sdt kiểu string
             $table->string('cus_password'); // Thêm cột cus_password kiểu string
             $table->string('cus_address')->nullable(); // Thêm cột cus_address kiểu string
+            $table->string('province_id')->nullable();
+            $table->string('district_id')->nullable();
+            $table->string('ward_code')->nullable();
             $table->integer('cus_points'); // Thêm cột cus_points kiểu integer
             $table->string('cus_sex'); // Thêm cột cus_sex kiểu string
             $table->string('cus_birthday'); // Thêm cột cus_image kiểu string

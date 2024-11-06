@@ -29,11 +29,11 @@ const Signin = () => {
   const [cus_email, setCusEmail] = useState('');
   const [cus_password, setCusPassword] = useState('');
 
-  const handleSubmit = (e) => {
+const handleSubmit = (e) => {
     e.preventDefault();
     const response = router.post('/signin', { cus_email, cus_password });
     console.log(response);
-  };
+};
 
   return (
     <StyledPaper elevation={3}>

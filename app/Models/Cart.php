@@ -12,14 +12,14 @@ class Cart extends Model
 {
     use HasFactory;
     protected $table = 'carts';
-    protected $fillable = ['customer_id', 'product_id', 'quantity', 'discount'];
+    protected $fillable = ['id', 'customer_id', 'product_id', 'quantity', 'discount'];
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id', 'id');
     }
     public function product()
     {
-        return $this->belongsTo(Products::class, 'product_id', 'id')->with('images');
+        return $this->belongsTo(Products::class, 'product_id', 'id')->with('images','saleOff');
     }
     public function cart(){
         return $this->belongsTo(Customer::class, 'customer_id', 'id')->belongsTo(Products::class, 'product_id', 'id');

@@ -7,7 +7,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { usePage, router } from "@inertiajs/react";
 
 const ProductDetail = () => {
-  const { product, categories, brands } = usePage().props;
+  const { product, categories, brands, saleOffs } = usePage().props;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [customerId, setCustomerId] = useState(JSON.parse(localStorage.getItem('customer'))?.id || 1);
@@ -25,7 +25,9 @@ const ProductDetail = () => {
   };
 
   const handleIncreaseQuantity = () => {
-    setQuantity(prevQuantity => prevQuantity + 1);
+    if (quantity < product.p_quantity) {
+      setQuantity(prevQuantity => prevQuantity + 1);
+    }
   };
 
   const handleDecreaseQuantity = () => {
@@ -33,14 +35,70 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = () => {
+    if (!customerId) {
+      alert('Vui lòng đăng nhập để thêm vào giỏ hàng');
+      return;
+    }
+
+    if (quantity > product.p_quantity) {
+      alert('Số lượng sản phẩm không đủ');
+      return;
+    }
+
     const cart = {
       customer_id: customerId,
       product_id: product.id,
       quantity: quantity,
       discount: 0,
     };
+
     router.post('/user/cart', cart);
     alert('Thêm vào giỏ hàng thành công');
+  };
+
+  const handleBuyNow = () => {
+    if (!customerId) {
+      alert('Vui lòng đăng nhập để mua hàng');
+      return;
+    }
+
+    if (quantity > product.p_quantity) {
+      alert('Số lượng sản phẩm không đủ');
+      return;
+    }
+
+    const cart = {
+      customer_id: customerId,
+      product_id: product.id,
+      quantity: quantity,
+      discount: 0,
+    };
+
+    router.post('/pay', cart);
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  };
+
+  const checkValidSaleOff = (sale) => {
+    const currentDate = new Date();
+    const startDate = new Date(sale.s_start);
+    const endDate = new Date(sale.s_end);
+    return currentDate >= startDate && currentDate <= endDate;
+  };
+
+  const validSaleOffs = product.sale_off ? product.sale_off.filter(sale => checkValidSaleOff(sale)) : [];
+
+  const calculateDiscountedPrice = () => {
+    if (validSaleOffs.length === 0) return product.p_selling;
+    
+    const maxDiscount = Math.max(...validSaleOffs.map(sale => sale.s_percent));
+    const discountAmount = (product.p_selling * maxDiscount) / 100;
+    return product.p_selling - discountAmount;
   };
 
   return (
@@ -49,7 +107,17 @@ const ProductDetail = () => {
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
             <Paper elevation={3} sx={{ p: 2, position: 'relative', borderRadius: '16px', overflow: 'hidden', height: '600px' }}>
-              <img src={product.images[currentImageIndex].ip_image} alt={product.p_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img 
+                src={product.images[currentImageIndex].ip_image} 
+                alt={product.p_name} 
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'contain',
+                  imageRendering: 'high-quality',
+                  backgroundColor: '#fff'
+                }} 
+              />
               <IconButton onClick={handlePrevImage} sx={{ position: 'absolute', top: '50%', left: 10, backgroundColor: 'rgba(255,255,255,0.7)' }}>
                 <ArrowBackIosIcon />
               </IconButton>
@@ -57,7 +125,7 @@ const ProductDetail = () => {
                 <ArrowForwardIosIcon />
               </IconButton>
             </Paper>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, flexWrap: 'wrap', gap: 1 }}>
               {product.images.map((image, index) => (
                 <Box
                   key={index}
@@ -65,16 +133,18 @@ const ProductDetail = () => {
                   src={image.ip_image}
                   alt={`Thumbnail ${index + 1}`}
                   sx={{
-                    width: 60,
-                    height: 60,
-                    objectFit: 'cover',
+                    width: 80,
+                    height: 80,
+                    objectFit: 'contain',
                     borderRadius: '8px',
-                    m: 0.5,
                     cursor: 'pointer',
-                    border: currentImageIndex === index ? '2px solid #1976d2' : 'none',
+                    border: currentImageIndex === index ? '3px solid #1976d2' : '1px solid #ddd',
                     transition: 'all 0.3s ease',
+                    backgroundColor: '#fff',
+                    padding: '4px',
                     '&:hover': {
                       transform: 'scale(1.1)',
+                      boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
                     },
                   }}
                   onClick={() => setCurrentImageIndex(index)}
@@ -86,9 +156,20 @@ const ProductDetail = () => {
             <Typography variant="h4" gutterBottom fontWeight="bold" sx={{ color: '#333' }}>
               {product.p_name}
             </Typography>
-            <Typography variant="h5" color="error" gutterBottom fontWeight="bold">
-              đ{product.p_purchase.toLocaleString()}
-            </Typography>
+            {validSaleOffs.length > 0 ? (
+              <>
+                <Typography variant="h5" color="text.secondary" sx={{ textDecoration: 'line-through' }}>
+                  {formatCurrency(product.p_selling)}
+                </Typography>
+                <Typography variant="h5" color="error" gutterBottom fontWeight="bold">
+                  {formatCurrency(calculateDiscountedPrice())}
+                </Typography>
+              </>
+            ) : (
+              <Typography variant="h5" color="error" gutterBottom fontWeight="bold">
+                {formatCurrency(product.p_selling)}
+              </Typography>
+            )}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <Rating value={4.5} readOnly precision={0.5} />
               <Typography variant="body2" sx={{ ml: 1, color: '#666' }}>(50 đánh giá)</Typography>
@@ -100,7 +181,15 @@ const ProductDetail = () => {
               Thương hiệu: <Chip label={brands.find(brand => brand.id === product.b_id)?.b_name || 'Không xác định'} size="small" sx={{ backgroundColor: '#e0e0e0' }} />
             </Typography>
             <Typography variant="body2" gutterBottom>
-              Cửa hàng: <Chip label={product.s_id} size="small" sx={{ backgroundColor: '#e0e0e0' }} />
+              Khuyến mãi: {validSaleOffs.length > 0 ? validSaleOffs.map((sale, index) => (
+                <Chip 
+                  key={index}
+                  label={`Giảm ${sale.s_percent}%`} 
+                  size="small" 
+                  color="error"
+                  sx={{ ml: 1 }}
+                />
+              )) : <Typography component="span" sx={{ ml: 1, color: '#666' }}>Không có khuyến mãi</Typography>}
             </Typography>
             <Divider sx={{ my: 2 }} />
             <Typography variant="body1" paragraph>
@@ -111,12 +200,27 @@ const ProductDetail = () => {
               <Button variant="outlined" onClick={handleDecreaseQuantity}>-</Button>
               <Typography sx={{ mx: 2 }}>{quantity}</Typography>
               <Button variant="outlined" onClick={handleIncreaseQuantity}>+</Button>
+              <Typography variant="body2" sx={{ ml: 2, color: '#666' }}>
+                ({product.p_quantity} sản phẩm có sẵn)
+              </Typography>
             </Box>
             <Box sx={{ mb: 2 }}>
-              <Button variant="contained" color="primary" startIcon={<ShoppingCartIcon />} sx={{ mr: 2 }} onClick={handleAddToCart}>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                startIcon={<ShoppingCartIcon />} 
+                sx={{ mr: 2 }} 
+                onClick={handleAddToCart}
+                disabled={product.p_quantity === 0}
+              >
                 Thêm vào giỏ hàng
               </Button>
-              <Button variant="contained" color="error">
+              <Button 
+                variant="contained" 
+                color="error"
+                onClick={handleBuyNow}
+                disabled={product.p_quantity === 0}
+              >
                 Mua ngay
               </Button>
             </Box>

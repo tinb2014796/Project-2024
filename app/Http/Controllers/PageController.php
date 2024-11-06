@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Models\SaleOff;
 use App\Models\ProductS;
+use App\Models\Oders;
 class PageController extends Controller
 {
     public function products()
@@ -33,11 +34,19 @@ class PageController extends Controller
     }
     public function orders()
     {
-        return Inertia::render('Admin/Orders');
+        $orders = Oders::with('customer', 'payment', 'orderDetails')->get();
+        foreach ($orders as $order) {
+            $order->tracking_id ='LDV9P8';
+        }
+        return Inertia::render('Admin/Orders', compact('orders'));
     }
     public function customers()
     {
         return Inertia::render('Admin/Customers');
     }
-    
+    public function saleOff()
+    {
+        $saleOffs = SaleOff::all();
+        return Inertia::render('Admin/SaleOff', compact('saleOffs'));
+    }
 }

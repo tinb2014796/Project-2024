@@ -66,6 +66,13 @@ export default function Products() {
     }));
   };
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>Sản phẩm</Typography>
@@ -101,15 +108,15 @@ export default function Products() {
                   <Avatar src={product.images && product.images.length > 0 && product.images[0].ip_image ? product.images[0].ip_image : 'https://via.placeholder.com/150'} />
                 </TableCell>
                 <TableCell>{product.p_name}</TableCell>
-                <TableCell>₫{product.p_selling}</TableCell>
+                <TableCell>{formatCurrency(product.p_selling)}</TableCell>
                 <TableCell>{product.p_quantity}</TableCell>
                 <TableCell>{product.p_description}</TableCell>
-                <TableCell>₫{product.p_purchase}</TableCell>
+                <TableCell>{formatCurrency(product.p_purchase)}</TableCell>
                 <TableCell>{product.c_id}</TableCell>
                 <TableCell>{product.b_id}</TableCell>
                 <TableCell>{product.s_id}</TableCell>
               </TableRow>
-            ))}
+            ))} 
           </TableBody>
         </Table>
       </TableContainer>

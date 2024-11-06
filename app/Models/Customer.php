@@ -19,6 +19,9 @@ class Customer extends Model
         'cus_sex',
         'cus_birthday',
         'cus_address',
+        'province_id',
+        'district_id',
+        'ward_code',
         'cus_image',
         'cus_points',
     ];

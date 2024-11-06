@@ -13,6 +13,7 @@ class Category extends Model
     protected $table = 'categories';
     protected $fillable = ['c_name', 'c_image'];
 
+
 }
 
 

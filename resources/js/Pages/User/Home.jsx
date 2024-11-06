@@ -12,32 +12,59 @@ import { Link } from '@inertiajs/react';
 function CategoryItem({ category }) {
   return (
     <Paper elevation={0} sx={{ textAlign: 'center', p: 2 }}>
-      <Box
-        component="img"
-        src={category.c_image}
-        alt={category.c_name}
-        sx={{
-          width: 100,
-          height: 100,
-          borderRadius: '50%',
-          mb: 2,
-        }}
-      />
+      <Link href={`/user/category-product/${category.id}`}>
+        <Box
+          component="img"
+          src={category.c_image}
+          alt={category.c_name}
+          sx={{
+            width: 100,
+            height: 100,
+            borderRadius: '50%',
+            mb: 2,
+            cursor: 'pointer'
+          }}
+        />
+      </Link>
       <Typography variant="subtitle1" gutterBottom>
-        {category.name}
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        {category.productCount} sản phẩm
+        {category.c_name}
       </Typography>
     </Paper>
   );
 }
 
 function ProductItem({ product }) {
-  console.log(product);
+  // Lấy phần trăm khuyến mãi cao nhất từ mảng sale_off
+  const maxDiscount = product.sale_off ? Math.max(...product.sale_off.map(sale => sale.s_percent)) : 0;
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(price);
+  };
+
   return (
     <Link href={`/user/detail-product/${product.id}`} style={{ textDecoration: 'none' }}>
-      <Card>
+      <Card sx={{ position: 'relative' }}>
+        {maxDiscount > 0 && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bgcolor: '#ff4d4f',
+              color: 'white',
+              px: 1,
+              py: 0.5,
+              zIndex: 1,
+              borderBottomLeftRadius: 8
+            }}
+          >
+            -{maxDiscount}%
+          </Box>
+        )}
+        
         <CardMedia
           component="img"
           height="140"
@@ -46,7 +73,25 @@ function ProductItem({ product }) {
         />
         <CardContent>
           <Typography variant="body2" noWrap>{product.p_name}</Typography>
-          <Typography variant="subtitle1" color="error">₫{product.p_selling.toLocaleString()}</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {maxDiscount > 0 ? (
+              <>
+                <Typography variant="subtitle1" color="error">
+                  {formatPrice(product.p_selling * (1 - maxDiscount / 100))}
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  sx={{ textDecoration: 'line-through', color: 'text.secondary' }}
+                >
+                  {formatPrice(product.p_selling || 0)}
+                </Typography>
+              </>
+            ) : (
+              <Typography variant="subtitle1" color="error">
+                {formatPrice(product.p_selling)}
+              </Typography>
+            )}
+          </Box>
           <Typography variant="body2" color="text.secondary">Số lượng: {product.p_quantity}</Typography>
           <Typography variant="body2" color="text.secondary" noWrap>{product.p_description}</Typography>
         </CardContent>
@@ -66,13 +111,13 @@ function InfoItem({ icon, title, description }) {
 }
 
 function Home() {
-    const { products, categories } = usePage().props;
+  const { products, categories } = usePage().props;
   return (
     <Box sx={{ p: 4 }}>
       <Typography 
       textAlign="center"
       color="#FFCC33"
-      variant="h4" gutterBottom sx={{ mb: 4 }}>
+      variant="h3" gutterBottom sx={{ fontWeight: 'bold', fontFamily: 'Roboto', mb: 4 }}>
         Nghệ Shop 
       </Typography>
       
@@ -115,7 +160,7 @@ function Home() {
         <Grid item xs={12} sm={6} md={3}>
           <InfoItem 
             icon={PhoneIcon}
-            title="Hotline: 0822221992"
+            title="Hotline: 0345291448"
             description="Vui lòng gọi hotline để hỗ trợ"
           />
         </Grid>

@@ -37,7 +37,6 @@ export default function AddProductModal({ open, onClose, newProduct, onInputChan
     //if (!newProduct.c_id) errors.c_id = 'Vui lòng chọn danh mục';
     //if (!newProduct.b_id) errors.b_id = 'Vui lòng chọn thương hiệu';
     if (!newProduct.p_description) errors.p_description = 'Vui lòng nhập mô tả';
-    //if (!newProduct.s_id) errors.s_id = 'Vui lòng chọn khuyến mãi';
     if (!newProduct.p_image) errors.p_image = 'Vui lòng chọn hình ảnh sản phẩm';
     return errors;
   };
@@ -171,19 +170,6 @@ export default function AddProductModal({ open, onClose, newProduct, onInputChan
                 helperText={formErrors.p_description}
                 sx={{ mb: 2 }}
               />
-              <FormControl fullWidth sx={{ mb: 2 }} error={!!formErrors.s_id}>
-                <InputLabel>Khuyến mãi</InputLabel>
-                <Select
-                  name="s_id"
-                  value={newProduct.s_id}
-                  onChange={onInputChange}
-                >
-                  {saleOffs.map((saleOff) => (
-                    <MenuItem key={saleOff.id} value={saleOff.id}>{saleOff.s_percent}</MenuItem>
-                  ))}
-                </Select>
-                {formErrors.s_id && <Typography color="error">{formErrors.s_id}</Typography>}
-              </FormControl>
               <Box sx={{ mb: 2 }}>
                 <input
                   accept="image/*"

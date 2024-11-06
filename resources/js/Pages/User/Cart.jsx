@@ -8,6 +8,7 @@ import { usePage, router } from "@inertiajs/react";
 import debounce from 'lodash/debounce';
 
 const Cart = () => {
+
   const { carts } = usePage().props;
   const [quantities, setQuantities] = useState(carts.reduce((acc, item) => ({...acc, [item.id]: item.quantity}), {}));
   const [selectedItems, setSelectedItems] = useState({});
@@ -62,12 +63,17 @@ const Cart = () => {
   }, [debouncedUpdate]);
 
   const calculateTotalPrice = () => {
-    return carts.reduce((total, item) => {
+    let total = 0;
+    carts.forEach(item => {
       if (selectedItems[item.id]) {
-        return total + parseFloat(item.product.p_selling) * quantities[item.id];
+        const discount = item.product.sale_off?.[0]?.s_percent || 0;
+        const price = parseFloat(item.product.p_selling);
+        const quantity = quantities[item.id];
+        const discountedPrice = price * (1 - discount/100);
+        total += discountedPrice * quantity;
       }
-      return total;
-    }, 0);
+    });
+    return Math.round(total);
   }
 
   return (
@@ -102,8 +108,9 @@ const Cart = () => {
         <Grid container spacing={2} alignItems="center">
           <Grid item container xs={12} alignItems="center">
             <Grid item xs={1}><Checkbox /></Grid>
-            <Grid item xs={5}><Typography variant="subtitle1">Sản Phẩm</Typography></Grid>
+            <Grid item xs={4}><Typography variant="subtitle1">Sản Phẩm</Typography></Grid>
             <Grid item xs={1}><Typography variant="subtitle1">Đơn Giá</Typography></Grid>
+            <Grid item xs={1}><Typography variant="subtitle1">Khuyến Mãi</Typography></Grid>
             <Grid item xs={2}><Typography variant="subtitle1">Số Lượng</Typography></Grid>
             <Grid item xs={1}><Typography variant="subtitle1">Số Tiền</Typography></Grid>
             <Grid item xs={2}><Typography variant="subtitle1">Thao Tác</Typography></Grid>
@@ -112,7 +119,7 @@ const Cart = () => {
           {carts.map((item, index) => (
             <Grid key={index} item container xs={12} alignItems="center">
               <Grid item xs={1}><Checkbox checked={selectedItems[item.id] || false} onChange={() => handleCheckboxChange(item.id)} /></Grid>
-              <Grid item xs={5}>
+              <Grid item xs={4}>
                 <Box display="flex" alignItems="center">
                   <img src={item.product.images[0].ip_image} alt={item.product.p_name} style={{ width: 80, height: 80, marginRight: 16 }} />
                   <Box>
@@ -123,6 +130,11 @@ const Cart = () => {
               </Grid>
               <Grid item xs={1}>
                 <Typography variant="body1">₫{parseFloat(item.product.p_selling).toLocaleString()}</Typography>
+              </Grid>
+              <Grid item xs={1}>
+                <Typography variant="body1" color="error">
+                  {item.product.sale_off?.[0]?.s_percent || 0}%
+                </Typography>
               </Grid>
               <Grid item xs={2}>
                 <Box display="flex" alignItems="center">
@@ -138,7 +150,7 @@ const Cart = () => {
               </Grid>
               <Grid item xs={1}>
                 <Typography variant="body1" color="error">
-                  ₫{(parseFloat(item.product.p_selling) * quantities[item.id]).toLocaleString()}
+                  ₫{Math.round(parseFloat(item.product.p_selling) * quantities[item.id] * (1 - (item.product.sale_off?.[0]?.s_percent || 0)/100)).toLocaleString()}
                 </Typography>
               </Grid>
               <Grid item xs={2}>

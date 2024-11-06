@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('detail_orders', function (Blueprint $table) {
             $table->id();
             $table->integer('quantity');
+            $table->decimal('total', 15, 0);
+            $table->string('discount')->nullable();
             $table->timestamps();
 
             $table->foreignId('or_id')->constrained('orders')->onDelete('cascade');

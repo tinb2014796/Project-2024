@@ -32,7 +32,6 @@ class ProductsController extends Controller
             'p_description' => $request->p_description,
             'c_id' => $request->c_id,
             'b_id' => $request->b_id,
-            's_id' => $request->s_id,
         ]);
 
         
@@ -60,9 +59,11 @@ class ProductsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function search(Request $request)
     {
-        //
+        $search = $request->search;
+        $products = Products::where('p_name', 'like', '%' . $search . '%')->get();
+        
     }
 
     /**
@@ -94,7 +95,6 @@ class ProductsController extends Controller
         $products->p_description = $request->p_description;
         $products->c_id = $request->c_id;
         $products->b_id = $request->b_id;
-        $products->s_id = $request->s_id;
 
         // Xử lý và lưu hình ảnh mới nếu có
         if ($request->hasFile('p_image')) {

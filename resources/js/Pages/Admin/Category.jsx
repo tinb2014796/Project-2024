@@ -29,12 +29,21 @@ export default function Category({ categories }) {
     handleClose();
   };
 
+  const handleBack = () => {
+    router.visit('/admin/products');
+  };
+
   return (
     <Container maxWidth="md">
       <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Quản lý danh mục
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            Quản lý danh mục
+          </Typography>
+          <Button variant="outlined" onClick={handleBack}>
+            Quay lại
+          </Button>
+        </Box>
         
         <Paper elevation={3} sx={{ p: 2, mb: 4 }}>
           {categories.length > 0 ? (

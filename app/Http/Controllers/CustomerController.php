@@ -51,6 +51,9 @@ class CustomerController extends Controller
             'cus_birthday' => $request->cus_birthday ?? '',
             'cus_password' => $request->cus_password ?? '',
             'cus_address' => $request->cus_address ?? '',
+            'province_id' => $request->province_id ?? '',
+            'district_id' => $request->district_id ?? '',
+            'ward_code' => $request->ward_code ?? '',
             'cus_image' => $request->cus_image ?? '',
             'cus_points' => $request->cus_points ?? 0,
         ]);
@@ -61,25 +64,66 @@ class CustomerController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function updateImageCustomer(Request $request, $id)
     {
-        //
+        $customer = Customer::find($id);
+        $file = $request->file('cus_image');
+        $file_name = time().'_'.$file->getClientOriginalName(); 
+        $file->move(public_path('images'), $file_name);
+        $imageUrl = asset('images/'.$file_name);
+        $customer->cus_image = $imageUrl;
+        $customer->save();
+        return redirect()->route('user.customer');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Customer $customer)
+    public function information(Request $request)
     {
-        //
+        $customer = $request->session()->get('customer');
+        $customer = Customer::find($customer->id);
+        return Inertia::render('User/Customer', ['customer' => $customer]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Customer $customer)
+    public function getCustomer($id)
     {
+        $customer = Customer::find($id);
+        return Inertia::render('User/Customer', ['customer' => $customer]);
+    }
+
+    public function updateCustomer(Request $request, $id)
+    {
+        $customer = Customer::find($id);
+        $customer->update([
+            'cus_familyname' => $request->cus_familyname,
+            'cus_name' => $request->cus_name,
+            'cus_sex' => $request->cus_sex,
+            'cus_birthday' => $request->cus_birthday,
+            'cus_sdt' => $request->cus_sdt,
+            'cus_address' => $request->cus_address,
+            'province_id' => $request->province_id,
+            'district_id' => $request->district_id,
+            'ward_code' => $request->ward_code,
+            
+
+        ]);
+        $file = $request->file('cus_image');
         
+        // Tạo tên file mới bằng cách kết hợp thời gian hiện tại và tên gốc của file
+        $file_name = time().'_'.$file->getClientOriginalName(); 
+        
+        // Di chuyển file ảnh vào thư mục public/images
+        $file->move(public_path('images'), $file_name);
+        
+        // Tạo URL đầy đủ cho ảnh
+        $imageUrl = asset('images/'.$file_name);
+        $customer->cus_image = $imageUrl;
+        $customer->save();
+        return Inertia::render('User/Customer', ['customer' => $customer]);
     }
 
     /**
@@ -90,12 +134,25 @@ class CustomerController extends Controller
         $customer = $request->customer_id;
         $customer = Customer::find($customer);
         $customer->cus_address = $request->address;
+        $customer->province_id = $request->province_id;
+        $customer->district_id = $request->district_id;
+        $customer->ward_code = $request->ward_code;
         $customer->cus_sdt = $request->phone;
         $customer->save();
-        return redirect()->back()->with('success', 'Địa chỉ đã được cập nhật');
+        return redirect()->route('user.cart');
 
     }
-
+    public function returnAddress(Request $request, Customer $customer)
+    {
+        $customer = $request->customer_id;
+        $customer = Customer::find($customer);
+        $customer->cus_address = $request->address;
+        $customer->province_id = $request->province_id;
+        $customer->district_id = $request->district_id;
+        $customer->ward_code = $request->ward_code;
+        $customer->cus_sdt = $request->phone;
+        $customer->save();
+    }
     /**
      * Remove the specified resource from storage.
      */

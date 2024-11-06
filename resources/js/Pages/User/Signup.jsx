@@ -23,6 +23,7 @@ const SignUp = () => {
   });
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,6 +31,9 @@ const SignUp = () => {
       ...prevState,
       [name]: value
     }));
+    if (name === 'cus_email') {
+      setEmailError('');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -38,8 +42,12 @@ const SignUp = () => {
       await router.post('/signup', formData);
     } catch (error) {
       if (error.response && error.response.status === 422) {
-        setErrorMessage('Email đã tồn tại. Vui lòng sử dụng email khác.');
-        setOpenSnackbar(true);
+        if (error.response.data.errors && error.response.data.errors.cus_email) {
+          setEmailError('Email đã tồn tại. Vui lòng sử dụng email khác.');
+        } else {
+          setErrorMessage('Có lỗi xảy ra. Vui lòng thử lại.');
+          setOpenSnackbar(true);
+        }
       }
     }
   };
@@ -121,6 +129,8 @@ const SignUp = () => {
           name="cus_email"
           value={formData.cus_email}
           onChange={handleChange}
+          error={!!emailError}
+          helperText={emailError}
         />
         <TextField
           label="Mật khẩu mới"

@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+use App\Models\Products;
+use App\Models\ImageProduct;
 
 class CategoryController extends Controller
 {
@@ -45,7 +47,16 @@ class CategoryController extends Controller
             
         ]);
     }
-
+    public function categoryProduct($id)
+    {
+        
+        $products = Products::with('category', 'images')->when($id, function ($query, $id) {
+            return $query->where('c_id', $id);
+        })->get();
+        $category = Category::find($id);
+        return Inertia::render('User/CategoryProduct', ['products' => $products, 'category' => $category]);
+    
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -59,7 +70,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        //
+        
     }
 
     /**
@@ -81,8 +92,9 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function deleteCategory(Category $category)
     {
-        //
+        $category->delete();
+        return redirect()->back();
     }
 }
