@@ -1,376 +1,368 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-  Tabs,
-  Tab,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Typography,
-  Grid,
-  Container
-} from '@mui/material';
+import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab, FormControl, InputLabel, Select, MenuItem, TablePagination, Stepper, Step, StepLabel } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Link, usePage, router } from '@inertiajs/react';
+import { usePage, router } from '@inertiajs/react';
 import axios from 'axios';
-import CancelOrder from '@/Components/CancelOrder';
 
 const OrderSuccess = () => {
   const { orders } = usePage().props;
-  const customer = JSON.parse(localStorage.getItem('customer'));
+  console.log(orders);
   const [tabValue, setTabValue] = useState(0);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
-  const [openCancelModal, setOpenCancelModal] = useState(false);
-  const [cancelOrderId, setCancelOrderId] = useState(null);
-  console.log(orders);
+  const [openDetailDialog, setOpenDetailDialog] = useState(false);
+  const [addressDetails, setAddressDetails] = useState({});
+  const [provinceList, setProvinceList] = useState([]);
+  const [districtList, setDistrictList] = useState([]);
+  const [wardList, setWardList] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState({
+    province: null,
+    district: null,
+    ward: null
+  });
+
+  const donHangGoc = orders.map(order => ({
+    id: order.id,
+    ngayDat: order.or_date,
+    customer: order.customer,
+    payment: order.payment,   
+    tongTien: order.or_total,
+    ghiChu: order.or_note,
+    status: order.or_status,
+    orderDetails: order.order_details?.map(detail => ({
+      p_name: detail.product?.p_name,
+      quantity: detail.quantity,
+      p_selling: detail.product?.p_selling,
+      total: detail.total
+    })),
+  }));
+
   useEffect(() => {
-    const fetchProvinces = async () => {
+    const getAddressDetails = async (address) => {
       try {
-        const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province', {
+        const response = await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`, {
           headers: {
-            'Token': 'c6967a25-9a90-11ef-8e53-0a00184fe694',
+            'Token': '62124d79-4ffa-11ee-b1d4-92b443b7a897',
             'Content-Type': 'application/json'
           }
         });
-        setProvinces(response.data.data);
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching address:', error);
+        return null;
+      }
+    };
+
+    if (selectedOrder?.customer?.cus_address) {
+      getAddressDetails(selectedOrder.customer.cus_address)
+        .then(details => {
+          if (details) {
+            setAddressDetails(details);
+          }
+        });
+    }
+  }, [selectedOrder]);
+
+  useEffect(() => {
+    const getProvinces = async () => {
+      try {
+        const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province', {
+          headers: {
+            'Token': '62124d79-4ffa-11ee-b1d4-92b443b7a897'
+          }
+        });
+        setProvinceList(response.data.data);
       } catch (error) {
         console.error('Lỗi khi lấy danh sách tỉnh/thành:', error);
       }
     };
-    fetchProvinces();
+    getProvinces();
   }, []);
 
   useEffect(() => {
-    const fetchDistricts = async () => {
+    const getDistricts = async () => {
+      if (!selectedOrder?.customer?.province_id) return;
+      
       try {
         const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district', {
           headers: {
-            'Token': 'c6967a25-9a90-11ef-8e53-0a00184fe694',
-            'Content-Type': 'application/json'
+            'Token': '62124d79-4ffa-11ee-b1d4-92b443b7a897'
+          },
+          params: {
+            province_id: selectedOrder.customer.province_id
           }
         });
-        setDistricts(response.data.data);
+        setDistrictList(response.data.data);
       } catch (error) {
         console.error('Lỗi khi lấy danh sách quận/huyện:', error);
       }
     };
-    fetchDistricts();
-  }, []);
+    getDistricts();
+  }, [selectedOrder?.customer?.province_id]);
 
   useEffect(() => {
-    const fetchWards = async () => {
+    const getWards = async () => {
+      if (!selectedOrder?.customer?.district_id) return;
+
       try {
         const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
           headers: {
-            'Token': 'c6967a25-9a90-11ef-8e53-0a00184fe694',
-            'Content-Type': 'application/json'
+            'Token': '62124d79-4ffa-11ee-b1d4-92b443b7a897'
+          },
+          params: {
+            district_id: selectedOrder.customer.district_id
           }
         });
-        setWards(response.data.data);
+        setWardList(response.data.data);
       } catch (error) {
         console.error('Lỗi khi lấy danh sách phường/xã:', error);
       }
     };
-    fetchWards();
-  }, []);
+    getWards();
+  }, [selectedOrder?.customer?.district_id]);
 
   useEffect(() => {
-    if (selectedOrder) {
-      const fetchDistrictsForProvince = async () => {
-        try {
-          const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district', {
-            params: {
-              province_id: selectedOrder.customer.province_id
-            },
-            headers: {
-              'Token': 'c6967a25-9a90-11ef-8e53-0a00184fe694',
-              'Content-Type': 'application/json'
-            }
-          });
-          setDistricts(response.data.data);
-        } catch (error) {
-          console.error('Lỗi khi lấy danh sách quận/huyện:', error);
-        }
-      };
-
-      const fetchWardsForDistrict = async () => {
-        try {
-          const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
-            params: {
-              district_id: selectedOrder.customer.district_id
-            },
-            headers: {
-              'Token': 'c6967a25-9a90-11ef-8e53-0a00184fe694',
-              'Content-Type': 'application/json'
-            }
-          });
-          setWards(response.data.data);
-        } catch (error) {
-          console.error('Lỗi khi lấy danh sách phường/xã:', error);
-        }
-      };
-
-      fetchDistrictsForProvince();
-      fetchWardsForDistrict();
+    if (selectedOrder?.customer) {
+      setSelectedAddress({
+        province: selectedOrder.customer.province_id,
+        district: selectedOrder.customer.district_id,
+        ward: selectedOrder.customer.ward_code
+      });
     }
   }, [selectedOrder]);
-
-  if (!orders) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography variant="h5" align="center">Không có đơn hàng nào</Typography>
-      </Container>
-    );
-  }
-
 
   const handleChangeTab = (event, newValue) => {
     setTabValue(newValue);
   };
 
-  const handleOpenDialog = (order) => {
-    setSelectedOrder(order);
-    setOpenDialog(true);
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setSelectedOrder(null);
-  };
-
-  const handleCancelOrder = (orderId) => {
-    setCancelOrderId(orderId);
-    setOpenCancelModal(true);
-  };
-
-  const handleSubmitCancel = ({ orderId }) => {
-    router.post(`/user/order/${orderId}`, {
-      data: { or_note: '' }
+  const filterOrdersByStatus = (status) => {
+    return donHangGoc.filter(order => {
+      const orderStatus = Object.entries(order.status);
+      const latestStatus = orderStatus[orderStatus.length - 1];
+      return latestStatus[0] === status.toString();
     });
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+  const handleOpenDetailDialog = (order) => {
+    setSelectedOrder(order);
+    setOpenDetailDialog(true);
   };
 
-  const renderOrderTable = (orders) => {
-    if (orders.length === 0) {
-      return (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="h6">Không có đơn hàng nào trong trạng thái này</Typography>
-        </Box>
-      );
-    }
-
-    return (
-      <TableContainer component={Paper} sx={{ mb: 4, boxShadow: 3 }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: '#FF4500' }}>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Mã đơn hàng</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Ngày đặt</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Tên khách hàng</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Tổng tiền</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Phương thức thanh toán</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Trạng thái đơn hàng</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Hành động</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {orders.map((order) => (
-              <TableRow key={order.id} hover>
-                <TableCell>{order.id}</TableCell>
-                <TableCell>
-                  {new Date(order.created_at).toLocaleString('vi-VN', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </TableCell>
-                <TableCell>{order.customer?.cus_name}</TableCell>
-                <TableCell>{formatCurrency(order.or_total)}</TableCell>
-                <TableCell>{order.payment?.pa_type}</TableCell>
-                <TableCell>
-                  <Box sx={{
-                    backgroundColor: order.or_status == 1 ? '#4CAF50' : 
-                                   order.or_status == -1 ? '#f44336' : '#FFA726',
-                    color: 'white',
-                    p: 1,
-                    borderRadius: 1,
-                    textAlign: 'center'
-                  }}>
-                    {order.or_status[6] ? order.or_status[6] : 
-                     order.or_status == -1 ? 'Đã hủy' : 'Chưa xác nhận'}
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      startIcon={<VisibilityIcon />}
-                      size="small"
-                      onClick={() => handleOpenDialog(order)}
-                      sx={{ borderRadius: 2 }}
-                    >
-                      XEM CHI TIẾT
-                    </Button>
-                    {order.or_status == 0 && (
-                      <Button
-                        variant="contained"
-                        color="error"
-                        size="small"
-                        onClick={() => handleCancelOrder(order.id)}
-                        sx={{ borderRadius: 2 }}
-                      >
-                        HỦY ĐƠN
-                      </Button>
-                    )}
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    );
+  const handleCloseDetailDialog = () => {
+    setOpenDetailDialog(false);
+    setSelectedOrder(null);
   };
 
-  const getProvinceName = (province_id) => {
-    const province = provinces.find(p => p.ProvinceID == province_id);
+  const getProvinceName = (provinceId) => {
+    const province = provinceList.find(p => p.ProvinceID === parseInt(provinceId));
     return province ? province.ProvinceName : '';
   };
 
-  const getDistrictName = (district_id) => {
-    const district = districts.find(d => d.DistrictID == district_id);
+  const getDistrictName = (districtId) => {
+    const district = districtList.find(d => d.DistrictID === parseInt(districtId));
     return district ? district.DistrictName : '';
   };
 
-  const getWardName = (ward_code) => {
-    const ward = wards.find(w => w.WardCode == ward_code);
+  const getWardName = (wardCode) => {
+    const ward = wardList.find(w => w.WardCode === wardCode);
     return ward ? ward.WardName : '';
   };
 
+  const getOrderStatusSteps = (status) => {
+    const steps = [
+      { label: 'Chờ xử lý', completed: false },
+      { label: 'Đã xác nhận', completed: false },
+      { label: 'Đang giao', completed: false },
+      { label: 'Đã giao', completed: false }
+    ];
+
+    const currentStatus = parseInt(Object.keys(status)[Object.keys(status).length - 1]);
+    
+    for (let i = 0; i < currentStatus; i++) {
+      steps[i].completed = true;
+    }
+    
+    return steps;
+  };
+
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ color: '#FF4500', fontWeight: 'bold', mb: 4 }}>
-        Tất cả đơn hàng
-      </Typography>
+    <Box sx={{ width: '100%', p: 3, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+      <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+        <Typography variant="h4" sx={{ mb: 3, color: '#1976d2', fontWeight: 'bold' }}>
+          Quản lý đơn hàng
+        </Typography>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
-        <Tabs 
-          value={tabValue} 
-          onChange={handleChangeTab}
-          sx={{
-            '& .MuiTab-root': {
-              fontWeight: 'bold',
-              fontSize: '1rem'
-            }
-          }}
-        >
-          <Tab label={`Đơn hàng chưa xác nhận (${pendingOrders.length})`} />
-          <Tab label={`Đơn hàng đã xác nhận (${confirmedOrders.length})`} />
-          <Tab label={`Đơn hàng đã hủy (${canceledOrders.length})`} />
-        </Tabs>
-      </Box>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Tabs 
+            value={tabValue} 
+            onChange={handleChangeTab}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              '& .MuiTab-root': {
+                minWidth: 120,
+                fontWeight: 'bold'
+              }
+            }}
+          >
+            <Tab label="Chờ xử lý" />
+            <Tab label="Đã xác nhận" />
+            <Tab label="Đang giao" />
+            <Tab label="Đã giao" />
+            <Tab label="Đã hủy" />
+          </Tabs>
+        </Box>
 
-      {tabValue === 0 && renderOrderTable(pendingOrders)}
-      {tabValue === 1 && renderOrderTable(confirmedOrders)}
-      {tabValue === 2 && renderOrderTable(canceledOrders)}
+        <TableContainer component={Paper} sx={{ boxShadow: 3, borderRadius: 2 }}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                <TableCell sx={{ fontWeight: 'bold' }}>Mã đơn</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Khách hàng</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Ngày đặt</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Tổng tiền</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Thao tác</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filterOrdersByStatus(tabValue + 1).map((order) => (
+                <TableRow key={order.id} hover>
+                  <TableCell>#{order.id}</TableCell>
+                  <TableCell>{order.customer?.cus_name}</TableCell>
+                  <TableCell>{new Date(order.ngayDat).toLocaleDateString()}</TableCell>
+                  <TableCell>{order.tongTien?.toLocaleString('vi-VN')}đ</TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="contained" 
+                      color="info"
+                      startIcon={<VisibilityIcon />}
+                      onClick={() => handleOpenDetailDialog(order)}
+                      sx={{ mr: 1, borderRadius: 2 }}
+                    >
+                      Chi tiết
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
 
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ backgroundColor: '#FF4500', color: 'white' }}>
+      <Dialog 
+        open={openDetailDialog} 
+        onClose={handleCloseDetailDialog} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 2 }
+        }}
+      >
+        <DialogTitle sx={{ bgcolor: '#f5f5f5', py: 2 }}>
           Chi tiết đơn hàng #{selectedOrder?.id}
         </DialogTitle>
-        <DialogContent sx={{ p: 4 }}>
+        <DialogContent sx={{ mt: 2 }}>
           {selectedOrder && (
-            <>
-              <Typography variant="h6" gutterBottom sx={{ color: '#FF4500', fontWeight: 'bold' }}>
-                Thông tin khách hàng
-              </Typography>
-              <Paper sx={{ p: 3, mb: 4, backgroundColor: '#f5f5f5' }}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography><strong>Tên:</strong> {selectedOrder.customer?.cus_familyname} {selectedOrder.customer?.cus_name}</Typography>
-                    <Typography><strong>Email:</strong> {selectedOrder.customer?.cus_email}</Typography>
-                    <Typography><strong>SĐT:</strong> {selectedOrder.customer?.cus_sdt}</Typography>
-                    <Typography><strong>Địa chỉ:</strong> {selectedOrder.customer?.cus_address}, {getWardName(selectedOrder.customer?.ward_code)}, {getDistrictName(selectedOrder.customer?.district_id)}, {getProvinceName(selectedOrder.customer?.province_id)}</Typography>
-                  </Grid>
-                </Grid>
+            <Box>
+              <Paper elevation={1} sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+                <Typography variant="h6" gutterBottom sx={{ color: '#1976d2' }}>
+                  Trạng thái đơn hàng
+                </Typography>
+                <Stepper activeStep={parseInt(Object.keys(selectedOrder.status)[Object.keys(selectedOrder.status).length - 1]) - 1}>
+                  {getOrderStatusSteps(selectedOrder.status).map((step, index) => (
+                    <Step key={index} completed={step.completed}>
+                      <StepLabel>{step.label}</StepLabel>
+                    </Step>
+                  ))}
+                </Stepper>
               </Paper>
-              
-              <Typography variant="h6" gutterBottom sx={{ color: '#FF4500', fontWeight: 'bold' }}>
-                Chi tiết sản phẩm
-              </Typography>
-              <TableContainer component={Paper} sx={{ mb: 4 }}>
-                <Table>
-                  <TableHead>
-                    <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Tên sản phẩm</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Số lượng</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Đơn giá</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold' }}>Thành tiền</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {selectedOrder.order_details?.map((detail, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{detail.product?.p_name}</TableCell>
-                        <TableCell align="right">{detail.quantity}</TableCell>
-                        <TableCell align="right">
-                          {formatCurrency(detail.product?.p_selling)}
-                        </TableCell>
-                        <TableCell align="right">
-                          {formatCurrency(detail.quantity * detail.product?.p_selling)}
+
+              <Paper elevation={1} sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+                <Typography variant="h6" gutterBottom sx={{ color: '#1976d2' }}>
+                  Thông tin khách hàng
+                </Typography>
+                <Box sx={{ pl: 2 }}>
+                  <Typography sx={{ mb: 1 }}>
+                    <strong>Tên:</strong> {selectedOrder.customer?.cus_name} {selectedOrder.customer?.cus_familyname}
+                  </Typography>
+                  <Typography sx={{ mb: 1 }}>
+                    <strong>Địa chỉ:</strong> {selectedOrder.customer?.cus_address}, {' '}
+                    {getWardName(selectedOrder.customer?.ward_code)}, {' '}
+                    {getDistrictName(selectedOrder.customer?.district_id)}, {' '}
+                    {getProvinceName(selectedOrder.customer?.province_id)}
+                  </Typography>
+                  <Typography sx={{ mb: 1 }}>
+                    <strong>Số điện thoại:</strong> {selectedOrder.customer?.cus_sdt}
+                  </Typography>
+                  <Typography>
+                    <strong>Email:</strong> {selectedOrder.customer?.cus_email}
+                  </Typography>
+                </Box>
+              </Paper>
+
+              <Paper elevation={1} sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+                <Typography variant="h6" gutterBottom sx={{ color: '#1976d2' }}>
+                  Thông tin đơn hàng
+                </Typography>
+                <Box sx={{ pl: 2 }}>
+                  <Typography sx={{ mb: 1 }}>
+                    <strong>Ngày đặt:</strong> {new Date(selectedOrder.ngayDat).toLocaleString()}
+                  </Typography>
+                  <Typography sx={{ mb: 1 }}>
+                    <strong>Phương thức thanh toán:</strong> {selectedOrder.payment?.pa_type}
+                  </Typography>
+                  <Typography>
+                    <strong>Ghi chú:</strong> {selectedOrder.ghiChu || 'Không có'}
+                  </Typography>
+                </Box>
+              </Paper>
+
+              <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}>
+                <Typography variant="h6" gutterBottom sx={{ color: '#1976d2' }}>
+                  Chi tiết sản phẩm
+                </Typography>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: '#f5f5f5' }}>
+                        <TableCell sx={{ fontWeight: 'bold' }}>Sản phẩm</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Số lượng</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Đơn giá</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Thành tiền</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {selectedOrder.orderDetails?.map((detail, index) => (
+                        <TableRow key={index} hover>
+                          <TableCell>{detail.p_name}</TableCell>
+                          <TableCell align="right">{detail.quantity}</TableCell>
+                          <TableCell align="right">{parseInt(detail.p_selling).toLocaleString('vi-VN')}đ</TableCell>
+                          <TableCell align="right">{parseInt(detail.total).toLocaleString('vi-VN')}đ</TableCell>
+                        </TableRow>
+                      ))}
+                      <TableRow>
+                        <TableCell colSpan={3} align="right" sx={{ fontWeight: 'bold' }}>Tổng cộng:</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+                          {parseInt(selectedOrder.tongTien).toLocaleString('vi-VN')}đ
                         </TableCell>
                       </TableRow>
-                    ))}
-                    <TableRow>
-                      <TableCell colSpan={3} align="right" sx={{ fontWeight: 'bold' }}>
-                        Tổng cộng:
-                      </TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 'bold', color: '#FF4500' }}>
-                        {formatCurrency(selectedOrder.or_total)}
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-
-              <Typography variant="h6" gutterBottom sx={{ color: '#FF4500', fontWeight: 'bold' }}>
-                Thông tin thanh toán
-              </Typography>
-              <Paper sx={{ p: 3, backgroundColor: '#f5f5f5' }}>
-                <Typography><strong>Phương thức:</strong> {selectedOrder.payment?.pa_type}</Typography>
-                <Typography><strong>Trạng thái:</strong> {selectedOrder.or_status == 1 ? 'Đã xác nhận' : 
-                                                        selectedOrder.or_status == -1 ? 'Đã hủy' : 'Chưa xác nhận'}</Typography>
-                <Typography><strong>Ghi chú:</strong> {selectedOrder.or_note || 'Không có ghi chú'}</Typography>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </Paper>
-            </>
+            </Box>
           )}
         </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button 
+            onClick={handleCloseDetailDialog}
+            variant="contained"
+            sx={{ borderRadius: 2 }}
+          >
+            Đóng
+          </Button>
+        </DialogActions>
       </Dialog>
-
-      <CancelOrder
-        open={openCancelModal}
-        onClose={() => setOpenCancelModal(false)}
-        onSubmit={handleSubmitCancel}
-        orderId={cancelOrderId}
-      />
-    </Container>
+    </Box>
   );
 };
 

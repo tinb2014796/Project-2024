@@ -60,6 +60,7 @@ Route::middleware(AdminMiddleware::class)->prefix('admin')->group(function () {
     Route::get('/orders', [PageController::class, 'orders']);
     Route::post('/orders/{order_id}', [OrdersController::class, 'updateOrder']);
     Route::get('/orders/{order_id}', [OrdersController::class, 'confirmOrder']);
+    Route::post('/orders/update-status/{order_id}', [OrdersController::class, 'updateStatus']);
 
     Route::get('/sale-off', [PageController::class, 'saleOff'])->name('admin.sale-off.index');
     Route::post('/sale-off/create', [SaleOffController::class, 'createSaleOff']);

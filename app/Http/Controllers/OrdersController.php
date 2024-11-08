@@ -69,7 +69,7 @@ class OrdersController extends Controller
         $order->cus_id = $customer_id;
         $order->pa_id = $paymentMethod == 'cod' ? 1 : 3;
         $order->or_total = $totalPrice;
-        $order->or_status = json_encode(['6' => 'Chưa xác nhận']); // Chưa xác nhận
+        $order->or_status = json_encode(['1' => 'Đang chờ xử lý']); // Chưa xác nhận
         $order->or_ship = '';
         $order->or_date = now();
         $order->or_note = $note ?? 'Không có ghi chú';
@@ -231,5 +231,50 @@ class OrdersController extends Controller
                       ->get();
         $order->save();
         return redirect()->back()->with('success', 'Hủy đơn hàng thành công');
+    }
+
+
+    public function updateStatus($order_id, Request $request)
+    {
+        $status = $request->status;
+        $order = Oders::find($order_id);
+        
+        // Lấy trạng thái hiện tại
+        $currentStatus = json_decode($order->or_status, true);
+        
+        // Thêm trạng thái mới
+        switch($status) {
+            case '1':
+                $currentStatus['1'] = 'Đang chờ xử lý';
+                break;
+            case '2':
+                $currentStatus['2'] = 'Đã xác nhận';
+                break;
+            case '3':
+                $currentStatus['3'] = 'Đã giao cho đơn vị vận chuyển';
+                break;
+            case '4':
+                $currentStatus['4'] = 'Đang giao';
+                // Trừ số lượng sản phẩm khi đơn hàng đang giao
+                foreach($order->orderDetails as $detail) {
+                    $product = $detail->product;
+                    $product->p_quantity -= $detail->quantity;
+                    $product->save();
+                }
+                break;
+            case '5':
+                $currentStatus['5'] = 'Đã giao';
+                break;
+            case '6':
+                $currentStatus['6'] = 'Chưa xác nhận';
+                break;
+            case '-1':
+                $currentStatus['-1'] = 'Đã hủy';
+                break;
+        }
+
+        $order->or_status = json_encode($currentStatus);
+        $order->save();
+        return redirect()->back();
     }
 }

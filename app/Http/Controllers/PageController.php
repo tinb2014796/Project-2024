@@ -35,10 +35,9 @@ class PageController extends Controller
     public function orders()
     {
         $orders = Oders::with('customer', 'payment', 'orderDetails')->get();
-        foreach ($orders as $order) {
-            $order->tracking_id ='LDV9P8';
+        foreach($orders as $order) {
+            $order->or_status = json_decode($order->or_status);
         }
-
         return Inertia::render('Admin/Orders', compact('orders'));
     }
     public function customers()

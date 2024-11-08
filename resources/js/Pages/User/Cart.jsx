@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Grid, Box, Typography, Paper, Button, Checkbox, TextField, IconButton } from '@mui/material';
+import { Grid, Box, Typography, Paper, Button, Checkbox, TextField, IconButton, Snackbar, Alert } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
@@ -12,6 +12,7 @@ const Cart = () => {
   const { carts } = usePage().props;
   const [quantities, setQuantities] = useState(carts.reduce((acc, item) => ({...acc, [item.id]: item.quantity}), {}));
   const [selectedItems, setSelectedItems] = useState({});
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   console.log(carts);
 
@@ -42,6 +43,12 @@ const Cart = () => {
 
   const handleBuySelected = () => {
     const selectedProducts = Object.keys(selectedItems).filter(id => selectedItems[id]);
+    
+    if (selectedProducts.length === 0) {
+      setOpenSnackbar(true);
+      return;
+    }
+
     const selectedCarts = carts.filter(cart => selectedItems[cart.id]);
     const data = {
       customer_id: selectedCarts[0].customer_id,
@@ -254,6 +261,17 @@ const Cart = () => {
           </Box>
         </Box>
       </Paper>
+
+      <Snackbar 
+        open={openSnackbar} 
+        autoHideDuration={3000} 
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="warning" onClose={() => setOpenSnackbar(false)}>
+          Vui lòng chọn sản phẩm trước khi mua hàng
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
