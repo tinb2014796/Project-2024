@@ -26,6 +26,13 @@ class OrdersController extends Controller
         $order = $this->createNewOrder($customer_id, $paymentMethod, $totalPrice, $request->note);
         if ($order->id) {
             $this->createOrderDetails($order->id, $products);
+            
+            // Xóa sản phẩm trong giỏ hàng sau khi đặt hàng thành công
+            foreach ($products as $product) {
+                \App\Models\Cart::where('customer_id', $customer_id)
+                    ->where('product_id', $product['id'])
+                    ->delete();
+            }
         }
         
         $orders = Oders::with(['customer', 'payment', 'orderDetails'])->find($order->id);
@@ -62,7 +69,7 @@ class OrdersController extends Controller
         $order->cus_id = $customer_id;
         $order->pa_id = $paymentMethod == 'cod' ? 1 : 3;
         $order->or_total = $totalPrice;
-        $order->or_status = 0; // Chưa xác nhận
+        $order->or_status = json_encode(['6' => 'Chưa xác nhận']); // Chưa xác nhận
         $order->or_ship = '';
         $order->or_date = now();
         $order->or_note = $note ?? 'Không có ghi chú';
@@ -163,6 +170,7 @@ class OrdersController extends Controller
 
     public function updatePayment(Request $request)
     {
+
         $order = Oders::find($request->order_id);
         $order->save();
         return redirect()->back();
@@ -191,9 +199,13 @@ class OrdersController extends Controller
     public function orderSuccess()
     {
         $user = session()->get('customer');
-        $orders = Oders::with(['customer', 'payment', 'orderDetails.product.images'])
+        $orders = Oders::with(['customer', 'payment', 'orderDetails.product'])
                       ->where('cus_id', $user->id)
                       ->get();
+        $orders = $orders->map(function($order) {
+            $order->or_status = json_decode($order->or_status);
+            return $order;
+        });
         return Inertia::render('User/OrderSuccess', compact('orders'));
     }
 
@@ -205,5 +217,19 @@ class OrdersController extends Controller
     public function orderInform()
     {
         return Inertia::render('User/OrderInform');
+    }
+
+    public function cancelOrder(Request $request, $order_id)
+    {
+        $order = Oders::find($order_id);
+        
+        $order->or_note = $request->or_note ?? '';
+        $order->or_status = -1;
+        $user = session()->get('customer');
+        $orders = Oders::with(['customer', 'payment', 'orderDetails.product'])
+                      ->where('cus_id', $user->id)
+                      ->get();
+        $order->save();
+        return redirect()->back()->with('success', 'Hủy đơn hàng thành công');
     }
 }

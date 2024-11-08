@@ -7,11 +7,9 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import { usePage } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
 
-
-
 function CategoryItem({ category }) {
   return (
-    <Paper elevation={0} sx={{ textAlign: 'center', p: 2 }}>
+    <Card elevation={0} sx={{ textAlign: 'center', p: 2 }}>
       <Link href={`/user/category-product/${category.id}`}>
         <Box
           component="img"
@@ -22,19 +20,19 @@ function CategoryItem({ category }) {
             height: 100,
             borderRadius: '50%',
             mb: 2,
-            cursor: 'pointer'
+            cursor: 'pointer',
+            objectFit: 'cover'
           }}
         />
       </Link>
       <Typography variant="subtitle1" gutterBottom>
         {category.c_name}
       </Typography>
-    </Paper>
+    </Card>
   );
 }
 
 function ProductItem({ product }) {
-  // Lấy phần trăm khuyến mãi cao nhất từ mảng sale_off
   const maxDiscount = product.sale_off ? Math.max(...product.sale_off.map(sale => sale.s_percent)) : 0;
 
   const formatPrice = (price) => {
@@ -46,7 +44,7 @@ function ProductItem({ product }) {
 
   return (
     <Link href={`/user/detail-product/${product.id}`} style={{ textDecoration: 'none' }}>
-      <Card sx={{ position: 'relative' }}>
+      <Card sx={{ position: 'relative', borderRadius: 2, boxShadow: 3 }}>
         {maxDiscount > 0 && (
           <Box
             sx={{
@@ -70,8 +68,9 @@ function ProductItem({ product }) {
           height="140"
           image={product.images[0].ip_image}
           alt={product.p_name}
+          sx={{ borderTopLeftRadius: 8, borderTopRightRadius: 8, objectFit: 'cover' }}
         />
-        <CardContent>
+        <CardContent sx={{ p: 2 }}>
           <Typography variant="body2" noWrap>{product.p_name}</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {maxDiscount > 0 ? (
@@ -122,7 +121,7 @@ function Home() {
       </Typography>
       
       {/* Hình ảnh banner lớn */}
-      <Box sx={{ mb: 4, width: '100%', height: '800px', overflow: 'hidden' }}>
+      <Box sx={{ mb: 4, width: '100%', height: '400px', overflow: 'hidden' }}>
         <img 
           src="/images/sunhouse-mama-shd5353w_0118(1).jpg" 
           alt="Banner sản phẩm" 

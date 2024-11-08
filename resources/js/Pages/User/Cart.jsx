@@ -44,7 +44,7 @@ const Cart = () => {
     const selectedProducts = Object.keys(selectedItems).filter(id => selectedItems[id]);
     const selectedCarts = carts.filter(cart => selectedItems[cart.id]);
     const data = {
-      customer_id: 1,
+      customer_id: selectedCarts[0].customer_id,
       products: selectedCarts.map(cart => ({
         id: cart.product.id,
         quantity: quantities[cart.id],
@@ -77,12 +77,12 @@ const Cart = () => {
   }
 
   return (
-    <>
-      <Paper elevation={3} sx={{ p: 2, m: 2, mb: 1 }}>
+    <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh', py: 2 }}>
+      <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'white' }}>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box display="flex" alignItems="center">
-            <ShoppingCartIcon sx={{ color: '#FFCC33', fontSize: 50, marginRight: 2 }} />
-            <Typography variant="h5">Nghệ Shop | Giỏ hàng</Typography>
+            <ShoppingCartIcon sx={{ color: '#ee4d2d', fontSize: 32, marginRight: 2 }} />
+            <Typography variant="h6" sx={{ color: '#222', fontWeight: 500 }}>Giỏ Hàng</Typography>
           </Box>
           <Box display="flex" alignItems="center" sx={{ width: '30%' }}>
             <TextField
@@ -90,11 +90,20 @@ const Cart = () => {
               size="small"
               placeholder="Tìm kiếm sản phẩm"
               sx={{ 
-                width: '100%'
+                width: '100%',
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '2px',
+                  '&:hover fieldset': {
+                    borderColor: '#ee4d2d',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#ee4d2d',
+                  }
+                }
               }}
               InputProps={{
                 endAdornment: (
-                  <IconButton color="primary" aria-label="tìm kiếm">
+                  <IconButton sx={{ color: '#ee4d2d' }}>
                     <SearchIcon />
                   </IconButton>
                 ),
@@ -104,83 +113,148 @@ const Cart = () => {
         </Box>
       </Paper>
       
-      <Paper elevation={3} sx={{ p: 2, m: 2, mt: 1 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item container xs={12} alignItems="center">
-            <Grid item xs={1}><Checkbox /></Grid>
-            <Grid item xs={4}><Typography variant="subtitle1">Sản Phẩm</Typography></Grid>
-            <Grid item xs={1}><Typography variant="subtitle1">Đơn Giá</Typography></Grid>
-            <Grid item xs={1}><Typography variant="subtitle1">Khuyến Mãi</Typography></Grid>
-            <Grid item xs={2}><Typography variant="subtitle1">Số Lượng</Typography></Grid>
-            <Grid item xs={1}><Typography variant="subtitle1">Số Tiền</Typography></Grid>
-            <Grid item xs={2}><Typography variant="subtitle1">Thao Tác</Typography></Grid>
+      <Paper elevation={0} sx={{ bgcolor: 'white' }}>
+        <Box sx={{ p: 2, borderBottom: '1px solid #f5f5f5' }}>
+          <Grid container alignItems="center">
+            <Grid item xs={1}><Checkbox sx={{ color: '#ee4d2d', '&.Mui-checked': { color: '#ee4d2d' } }}/></Grid>
+            <Grid item xs={4}><Typography sx={{ color: '#222' }}>Sản Phẩm</Typography></Grid>
+            <Grid item xs={1}><Typography sx={{ color: '#222' }}>Đơn Giá</Typography></Grid>
+            <Grid item xs={1}><Typography sx={{ color: '#222' }}>Giảm Giá</Typography></Grid>
+            <Grid item xs={2}><Typography sx={{ color: '#222' }}>Số Lượng</Typography></Grid>
+            <Grid item xs={1}><Typography sx={{ color: '#222' }}>Số Tiền</Typography></Grid>
+            <Grid item xs={2}><Typography sx={{ color: '#222' }}>Thao Tác</Typography></Grid>
           </Grid>
-          
-          {carts.map((item, index) => (
-            <Grid key={index} item container xs={12} alignItems="center">
-              <Grid item xs={1}><Checkbox checked={selectedItems[item.id] || false} onChange={() => handleCheckboxChange(item.id)} /></Grid>
+        </Box>
+        
+        {carts.map((item, index) => (
+          <Box key={index} sx={{ p: 2, borderBottom: '1px solid #f5f5f5' }}>
+            <Grid container alignItems="center">
+              <Grid item xs={1}>
+                <Checkbox 
+                  checked={selectedItems[item.id] || false} 
+                  onChange={() => handleCheckboxChange(item.id)}
+                  sx={{ color: '#ee4d2d', '&.Mui-checked': { color: '#ee4d2d' } }}
+                />
+              </Grid>
               <Grid item xs={4}>
                 <Box display="flex" alignItems="center">
-                  <img src={item.product.images[0].ip_image} alt={item.product.p_name} style={{ width: 80, height: 80, marginRight: 16 }} />
+                  <img 
+                    src={item.product.images[0].ip_image} 
+                    alt={item.product.p_name} 
+                    style={{ width: 80, height: 80, objectFit: 'cover', marginRight: 16 }} 
+                  />
                   <Box>
-                    <Typography variant="body1">{item.product.p_name}</Typography>
-                    <Typography variant="body2">{item.product.p_description}</Typography>
+                    <Typography sx={{ color: '#222', mb: 1 }}>{item.product.p_name}</Typography>
+                    <Typography variant="body2" sx={{ color: '#757575' }}>{item.product.p_description}</Typography>
                   </Box>
                 </Box>
               </Grid>
               <Grid item xs={1}>
-                <Typography variant="body1">₫{parseFloat(item.product.p_selling).toLocaleString()}</Typography>
+                <Typography sx={{ color: '#929292' }}>₫{parseFloat(item.product.p_selling).toLocaleString()}</Typography>
               </Grid>
               <Grid item xs={1}>
-                <Typography variant="body1" color="error">
+                <Typography sx={{ color: '#ee4d2d' }}>
                   {item.product.sale_off?.[0]?.s_percent || 0}%
                 </Typography>
               </Grid>
               <Grid item xs={2}>
                 <Box display="flex" alignItems="center">
-                  <IconButton size="small" onClick={() => updateQuantity(item.id, quantities[item.id] - 1)}><RemoveIcon /></IconButton>
+                  <IconButton 
+                    size="small" 
+                    onClick={() => updateQuantity(item.id, quantities[item.id] - 1)}
+                    sx={{ border: '1px solid #e8e8e8' }}
+                  >
+                    <RemoveIcon fontSize="small" />
+                  </IconButton>
                   <TextField 
                     value={quantities[item.id]} 
                     size="small" 
-                    sx={{ width: 40, mx: 1 }} 
+                    sx={{ 
+                      width: 40, 
+                      mx: 1,
+                      '& .MuiOutlinedInput-root': {
+                        height: '32px',
+                      }
+                    }} 
                     onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 0)}
                   />
-                  <IconButton size="small" onClick={() => updateQuantity(item.id, quantities[item.id] + 1)}><AddIcon /></IconButton>
+                  <IconButton 
+                    size="small" 
+                    onClick={() => updateQuantity(item.id, quantities[item.id] + 1)}
+                    sx={{ border: '1px solid #e8e8e8' }}
+                  >
+                    <AddIcon fontSize="small" />
+                  </IconButton>
                 </Box>
               </Grid>
               <Grid item xs={1}>
-                <Typography variant="body1" color="error">
+                <Typography sx={{ color: '#ee4d2d', fontWeight: 500 }}>
                   ₫{Math.round(parseFloat(item.product.p_selling) * quantities[item.id] * (1 - (item.product.sale_off?.[0]?.s_percent || 0)/100)).toLocaleString()}
                 </Typography>
               </Grid>
               <Grid item xs={2}>
-                <Button variant="text" color="error" onClick={deleteCart}>Xóa</Button>
+                <Button 
+                  onClick={deleteCart}
+                  sx={{ 
+                    color: '#222',
+                    '&:hover': {
+                      color: '#ee4d2d',
+                      bgcolor: 'transparent'
+                    }
+                  }}
+                >
+                  Xóa
+                </Button>
               </Grid>
             </Grid>
-          ))}
-          
-          <Grid item xs={12}>
-            <Box bgcolor="#f5f5f5" p={2}>
-              <Typography variant="body2">
-                Giảm ₫300.000 phí vận chuyển đơn tối thiểu ₫0; Giảm ₫500.000 phí vận chuyển đơn tối thiểu ₫500.000
-                <Button variant="text" color="primary" size="small">Tìm hiểu thêm</Button>
-              </Typography>
-            </Box>
-          </Grid>
-          
-          <Grid item xs={12}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
-              <Typography variant="h6" color="error">
-                Tổng tiền: ₫{calculateTotalPrice().toLocaleString()}
-              </Typography>
-              <Button variant="contained" color="primary" onClick={handleBuySelected} >
-                Mua hàng đã chọn
+          </Box>
+        ))}
+        
+        <Box sx={{ position: 'sticky', bottom: 0, bgcolor: 'white', borderTop: '1px solid #f5f5f5', p: 2 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Box display="flex" alignItems="center">
+              <Checkbox sx={{ color: '#ee4d2d', '&.Mui-checked': { color: '#ee4d2d' } }}/>
+              <Typography sx={{ color: '#222', mr: 2 }}>Chọn Tất Cả</Typography>
+              <Button 
+                onClick={deleteCart}
+                sx={{ 
+                  color: '#222',
+                  '&:hover': {
+                    color: '#ee4d2d',
+                    bgcolor: 'transparent'
+                  }
+                }}
+              >
+                Xóa
               </Button>
             </Box>
-          </Grid>
-        </Grid>
+            <Box display="flex" alignItems="center">
+              <Box mr={3}>
+                <Typography sx={{ color: '#222' }}>
+                  Tổng thanh toán ({Object.keys(selectedItems).filter(id => selectedItems[id]).length} sản phẩm):
+                  <Typography component="span" sx={{ color: '#ee4d2d', fontSize: '20px', ml: 1, fontWeight: 500 }}>
+                    ₫{calculateTotalPrice().toLocaleString()}
+                  </Typography>
+                </Typography>
+              </Box>
+              <Button 
+                variant="contained" 
+                onClick={handleBuySelected}
+                sx={{
+                  bgcolor: '#ee4d2d',
+                  '&:hover': {
+                    bgcolor: '#d73211'
+                  },
+                  px: 4
+                }}
+              >
+                Mua Hàng
+              </Button>
+            </Box>
+          </Box>
+        </Box>
       </Paper>
-    </>
+    </Box>
   );
 };
 

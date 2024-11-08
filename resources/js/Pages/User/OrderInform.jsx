@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Box, Paper, Typography, Grid, Button } from '@mui/material';
-import { usePage } from '@inertiajs/react';
+import { usePage, Link } from '@inertiajs/react';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const OrderInform = () => {
     const { orders } = usePage().props;
-    
+    console.log(orders);
     const calculateTotal = () => {
         return orders.order_details?.reduce((total, item) => {
             return total + (item.quantity * parseInt(item.total/item.quantity));
@@ -92,30 +92,34 @@ const OrderInform = () => {
                     </Paper>
 
                     <Box sx={{ mt: 3, textAlign: 'center' }}>
-                        <Button 
-                            variant="contained" 
-                            sx={{ 
-                                bgcolor: '#ee4d2d',
-                                '&:hover': {
-                                    bgcolor: '#d73211'
-                                },
-                                mr: 2
-                            }}
-                        >
-                            Theo dõi đơn hàng
-                        </Button>
-                        <Button 
-                            variant="outlined"
-                            sx={{
-                                color: '#ee4d2d',
-                                borderColor: '#ee4d2d',
-                                '&:hover': {
-                                    borderColor: '#d73211'
-                                }
-                            }}
-                        >
-                            Tiếp tục mua sắm
-                        </Button>
+                        <Link href="/user/order-success">
+                            <Button 
+                                variant="contained" 
+                                sx={{ 
+                                    bgcolor: '#ee4d2d',
+                                    '&:hover': {
+                                        bgcolor: '#d73211'
+                                    },
+                                    mr: 2
+                                }}
+                            >
+                                Theo dõi đơn hàng
+                            </Button>
+                        </Link>
+                        <Link href="/user/home">
+                            <Button 
+                                variant="outlined"
+                                sx={{
+                                    color: '#ee4d2d',
+                                    borderColor: '#ee4d2d',
+                                    '&:hover': {
+                                        borderColor: '#d73211'
+                                    }
+                                }}
+                            >
+                                Tiếp tục mua sắm 
+                            </Button>
+                        </Link>
                     </Box>
                 </Paper>
             </Box>

@@ -64,16 +64,27 @@ function DashboardCharts() {
   };
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={3}>
       <Grid item xs={12} md={8}>
-        <Paper sx={{ p: 2 }}>
-          <Typography variant="h6" gutterBottom>Doanh thu & Mua hàng</Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Paper sx={{ 
+          p: 3, 
+          boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+          borderRadius: 2 
+        }}>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+            Doanh thu & Mua hàng
+          </Typography>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'flex-end', 
+            mb: 2 
+          }}>
             <ToggleButtonGroup
               value={timeRange}
               exclusive
               onChange={handleTimeRangeChange}
-              aria-label="time range"
+              size="small"
+              sx={{ '& .MuiToggleButton-root': { px: 3 } }}
             >
               <ToggleButton value="daily" aria-label="daily">
                 Ngày
@@ -86,15 +97,22 @@ function DashboardCharts() {
               </ToggleButton>
             </ToggleButtonGroup>
           </Box>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={400}>
             <BarChart data={salesPurchaseData[timeRange]}>
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  border: 'none',
+                  borderRadius: '4px',
+                  boxShadow: '0 0 10px rgba(0,0,0,0.1)'
+                }}
+              />
               <Legend />
-              <Bar dataKey="Purchase" fill="#0000FF" name="Mua hàng" />
-              <Bar dataKey="Sales" fill="#FF0000" name="Doanh thu" />
+              <Bar dataKey="Purchase" fill="#4dabf5" name="Mua hàng" />
+              <Bar dataKey="Sales" fill="#ff6b6b" name="Doanh thu" />
             </BarChart>
           </ResponsiveContainer>
         </Paper>

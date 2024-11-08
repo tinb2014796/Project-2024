@@ -111,17 +111,6 @@ class CustomerController extends Controller
             
 
         ]);
-        $file = $request->file('cus_image');
-        
-        // Tạo tên file mới bằng cách kết hợp thời gian hiện tại và tên gốc của file
-        $file_name = time().'_'.$file->getClientOriginalName(); 
-        
-        // Di chuyển file ảnh vào thư mục public/images
-        $file->move(public_path('images'), $file_name);
-        
-        // Tạo URL đầy đủ cho ảnh
-        $imageUrl = asset('images/'.$file_name);
-        $customer->cus_image = $imageUrl;
         $customer->save();
         return Inertia::render('User/Customer', ['customer' => $customer]);
     }

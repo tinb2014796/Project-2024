@@ -18,8 +18,12 @@ const User = () => {
     email: customer.cus_email,
     birth: customer.cus_birthday,
     sex: customer.cus_sex,
-    image: customer.cus_image
+    image: customer.cus_image,
+    province_id: customer.province_id,
+    district_id: customer.district_id,
+    ward_code: customer.ward_code
   });
+  console.log(currentUser);
   const [openCustomerUpdate, setOpenCustomerUpdate] = useState(false);
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -31,14 +35,37 @@ const User = () => {
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const response = await axios.get('https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json');
-        setProvinces(response.data);
-        const selectedProvince = response.data.find(p => p.Id === customer.province_id);
+        const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province', {
+          headers: {
+            'Token': 'c6967a25-9a90-11ef-8e53-0a00184fe694',
+            'Content-Type': 'application/json'
+          }
+        });
+        setProvinces(response.data.data);
+        const selectedProvince = response.data.data.find(p => p.ProvinceID == customer.province_id);
         if (selectedProvince) {
-          setDistricts(selectedProvince.Districts);
-          const selectedDistrict = selectedProvince.Districts.find(d => d.Id === customer.district_id);
+          const districtResponse = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district', {
+            headers: {
+              'Token': 'c6967a25-9a90-11ef-8e53-0a00184fe694',
+              'Content-Type': 'application/json'
+            },
+            params: {
+              province_id: selectedProvince.ProvinceID
+            }
+          });
+          setDistricts(districtResponse.data.data);
+          const selectedDistrict = districtResponse.data.data.find(d => d.DistrictID == customer.district_id);
           if (selectedDistrict) {
-            setWards(selectedDistrict.Wards);
+            const wardResponse = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
+              headers: {
+                'Token': 'c6967a25-9a90-11ef-8e53-0a00184fe694',
+                'Content-Type': 'application/json'
+              },
+              params: {
+                district_id: selectedDistrict.DistrictID
+              }
+            });
+            setWards(wardResponse.data.data);
           }
         }
       } catch (error) {
@@ -114,129 +141,154 @@ const User = () => {
     }
   };
 
-  const getProvinceName = () => {
-    const province = provinces.find(p => p.Id === customer.province_id);
-    return province ? province.Name : '';
+  const getProvinceName = (provinceId) => {
+    const province = provinces.find(p => p.ProvinceID == provinceId);
+    return province ? province.ProvinceName : '';
   };
 
-  const getDistrictName = () => {
-    const district = districts.find(d => d.Id === customer.district_id);
-    return district ? district.Name : '';
+  const getDistrictName = (districtId) => {
+    const district = districts.find(d => d.DistrictID == districtId);
+    return district ? district.DistrictName : '';
   };
-
-  const getWardName = () => {
-    const ward = wards.find(w => w.Id === customer.ward_code);
-    return ward ? ward.Name : '';
+ 
+  const getWardName = (wardCode) => {
+    const ward = wards.find(w => w.WardCode == wardCode);
+    return ward ? ward.WardName : '';
   };
+ 
 
   return (
     <>
-      <Typography variant="h4" gutterBottom sx={{ marginLeft: 13, marginTop: 3 }}>
-        Thông tin tài khoản
-      </Typography>
-      <Box sx={{ display: 'flex', gap: 3, maxWidth: 1400, mx: 'auto', marginTop: 3 }}>
-        <Paper sx={{ p: 3, width: 250, height: 'fit-content' }}>
-          <Box display="flex" flexDirection="column" alignItems="center" position="relative">
-            <Avatar 
-              sx={{ 
-                width: 180, 
-                height: 180, 
-                mb: 2,
-                opacity: loading ? 0.5 : 1 
-              }} 
-              src={previewImage || selectedImage} 
-            />
-            <input
-              accept="image/jpeg,image/png,image/gif"
-              style={{ display: 'none' }}
-              id="avatar-upload"
-              type="file"
-              onChange={handleImageUpload}
-              disabled={loading}
-            />
-            <label htmlFor="avatar-upload">
-              <IconButton 
-                color="primary" 
-                aria-label="upload picture"
-                component="span"
-                disabled={loading}
-                sx={{
-                  position: 'absolute',
-                  bottom: 50,
+      <Box sx={{ maxWidth: 1400, mx: 'auto', marginTop: 3, marginBottom: 15, padding: '0 20px' }}>
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <Paper sx={{ p: 4, position: 'relative'}}>
+              <Button 
+                variant="contained"
+                size="medium"
+                color="primary"
+                startIcon={<Edit />}
+                sx={{ 
+                  position: 'absolute', 
+                  top: 20, 
                   right: 20,
-                  backgroundColor: 'white',
-                  '&:hover': {
-                    backgroundColor: '#f5f5f5'
-                  }
+                  borderRadius: '20px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}
+                onClick={() => setOpenCustomerUpdate(true)}
               >
-                <PhotoCamera />
-              </IconButton>
-            </label>
-            {loading && (
-              <Typography variant="caption" color="text.secondary">
-                Đang tải ảnh lên...
-              </Typography>
-            )}
-            <Typography variant="h6" align="center">{customer.cus_familyname} {customer.cus_name}</Typography>
-          </Box>
-        </Paper>
-        
-        <Paper sx={{ p: 3, flexGrow: 1, position: 'relative'}}>
-          <Button 
-            variant="contained"
-            size="small"
-            color="primary"
-            sx={{ position: 'absolute', top: 16, right: 16 }}
-            onClick={() => setOpenCustomerUpdate(true)}
-          >
-            Cập nhật thông tin
-          </Button>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>Thông tin cá nhân</Typography>
-              <Box flexGrow={1}>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <Typography variant="body1" sx={{ minWidth: 100 }}>Họ:</Typography>
-                  <Typography>{customer.cus_familyname}</Typography>
-                </Box>
-                <Box display="flex" alignItems="center">
-                  <Typography variant="body1" sx={{ minWidth: 100 }}>Tên:</Typography>
-                  <Typography>{customer.cus_name}</Typography>
-                </Box>
-              </Box>
-              <Box display="flex" gap={3} mb={3} mt={3}>
-                <Typography variant="body1" sx={{ minWidth: 80 }}>Ngày sinh: </Typography>
-                <Typography>{formatDate(customer.cus_birthday)}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 3 }}>
-                <Typography variant="body1" sx={{ minWidth: 80 }}>Giới tính:</Typography>
-                <Typography>{translateGender(customer.cus_sex)}</Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>Số điện thoại và Email</Typography>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                <Typography variant="body1" sx={{ flexGrow: 1 }}>Số điện thoại: {customer.cus_sdt}</Typography>
-              </Box>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                <Typography variant="body1" sx={{ flexGrow: 1 }}>Địa chỉ email: {customer.cus_email}</Typography>
-              </Box>
-              <Divider sx={{ my: 3 }} />
-              <Typography variant="h6" gutterBottom>Địa chỉ</Typography>
-              <Box display="flex" flexDirection="column" gap={2}>
-                <Typography variant="body1">
-                  {customer.cus_address}, {getWardName()}, {getDistrictName()}, {getProvinceName()}
-                </Typography>
-              </Box>
-            </Grid>
+                Cập nhật thông tin
+              </Button>
+              <Grid container spacing={4}>
+                <Grid item xs={12} md={6}>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#FF4500', fontWeight: 'bold' }}>
+                    Thông tin cá nhân
+                  </Typography>
+                  <Box sx={{ backgroundColor: '#f8f9fa', p: 3, borderRadius: '8px' }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Typography variant="body1" sx={{ minWidth: 100, color: '#666' }}>Họ:</Typography>
+                      <Typography sx={{ fontWeight: 500 }}>{customer.cus_familyname}</Typography>
+                    </Box>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Typography variant="body1" sx={{ minWidth: 100, color: '#666' }}>Tên:</Typography>
+                      <Typography sx={{ fontWeight: 500 }}>{customer.cus_name}</Typography>
+                    </Box>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Typography variant="body1" sx={{ minWidth: 100, color: '#666' }}>Ngày sinh:</Typography>
+                      <Typography sx={{ fontWeight: 500 }}>{formatDate(customer.cus_birthday)}</Typography>
+                    </Box>
+                    <Box display="flex" alignItems="center">
+                      <Typography variant="body1" sx={{ minWidth: 100, color: '#666' }}>Giới tính:</Typography>
+                      <Typography sx={{ fontWeight: 500 }}>{translateGender(customer.cus_sex)}</Typography>
+                    </Box>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <Box display="flex" flexDirection="column" alignItems="center" position="relative">
+                    <Avatar 
+                      sx={{ 
+                        width: 200, 
+                        height: 200, 
+                        mb: 2,
+                        opacity: loading ? 0.5 : 1,
+                        border: '3px solid #f5f5f5'
+                      }} 
+                      src={previewImage || selectedImage} 
+                    />
+                    <input
+                      accept="image/jpeg,image/png,image/gif"
+                      style={{ display: 'none' }}
+                      id="avatar-upload"
+                      type="file"
+                      onChange={handleImageUpload}
+                      disabled={loading}
+                    />
+                    <label htmlFor="avatar-upload">
+                      <IconButton 
+                        color="primary" 
+                        aria-label="upload picture"
+                        component="span"
+                        disabled={loading}
+                        sx={{
+                          position: 'absolute',
+                          bottom: 60,
+                          right: 30,
+                          backgroundColor: 'white',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                          '&:hover': {
+                            backgroundColor: '#f5f5f5'
+                          }
+                        }}
+                      >
+                        <PhotoCamera />
+                      </IconButton>
+                    </label>
+                    {loading && (
+                      <Typography variant="caption" color="text.secondary">
+                        Đang tải ảnh lên...
+                      </Typography>
+                    )}
+                    <Typography variant="h6" align="center" sx={{ mt: 2, fontWeight: 'bold' }}>
+                      {customer.cus_familyname} {customer.cus_name}
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#FF4500', fontWeight: 'bold' }}>
+                    Thông tin liên hệ
+                  </Typography>
+                  <Box sx={{ backgroundColor: '#f8f9fa', p: 3, borderRadius: '8px', mb: 3 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Typography variant="body1" sx={{ minWidth: 140, color: '#666' }}>Số điện thoại:</Typography>
+                      <Typography sx={{ fontWeight: 500 }}>{customer.cus_sdt}</Typography>
+                    </Box>
+                    <Box display="flex" alignItems="center">
+                      <Typography variant="body1" sx={{ minWidth: 140, color: '#666' }}>Email:</Typography>
+                      <Typography sx={{ fontWeight: 500 }}>{customer.cus_email}</Typography>
+                    </Box>
+                  </Box>
+                  
+                  <Typography variant="h6" gutterBottom sx={{ color: '#FF4500', fontWeight: 'bold' }}>
+                    Địa chỉ
+                  </Typography>
+                  <Box sx={{ backgroundColor: '#f8f9fa', p: 3, borderRadius: '8px' }}>
+                    <Typography variant="body1" sx={{ fontWeight: 500, lineHeight: 1.6 }}>
+                      {customer.cus_address}, {getWardName(customer.ward_code)}, {getDistrictName(customer.district_id)}, {getProvinceName(customer.province_id)}
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Paper>
           </Grid>
-        </Paper>
+        </Grid>
       </Box>
       <CustomerUpdate 
         open={openCustomerUpdate}
         onClose={() => setOpenCustomerUpdate(false)}
         customer={customer}
+        provinces={provinces}
+        districts={districts}
+        wards={wards}
       />
       <UpdateUserInfoModal
         open={openUpdateModal}

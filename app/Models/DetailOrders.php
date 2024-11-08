@@ -19,6 +19,6 @@ class DetailOrders extends Model
     ];
     public function product()
     {
-        return $this->belongsTo(Product::class, 'p_id')->with('images');
+        return $this->belongsTo(Products::class, 'p_id')->with('images');
     }
 }

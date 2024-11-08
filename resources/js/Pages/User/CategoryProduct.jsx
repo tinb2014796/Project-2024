@@ -10,6 +10,13 @@ function CategoryProduct() {
         return <Typography>Đang tải...</Typography>;
     }
 
+    const formatPrice = (price) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(price);
+    };
+
     return (
         <Box sx={{ p: 4 }}>
             <Typography 
@@ -39,7 +46,7 @@ function CategoryProduct() {
                             <CardContent>
                                 <Typography variant="body2" noWrap>Tên sản phẩm: {product.p_name}</Typography>
                                 <Typography variant="subtitle1" color="error">
-                                    Giá bán: {product.p_selling.toLocaleString()}vnđ
+                                    Giá bán: {formatPrice(product.p_selling)}
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary">
                                     Số lượng còn lại: {product.p_quantity}

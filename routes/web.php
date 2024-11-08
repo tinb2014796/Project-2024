@@ -72,6 +72,7 @@ Route::middleware(AdminMiddleware::class)->prefix('admin')->group(function () {
 
 //User
 Route::middleware(UserAuthMiddleware::class)->prefix('user')->group(function () {
+
    
     Route::get('/category-product/{id}', [CategoryController::class, 'categoryProduct']);
     Route::get('/detail-product/{id}', [UserController::class, 'detailProduct']);
@@ -96,7 +97,7 @@ Route::middleware(UserAuthMiddleware::class)->prefix('user')->group(function () 
     Route::post('/order-success', [OrdersController::class, 'orderSuccess']);
 
     Route::get('/order-confirm', [OrdersController::class, 'orderConfirm']);
-
+    Route::post('/order/{id}', [OrdersController::class, 'cancelOrder']);
     
     Route::get('/follow-order', [OrdersController::class, 'followOrder']);
 

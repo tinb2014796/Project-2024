@@ -38,6 +38,7 @@ class PageController extends Controller
         foreach ($orders as $order) {
             $order->tracking_id ='LDV9P8';
         }
+
         return Inertia::render('Admin/Orders', compact('orders'));
     }
     public function customers()

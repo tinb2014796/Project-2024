@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\DetailOrders;    
 use App\Models\Customer;
 use App\Models\Payment;
+use App\Models\Products;
+use App\Models\ImageProduct;
 
 class Oders extends Model
 {
@@ -23,7 +25,7 @@ class Oders extends Model
     }
     public function orderDetails()
     {
-        return $this->hasMany(DetailOrders::class, 'or_id', 'id')->join('products', 'products.id', '=', 'detail_orders.p_id');
+        return $this->hasMany(DetailOrders::class, 'or_id', 'id')->with('product');
     }
     public function products()
     {

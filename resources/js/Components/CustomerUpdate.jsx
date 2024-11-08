@@ -22,11 +22,16 @@ const CustomerUpdate = ({ open, onClose, customer }) => {
     const [wards, setWards] = useState([]);
 
     useEffect(() => {
-        // Lấy danh sách tỉnh/thành phố
+        // Lấy danh sách tỉnh/thành phố từ GHN
         const fetchProvinces = async () => {
             try {
-                const response = await axios.get('https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json');
-                setProvinces(response.data);
+                const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province', {
+                    headers: {
+                        'Token': 'c6967a25-9a90-11ef-8e53-0a00184fe694',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                setProvinces(response.data.data);
             } catch (error) {
                 console.error('Lỗi khi lấy danh sách tỉnh/thành:', error);
             }
@@ -35,24 +40,50 @@ const CustomerUpdate = ({ open, onClose, customer }) => {
     }, []);
 
     useEffect(() => {
-        // Lấy danh sách quận/huyện khi tỉnh/thành phố thay đổi
-        if (formData.province_id && provinces.length > 0) {
-            const selectedProvince = provinces.find(p => p.Id === formData.province_id);
-            if (selectedProvince) {
-                setDistricts(selectedProvince.Districts);
+        // Lấy danh sách quận/huyện khi tỉnh/thành phố thay đổi từ GHN
+        const fetchDistricts = async () => {
+            if (formData.province_id) {
+                try {
+                    const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district', {
+                        headers: {
+                            'Token': 'c6967a25-9a90-11ef-8e53-0a00184fe694',
+                            'Content-Type': 'application/json'
+                        },
+                        params: {
+                            province_id: formData.province_id
+                        }
+                    });
+                    setDistricts(response.data.data);
+                } catch (error) {
+                    console.error('Lỗi khi lấy danh sách quận/huyện:', error);
+                }
             }
-        }
-    }, [formData.province_id, provinces]);
+        };
+        fetchDistricts();
+    }, [formData.province_id]);
 
     useEffect(() => {
-        // Lấy danh sách phường/xã khi quận/huyện thay đổi
-        if (formData.district_id && districts.length > 0) {
-            const selectedDistrict = districts.find(d => d.Id === formData.district_id);
-            if (selectedDistrict) {
-                setWards(selectedDistrict.Wards);
+        // Lấy danh sách phường/xã khi quận/huyện thay đổi từ GHN
+        const fetchWards = async () => {
+            if (formData.district_id) {
+                try {
+                    const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
+                        headers: {
+                            'Token': 'c6967a25-9a90-11ef-8e53-0a00184fe694',
+                            'Content-Type': 'application/json'
+                        },
+                        params: {
+                            district_id: formData.district_id
+                        }
+                    });
+                    setWards(response.data.data);
+                } catch (error) {
+                    console.error('Lỗi khi lấy danh sách phường/xã:', error);
+                }
             }
-        }
-    }, [formData.district_id, districts]);
+        };
+        fetchWards();
+    }, [formData.district_id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -155,8 +186,8 @@ const CustomerUpdate = ({ open, onClose, customer }) => {
                             >
                                 <MenuItem value="" disabled>Chọn Tỉnh/Thành phố</MenuItem>
                                 {provinces.map((province) => (
-                                    <MenuItem key={province.Id} value={province.Id}>
-                                        {province.Name}
+                                    <MenuItem key={province.ProvinceID} value={province.ProvinceID}>
+                                        {province.ProvinceName}
                                     </MenuItem>
                                 ))}
                             </Select>
@@ -172,8 +203,8 @@ const CustomerUpdate = ({ open, onClose, customer }) => {
                             >
                                 <MenuItem value="" disabled>Chọn Quận/Huyện</MenuItem>
                                 {districts.map((district) => (
-                                    <MenuItem key={district.Id} value={district.Id}>
-                                        {district.Name}
+                                    <MenuItem key={district.DistrictID} value={district.DistrictID}>
+                                        {district.DistrictName}
                                     </MenuItem>
                                 ))}
                             </Select>
@@ -189,8 +220,8 @@ const CustomerUpdate = ({ open, onClose, customer }) => {
                             >
                                 <MenuItem value="" disabled>Chọn Phường/Xã</MenuItem>
                                 {wards.map((ward) => (
-                                    <MenuItem key={ward.Id} value={ward.Id}>
-                                        {ward.Name}
+                                    <MenuItem key={ward.WardCode} value={ward.WardCode}>
+                                        {ward.WardName}
                                     </MenuItem>
                                 ))}
                             </Select>

@@ -42,7 +42,11 @@ export default function Main({ children }) {
     };
 
     const handleUserClick = (event) => {
-        setUserAnchorEl(event.currentTarget);
+        if(auth){
+            setUserAnchorEl(event.currentTarget);
+        }else{
+            router.get('/signin');
+        }
     };
 
     const handleUserClose = () => {
@@ -100,28 +104,28 @@ export default function Main({ children }) {
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box sx={{ display: 'flex', gap: 3 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <EmailIcon sx={{ fontSize: 16 }} />
-                                <Typography variant="body2">ngheshop@gmail.com</Typography>
+                                <EmailIcon sx={{ fontSize: 16, color: 'black' }} />
+                                <Typography variant="body2" sx={{ color: 'black' }}>ngheshop@gmail.com</Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <PhoneIcon sx={{ fontSize: 16 }} />
-                                <Typography variant="body2">0123 456 789</Typography>
+                                <PhoneIcon sx={{ fontSize: 16, color: 'black' }} />
+                                <Typography variant="body2" sx={{ color: 'black' }}>0345 291 448</Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <LocationOnIcon sx={{ fontSize: 16 }} />
-                                <Typography variant="body2">Hà Nội, Việt Nam</Typography>
+                                <LocationOnIcon sx={{ fontSize: 16, color: 'black' }} />
+                                <Typography variant="body2" sx={{ color: 'black' }}>Cần Thơ, Việt Nam</Typography>
                             </Box>
                         </Box>
                         <Box sx={{ display: 'flex', gap: 2 }}>
                             {auth ? (
-                                <Typography variant="body2">Xin chào, {auth.cus_name}</Typography>
+                                <Typography variant="body2" sx={{ color: 'black' }}>Xin chào, {auth.cus_name}</Typography>
                             ) : (
                                 <>
-                                    <Link href="/signin" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <Link href="/signin" style={{ textDecoration: 'none', color: 'black' }}>
                                         <Typography variant="body2">Đăng nhập</Typography>
                                     </Link>
-                                    <Typography variant="body2">|</Typography>
-                                    <Link href="/signup" style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <Typography variant="body2" sx={{ color: 'black' }}>|</Typography>
+                                    <Link href="/signup" style={{ textDecoration: 'none', color: 'black' }}>
                                         <Typography variant="body2">Đăng ký</Typography>
                                     </Link>
                                 </>
@@ -136,7 +140,7 @@ export default function Main({ children }) {
                 position="sticky" 
                 elevation={0} 
                 sx={{ 
-                    backgroundColor: '#CC9933',
+                    backgroundColor: '#00FFFF',
                     borderBottom: '1px solid #e0e0e0',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                 }}
@@ -144,10 +148,10 @@ export default function Main({ children }) {
                 <Container maxWidth="lg">
                     <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Link href="/user/home" style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <Link href="/user/home" style={{ textDecoration: 'none', color: 'black' }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                     <img src="/images/9lc.jpg" alt="Nghệ Shop Logo" style={{ height: 50, borderRadius: '50%' }} />
-                                    <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
+                                    <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'black' }}>
                                         Nghệ Shop
                                     </Typography>
                                 </Box>
@@ -155,18 +159,16 @@ export default function Main({ children }) {
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                             <Button 
-                                color="inherit" 
+                                sx={{ color: 'black', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                                 component={Link} 
                                 href="/user/home"
-                                sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                             >
                                 Trang chủ
                             </Button>
                             <Button
-                                color="inherit"
+                                sx={{ color: 'black', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                                 endIcon={<KeyboardArrowDownIcon />}
                                 onClick={handleProductClick}
-                                sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                             >
                                 Sản phẩm
                             </Button>
@@ -185,34 +187,31 @@ export default function Main({ children }) {
                                         onClick={handleProductClose} 
                                         component={Link} 
                                         href={`/user/category-product/${category.id}`}
-                                        sx={{ minWidth: 180 }}
+                                        sx={{ minWidth: 180, color: 'black' }}
                                     >
                                         {category.c_name}
                                     </MenuItem>
                                 ))}
                             </Menu>
                             <Button 
-                                color="inherit" 
+                                sx={{ color: 'black', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                                 component={Link} 
                                 href="/user/order-success"
-                                sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                             >
                                 Đơn hàng
                             </Button>
                             <Button 
-                                color="inherit" 
+                                sx={{ color: 'black', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                                 component={Link} 
                                 href="/lien-he"
-                                sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                             >
                                 Liên hệ
                             </Button>
 
                             <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 2 }}>
                                 <IconButton 
-                                    color="inherit" 
+                                    sx={{ color: 'black', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                                     onClick={handleSearchClick}
-                                    sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                                 >
                                     <SearchIcon />
                                 </IconButton>
@@ -223,7 +222,7 @@ export default function Main({ children }) {
                                             value={searchValue}
                                             onChange={handleSearch}
                                             sx={{
-                                                color: 'inherit',
+                                                color: 'black',
                                                 '& .MuiInputBase-input': {
                                                     padding: '8px 12px',
                                                     transition: 'width 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
@@ -267,6 +266,7 @@ export default function Main({ children }) {
                                                                 <ListItemText 
                                                                     primary={product.p_name}
                                                                     secondary={`Giá: ${formatPrice(product.p_selling)}`}
+                                                                    sx={{ color: 'black' }}
                                                                 />
                                                             </Box>
                                                         </ListItem>
@@ -278,16 +278,35 @@ export default function Main({ children }) {
                                 )}
 
                                 <IconButton
-                                    color="inherit"
+                                    sx={{ color: 'black', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                                     onClick={handleUserClick}
-                                    sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                                 >
                                     <PersonIcon />
                                 </IconButton>
+                                <Menu
+                                    anchorEl={userAnchorEl}
+                                    open={Boolean(userAnchorEl)}
+                                    onClose={handleUserClose}
+                                    PaperProps={{
+                                        elevation: 3,
+                                        sx: { mt: 1 }
+                                    }}
+                                >
+                                    <MenuItem 
+                                        component={Link} 
+                                        href="/user/customer"
+                                        onClick={handleUserClose}
+                                        sx={{ color: 'black' }}
+                                    >
+                                        Thông tin cá nhân
+                                    </MenuItem>
+                                    <MenuItem onClick={handleLogout} sx={{ color: 'black' }}>
+                                        Đăng xuất
+                                    </MenuItem>
+                                </Menu>
 
                                 <IconButton 
-                                    color="inherit"
-                                    sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
+                                    sx={{ color: 'black', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                                 >
                                     <Badge badgeContent={0} color="error">
                                         <FavoriteIcon />
@@ -297,9 +316,9 @@ export default function Main({ children }) {
                                 <IconButton 
                                     component={Link} 
                                     href="/user/cart"
-                                    sx={{ '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
+                                    sx={{ color: 'black', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                                 >
-                                    <Badge badgeContent={0} sx={{ color: 'white' }}>
+                                    <Badge badgeContent={0} sx={{ color: 'black' }}>
                                         <ShoppingCartIcon />
                                     </Badge>
                                 </IconButton>
@@ -312,7 +331,7 @@ export default function Main({ children }) {
             <Box sx={{ flexGrow: 1 }}>
                 {searchResult.length > 0 ? (
                     <Container sx={{ bgcolor: '#f5f5f5', minHeight: '10vh', py: 3 }}>
-                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', mb: 3, color: 'black' }}>
                             Kết quả tìm kiếm ({searchResult.length} sản phẩm)
                         </Typography>
                         <Grid container spacing={3}>
@@ -359,7 +378,7 @@ export default function Main({ children }) {
                                                     sx={{ objectFit: 'cover' }}
                                                 />
                                                 <CardContent>
-                                                    <Typography variant="h6" noWrap sx={{ mb: 1 }}>{product.p_name}</Typography>
+                                                    <Typography variant="h6" noWrap sx={{ mb: 1, color: 'black' }}>{product.p_name}</Typography>
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                                         {maxDiscount > 0 ? (
                                                             <>
@@ -402,76 +421,76 @@ export default function Main({ children }) {
             </Box>
 
             {/* Footer */}
-            <Box sx={{ bgcolor: '#CC9933', color: 'white', py: 6, mt: 'auto' }}>
+            <Box sx={{ bgcolor: '#00FFFF', color: 'black', py: 6 }}>
                 <Container maxWidth="lg">
                     <Grid container spacing={4}>
                         <Grid item xs={12} md={4}>
-                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: 'black' }}>
                                 Về Nghệ Shop
                             </Typography>
-                            <Typography variant="body2" paragraph>
+                            <Typography variant="body2" paragraph sx={{ color: 'black' }}>
                                 Nghệ Shop là cửa hàng chuyên cung cấp các sản phẩm chất lượng cao, 
                                 đảm bảo uy tín và giá cả hợp lý cho khách hàng.
                             </Typography>
                             <Stack direction="row" spacing={2}>
-                                <IconButton color="inherit">
-                                    <FacebookIcon />
+                                <IconButton sx={{ color: 'black' }} href="https://www.facebook.com/NgheLWR">
+                                        <FacebookIcon />
                                 </IconButton>
-                                <IconButton color="inherit">
+                                <IconButton sx={{ color: 'black' }} href="https://www.instagram.com/nghe.9lc.37/">
                                     <InstagramIcon />
                                 </IconButton>
-                                <IconButton color="inherit">
+                                <IconButton sx={{ color: 'black' }} href="https://twitter.com/NgheLWR">
                                     <TwitterIcon />
                                 </IconButton>
                             </Stack>
                         </Grid>
                         <Grid item xs={12} md={4}>
-                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: 'black' }}>
                                 Liên hệ
                             </Typography>
                             <Stack spacing={2}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <LocationOnIcon />
-                                    <Typography variant="body2">
-                                        123 Đường ABC, Quận XYZ, Hà Nội
+                                    <LocationOnIcon sx={{ color: 'black' }} />
+                                    <Typography variant="body2" sx={{ color: 'black' }}>
+                                      207 Đường 3/2, Xuân Khánh, Ninh Kiều, Cần Thơ
                                     </Typography>
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <PhoneIcon />
-                                    <Typography variant="body2">
-                                        0123 456 789
+                                    <PhoneIcon sx={{ color: 'black' }} />
+                                    <Typography variant="body2" sx={{ color: 'black' }}>
+                                        0345 291 448
                                     </Typography>
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <EmailIcon />
-                                    <Typography variant="body2">
+                                    <EmailIcon sx={{ color: 'black' }} />
+                                    <Typography variant="body2" sx={{ color: 'black' }}>
                                         ngheshop@gmail.com
                                     </Typography>
                                 </Box>
                             </Stack>
                         </Grid>
                         <Grid item xs={12} md={4}>
-                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: 'black' }}>
                                 Chính sách
                             </Typography>
                             <Stack spacing={1}>
-                                <Link href="#" style={{ color: 'white', textDecoration: 'none' }}>
+                                <Link href="#" style={{ color: 'black', textDecoration: 'none' }}>
                                     <Typography variant="body2">Chính sách bảo mật</Typography>
                                 </Link>
-                                <Link href="#" style={{ color: 'white', textDecoration: 'none' }}>
+                                <Link href="#" style={{ color: 'black', textDecoration: 'none' }}>
                                     <Typography variant="body2">Điều khoản dịch vụ</Typography>
                                 </Link>
-                                <Link href="#" style={{ color: 'white', textDecoration: 'none' }}>
+                                <Link href="#" style={{ color: 'black', textDecoration: 'none' }}>
                                     <Typography variant="body2">Chính sách đổi trả</Typography>
                                 </Link>
-                                <Link href="#" style={{ color: 'white', textDecoration: 'none' }}>
+                                <Link href="#" style={{ color: 'black', textDecoration: 'none' }}>
                                     <Typography variant="body2">Hướng dẫn mua hàng</Typography>
                                 </Link>
                             </Stack>
                         </Grid>
                     </Grid>
-                    <Divider sx={{ my: 4, borderColor: 'rgba(255,255,255,0.2)' }} />
-                    <Typography variant="body2" align="center">
+                    <Divider sx={{ my: 4, borderColor: 'rgba(0,0,0,0.2)' }} />
+                    <Typography variant="body2" align="center" sx={{ color: 'black' }}>
                         © {new Date().getFullYear()} Nghệ Shop. Tất cả các quyền được bảo lưu.
                     </Typography>
                 </Container>

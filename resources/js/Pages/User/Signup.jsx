@@ -6,6 +6,39 @@ import {
 import { Link } from "@inertiajs/react";
 import { router } from '@inertiajs/react';
 import MuiAlert from '@mui/material/Alert';
+import { styled } from '@mui/system';
+
+const StyledPaper = styled(Paper)({
+  maxWidth: 400,
+  margin: '50px auto',
+  padding: '30px',
+  textAlign: 'center',
+  boxShadow: '0px 4px 20px rgba(0,0,0,0.15)',
+  borderRadius: '12px',
+});
+
+const StyledTextField = styled(TextField)({
+  marginBottom: '15px',
+  '& .MuiOutlinedInput-root': {
+    '& fieldset': {
+      borderColor: '#E0E0E0',
+    },
+    '&:hover fieldset': {
+      borderColor: '#00CED1',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#00CED1',
+    },
+  },
+});
+
+const StyledButton = styled(Button)({
+  padding: '12px',
+  fontSize: '16px',
+  fontWeight: 'bold',
+  borderRadius: '8px',
+  textTransform: 'none',
+});
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -60,44 +93,52 @@ const SignUp = () => {
   };
 
   return (
-    <Paper elevation={3} sx={{ maxWidth: 400, marginTop: '60px', marginLeft: 'auto', marginRight: 'auto', padding: 2, boxShadow: '0px 3px 15px rgba(0,0,0,0.2)' }}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" gutterBottom >
-          Tạo tài khoản mới
+    <Box sx={{ backgroundColor: '#f5f5f5', minHeight: '100vh', py: 4 }}>
+      <StyledPaper elevation={3}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+          TẠO TÀI KHOẢN MỚI
         </Typography>
-        <Typography variant="subtitle1" gutterBottom>
-          Nhanh chóng và dễ dàng.
-        </Typography>
-      </Box>
-      
-      <form onSubmit={handleSubmit}>
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-          <TextField 
-            label="Họ" 
-            variant="outlined" 
-            fullWidth 
-            name="cus_familyname"
-            value={formData.cus_familyname}
-            onChange={handleChange}
-          />
-          <TextField 
-            label="Tên" 
-            variant="outlined" 
-            fullWidth 
-            name="cus_name"
-            value={formData.cus_name}
-            onChange={handleChange}
-          />
-        </Box>
-
-        <Typography variant="subtitle2" gutterBottom>
-          Ngày sinh
+        <Typography variant="body1" gutterBottom sx={{ mb: 4 }}>
+          Bạn đã có tài khoản? <Link href="/signin" style={{ color: '#00CED1', textDecoration: 'none', fontWeight: 'bold' }}>Đăng nhập tại đây</Link>
         </Typography>
         
-        <Box sx={{ mb: 2 }}>
-          <TextField
-            type="date"
+        <form onSubmit={handleSubmit}>
+          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <StyledTextField 
+              label="Họ" 
+              variant="outlined" 
+              fullWidth 
+              required
+              name="cus_familyname"
+              value={formData.cus_familyname}
+              onChange={handleChange}
+            />
+            <StyledTextField 
+              label="Tên" 
+              variant="outlined" 
+              fullWidth 
+              required
+              name="cus_name"
+              value={formData.cus_name}
+              onChange={handleChange}
+            />
+          </Box>
+
+          <StyledTextField
+            label="Số điện thoại"
+            variant="outlined"
             fullWidth
+            required
+            name="cus_sdt"
+            value={formData.cus_sdt}
+            onChange={handleChange}
+          />
+
+          <StyledTextField
+            type="date"
+            label="Ngày sinh"
+            fullWidth
+            required
             InputLabelProps={{
               shrink: true,
             }}
@@ -105,63 +146,69 @@ const SignUp = () => {
             value={formData.cus_birthday}
             onChange={handleChange}
           />
-        </Box>
 
-        <Typography variant="subtitle2" gutterBottom>
-          Giới tính
-        </Typography>
-        <RadioGroup 
-          row 
-          name="cus_sex"
-          value={formData.cus_sex}
-          onChange={handleChange}
-        >
-          <FormControlLabel value="female" control={<Radio />} label="Nữ" />
-          <FormControlLabel value="male" control={<Radio />} label="Nam" />
-          <FormControlLabel value="custom" control={<Radio />} label="Tùy chỉnh" />
-        </RadioGroup>
+          <FormControl component="fieldset" sx={{ mb: 2, width: '100%' }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Giới tính
+            </Typography>
+            <RadioGroup 
+              row 
+              name="cus_sex"
+              value={formData.cus_sex}
+              onChange={handleChange}
+            >
+              <FormControlLabel value="female" control={<Radio sx={{ color: '#00CED1' }} />} label="Nữ" />
+              <FormControlLabel value="male" control={<Radio sx={{ color: '#00CED1' }} />} label="Nam" />
+              <FormControlLabel value="custom" control={<Radio sx={{ color: '#00CED1' }} />} label="Tùy chỉnh" />
+            </RadioGroup>
+          </FormControl>
 
-        <TextField
-          label="Email"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          name="cus_email"
-          value={formData.cus_email}
-          onChange={handleChange}
-          error={!!emailError}
-          helperText={emailError}
-        />
-        <TextField
-          label="Mật khẩu mới"
-          variant="outlined"
-          type="password"
-          fullWidth
-          margin="normal"
-          name="cus_password"
-          value={formData.cus_password}
-          onChange={handleChange}
-        />
-        <Button 
-          type="submit"
-          variant="contained" 
-          fullWidth 
-          sx={{ mt: 2, backgroundColor: '#FFCC00', '&:hover': { backgroundColor: '#E6B800' } }}
-        >
-          Đăng ký
-        </Button>
-      </form>
+          <StyledTextField
+            label="Email"
+            variant="outlined"
+            fullWidth
+            required
+            name="cus_email"
+            value={formData.cus_email}
+            onChange={handleChange}
+            error={!!emailError}
+            helperText={emailError}
+          />
 
-      <Box sx={{ textAlign: 'center', mt: 2 }}>
-        <Link href="/signin">Bạn đã có tài khoản</Link>
-      </Box>
+          <StyledTextField
+            label="Mật khẩu"
+            variant="outlined"
+            type="password"
+            fullWidth
+            required
+            name="cus_password"
+            value={formData.cus_password}
+            onChange={handleChange}
+          />
 
-      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
-          {errorMessage}
-        </Alert>
-      </Snackbar>
-    </Paper>
+          <StyledButton 
+            type="submit"
+            variant="contained" 
+            fullWidth 
+            sx={{ 
+              backgroundColor: '#00CED1',
+              '&:hover': {
+                backgroundColor: '#008B8B'
+              },
+              mt: 2
+            }}
+          >
+            Đăng ký
+          </StyledButton>
+        </form>
+
+        <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+          <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+            {errorMessage}
+          </Alert>
+        </Snackbar>
+      </StyledPaper>
+    </Box>
   );
 };
 
