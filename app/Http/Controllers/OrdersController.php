@@ -21,9 +21,10 @@ class OrdersController extends Controller
         $paymentMethod = $request->paymentMethod;
         $customer_id = $request->customer_id;
         $products = $request->products;
+
         $totalPrice = $this->calculateTotalPrice($products);
         
-        $order = $this->createNewOrder($customer_id, $paymentMethod, $totalPrice, $request->note);
+        $order = $this->createNewOrder($customer_id, $paymentMethod, $totalPrice, $request->note, $products);
         if ($order->id) {
             $this->createOrderDetails($order->id, $products);
             
@@ -63,13 +64,13 @@ class OrdersController extends Controller
     /**
      * Tạo đơn hàng mới.
      */
-    private function createNewOrder($customer_id, $paymentMethod, $totalPrice, $note)
+    private function createNewOrder($customer_id, $paymentMethod, $totalPrice, $note, $products)
     {
         $order = new Oders();
         $order->cus_id = $customer_id;
         $order->pa_id = $paymentMethod == 'cod' ? 1 : 3;
         $order->or_total = $totalPrice;
-        $order->or_status = json_encode(['1' => 'Đang chờ xử lý']); // Chưa xác nhận
+        $order->or_status = json_encode(['1' => 'Đang chờ xử lý']);
         $order->or_ship = '';
         $order->or_date = now();
         $order->or_note = $note ?? 'Không có ghi chú';
@@ -88,7 +89,8 @@ class OrdersController extends Controller
                 'or_id' => $order_id,
                 'p_id' => $product['id'],
                 'quantity' => $product['quantity'],
-                'total' => $product['price'] * $product['quantity']
+                'total' => $product['price'] * $product['quantity'],
+                'discount' => $product['discount'] ?? 0
             ]);
         }
     }

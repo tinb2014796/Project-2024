@@ -18,6 +18,10 @@ class SaleOff extends Model
         's_value_max',
         's_start',
         's_end',
+        's_type',
+        's_catalory',
+        's_code',
+        's_quantity',
         'p_id'
     ];
     
@@ -25,4 +29,5 @@ class SaleOff extends Model
     {
         return $this->belongsTo(Products::class, 'p_id', 'id');
     }
+    
 }

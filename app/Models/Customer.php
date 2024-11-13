@@ -25,5 +25,9 @@ class Customer extends Model
         'cus_image',
         'cus_points',
     ];
-
+    public function orders()
+    {
+        return $this->hasMany(Oders::class, 'cus_id', 'id');
+    }
+    
 }

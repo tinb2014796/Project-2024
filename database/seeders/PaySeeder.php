@@ -13,16 +13,27 @@ class PaySeeder extends Seeder
     public function run(): void
     {
         DB::table('pays')->insert([
-            'pa_type' => 'Thanh toán khi nhận hàng',
-            'pa_status' => 0,
-        ]);
-        DB::table('pays')->insert([
-            'pa_type' => 'Thanh toán qua ngân hàng',
-            'pa_status' => 1,
-        ]);
-        DB::table('pays')->insert([
-            'pa_type' => 'Thanh toán qua ví điện tử',
-            'pa_status' => 1,
+            [
+                'id' => 1,
+                'pa_type' => 'Thanh toán khi nhận hàng', 
+                'pa_status' => '0',
+                'created_at' => NULL,
+                'updated_at' => NULL
+            ],
+            [
+                'id' => 2,
+                'pa_type' => 'Thanh toán qua ngân hàng',
+                'pa_status' => '1', 
+                'created_at' => NULL,
+                'updated_at' => NULL
+            ],
+            [
+                'id' => 3,
+                'pa_type' => 'Thanh toán qua ví điện tử',
+                'pa_status' => '1',
+                'created_at' => NULL,
+                'updated_at' => NULL
+            ]
         ]);
     }
 }

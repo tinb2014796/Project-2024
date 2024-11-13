@@ -68,21 +68,29 @@ const ProductDetail = () => {
     });
   };
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  };
+
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ py: 4 }}>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={6}>
-            <Paper elevation={3} sx={{ p: 2, position: 'relative', borderRadius: '16px', overflow: 'hidden', height: '600px' }}>
-              <img src={product.images[currentImageIndex].ip_image} alt={product.p_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              <IconButton onClick={handlePrevImage} sx={{ position: 'absolute', top: '50%', left: 10, backgroundColor: 'rgba(255,255,255,0.7)' }}>
+    <Container maxWidth="lg" sx={{ bgcolor: '#f5f5f5', py: 2 }}>
+      <Box sx={{ bgcolor: 'white', p: 2, borderRadius: 1 }}>
+        <Grid container spacing={2}>
+          {/* Phần hình ảnh bên trái */}
+          <Grid item xs={12} md={5}>
+            <Paper elevation={0} sx={{ position: 'relative', borderRadius: '2px', height: '450px' }}>
+              <img src={product.images[currentImageIndex].ip_image} alt={product.p_name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              <IconButton onClick={handlePrevImage} sx={{ position: 'absolute', top: '50%', left: 10, bgcolor: 'rgba(0,0,0,0.4)', color: 'white', '&:hover': { bgcolor: 'rgba(0,0,0,0.6)' } }}>
                 <ArrowBackIosIcon />
               </IconButton>
-              <IconButton onClick={handleNextImage} sx={{ position: 'absolute', top: '50%', right: 10, backgroundColor: 'rgba(255,255,255,0.7)' }}>
+              <IconButton onClick={handleNextImage} sx={{ position: 'absolute', top: '50%', right: 10, bgcolor: 'rgba(0,0,0,0.4)', color: 'white', '&:hover': { bgcolor: 'rgba(0,0,0,0.6)' } }}>
                 <ArrowForwardIosIcon />
               </IconButton>
             </Paper>
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', mt: 2, gap: 1, overflowX: 'auto' }}>
               {product.images.map((image, index) => (
                 <Box
                   key={index}
@@ -90,64 +98,125 @@ const ProductDetail = () => {
                   src={image.ip_image}
                   alt={`Thumbnail ${index + 1}`}
                   sx={{
-                    width: 60,
-                    height: 60,
+                    width: 80,
+                    height: 80,
                     objectFit: 'cover',
-                    borderRadius: '8px',
-                    m: 0.5,
                     cursor: 'pointer',
-                    border: currentImageIndex === index ? '2px solid #1976d2' : 'none',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'scale(1.1)',
-                    },
+                    border: currentImageIndex === index ? '2px solid #ee4d2d' : '1px solid #e8e8e8',
+                    '&:hover': { borderColor: '#ee4d2d' },
                   }}
                   onClick={() => setCurrentImageIndex(index)}
                 />
               ))}
             </Box>
           </Grid>
-          <Grid item xs={12} md={6}>
-            <Typography variant="h4" gutterBottom fontWeight="bold" sx={{ color: '#333' }}>
-              {product.p_name}
-            </Typography>
-            <Typography variant="h5" color="error" gutterBottom fontWeight="bold">
-              đ{product.p_purchase.toLocaleString()}
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Rating value={4.5} readOnly precision={0.5} />
-              <Typography variant="body2" sx={{ ml: 1, color: '#666' }}>(50 đánh giá)</Typography>
-            </Box>
-            <Typography variant="body2" gutterBottom>
-              Danh mục: <Chip label={categories.find(cat => cat.id === product.c_id)?.c_name || 'Không xác định'} size="small" sx={{ backgroundColor: '#e0e0e0' }} />
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              Thương hiệu: <Chip label={brands.find(brand => brand.id === product.b_id)?.b_name || 'Không xác định'} size="small" sx={{ backgroundColor: '#e0e0e0' }} />
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              Cửa hàng: <Chip label={product.s_id} size="small" sx={{ backgroundColor: '#e0e0e0' }} />
-            </Typography>
-            <Box sx={{ mt: 3, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              <Button variant="contained" startIcon={<EditIcon />} onClick={() => setEditModalOpen(true)} sx={{ flex: 1 }}>
-                Chỉnh sửa sản phẩm
-              </Button>
-              <Button variant="contained" startIcon={<AddPhotoAlternateIcon />} onClick={handleOpenAddImageModal} sx={{ flex: 1 }}>
-                Thêm ảnh
-              </Button>
-              <Button variant="contained" color="error" startIcon={<DeleteIcon />} onClick={handleOpenDeleteModal} sx={{ flex: 1 }}>
-                Xóa sản phẩm
-              </Button>
+
+          {/* Phần thông tin bên phải */}
+          <Grid item xs={12} md={7}>
+            <Box sx={{ pl: 2 }}>
+              <Typography variant="h5" sx={{ fontWeight: 400, mb: 1 }}>
+                {product.p_name}
+              </Typography>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
+                <Rating value={4.5} readOnly precision={0.5} size="small" />
+                <Divider orientation="vertical" flexItem />
+                <Typography variant="body2" color="text.secondary">50 Đánh Giá</Typography>
+                <Divider orientation="vertical" flexItem />
+                <Typography variant="body2" color="text.secondary">{product.p_quantity} Đã Bán</Typography>
+              </Box>
+
+              <Box sx={{ bgcolor: '#fafafa', p: 2, mb: 2 }}>
+                <Typography variant="h4" color="#ee4d2d" sx={{ fontWeight: 500 }}>
+                  {formatCurrency(product.p_purchase)}
+                </Typography>
+              </Box>
+
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={3}>
+                  <Typography variant="body2" color="text.secondary">Danh Mục</Typography>
+                </Grid>
+                <Grid item xs={9}>
+                  <Chip 
+                    label={categories.find(cat => cat.id === product.c_id)?.c_name || 'Không xác định'} 
+                    size="small" 
+                    sx={{ bgcolor: '#f5f5f5' }} 
+                  />
+                </Grid>
+
+                <Grid item xs={3}>
+                  <Typography variant="body2" color="text.secondary">Thương Hiệu</Typography>
+                </Grid>
+                <Grid item xs={9}>
+                  <Chip 
+                    label={brands.find(brand => brand.id === product.b_id)?.b_name || 'Không xác định'} 
+                    size="small" 
+                    sx={{ bgcolor: '#f5f5f5' }} 
+                  />
+                </Grid>
+
+                <Grid item xs={3}>
+                  <Typography variant="body2" color="text.secondary">Khuyến Mãi</Typography>
+                </Grid>
+                <Grid item xs={9}>
+                  <Chip 
+                    label={saleOffs.find(sale => sale.id === product.s_id)?.s_name || 'Không có khuyến mãi'} 
+                    size="small" 
+                    sx={{ bgcolor: '#f5f5f5' }} 
+                  />
+                </Grid>
+              </Grid>
+
+              <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+                <Button 
+                  variant="contained" 
+                  startIcon={<EditIcon />} 
+                  onClick={() => setEditModalOpen(true)}
+                  sx={{ 
+                    bgcolor: '#ee4d2d',
+                    '&:hover': { bgcolor: '#d73211' },
+                    flex: 1
+                  }}
+                >
+                  Chỉnh sửa
+                </Button>
+                <Button 
+                  variant="contained"
+                  startIcon={<AddPhotoAlternateIcon />}
+                  onClick={handleOpenAddImageModal}
+                  sx={{ 
+                    bgcolor: '#ee4d2d',
+                    '&:hover': { bgcolor: '#d73211' },
+                    flex: 1
+                  }}
+                >
+                  Thêm ảnh
+                </Button>
+                <Button 
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={handleOpenDeleteModal}
+                  sx={{ flex: 1 }}
+                >
+                  Xóa
+                </Button>
+              </Box>
             </Box>
           </Grid>
         </Grid>
       </Box>
-      <Divider sx={{ my: 4 }} />
-      <Typography variant="h6" gutterBottom sx={{ color: '#333', fontWeight: 'bold' }}>
-        Mô tả sản phẩm
-      </Typography>
-      <Typography variant="body1" paragraph sx={{ color: '#666', lineHeight: 1.6 }}>
-        {product.p_description}
-      </Typography>
+
+      <Box sx={{ bgcolor: 'white', mt: 2, p: 2, borderRadius: 1 }}>
+        <Typography variant="h6" sx={{ p: 2, bgcolor: '#f5f5f5' }}>
+          MÔ TẢ CHI TIẾT
+        </Typography>
+        <Box sx={{ p: 2 }}>
+          <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+            {product.p_description}
+          </Typography>
+        </Box>
+      </Box>
 
       <EditProductModal
         open={editModalOpen}
@@ -170,7 +239,13 @@ const ProductDetail = () => {
             onChange={(e) => setSelectedImage(e.target.files[0])}
             style={{ marginBottom: '16px' }}
           />
-          <Button variant="contained" onClick={handleAddImage} disabled={!selectedImage} fullWidth>
+          <Button 
+            variant="contained" 
+            onClick={handleAddImage} 
+            disabled={!selectedImage} 
+            fullWidth
+            sx={{ bgcolor: '#ee4d2d', '&:hover': { bgcolor: '#d73211' } }}
+          >
             Thêm ảnh
           </Button>
         </Box>
@@ -188,7 +263,12 @@ const ProductDetail = () => {
             <Button onClick={handleCloseDeleteModal} sx={{ mr: 2 }}>
               Hủy
             </Button>
-            <Button variant="contained" color="error" onClick={handleDeleteProduct}>
+            <Button 
+              variant="contained" 
+              color="error" 
+              onClick={handleDeleteProduct}
+              sx={{ bgcolor: '#ee4d2d', '&:hover': { bgcolor: '#d73211' } }}
+            >
               Xóa sản phẩm
             </Button>
           </Box>

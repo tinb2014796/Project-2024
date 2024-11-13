@@ -24,34 +24,70 @@ class SaleOffController extends Controller
      */
     public function createSaleOff(Request $request)
     {
-        foreach($request->p_id as $product_id){
+        if ($request->p_id) {
+            foreach($request->p_id as $product_id){
+                $saleOff = SaleOff::create([
+                    's_name' => $request->s_name,
+                    's_start' => $request->s_start,
+                    's_end' => $request->s_end,
+                    's_type' => $request->s_type,
+                    's_catalory' => $request->s_catalory,
+                    's_code' => $request->s_code ?? null,
+                    's_value_min' => $request->s_value_min ?? null,
+                    's_value_max' => $request->s_value_max ?? null,
+                    's_percent' => $request->s_percent ?? null,
+                    's_quantity' => $request->s_quantity ?? null,
+                    'p_id' => $product_id 
+                ]);
+            }
+        } else {
             $saleOff = SaleOff::create([
                 's_name' => $request->s_name,
                 's_start' => $request->s_start,
                 's_end' => $request->s_end,
-                's_value_min' => $request->s_value_min,
-                's_value_max' => $request->s_value_max,
-                's_percent' => $request->s_percent,
-                'p_id' => $product_id
+                's_type' => $request->s_type,
+                's_catalory' => $request->s_catalory,
+                's_code' => $request->s_code ?? null,
+                's_value_min' => $request->s_value_min ?? null,
+                's_value_max' => $request->s_value_max ,
+                's_percent' => $request->s_percent ,
+                's_quantity' => $request->s_quantity ?? null,
+                'p_id' => $request->p_id ?? null
             ]);
+            
         }
+
         return redirect()->route('admin.sale-off.index')->with('success', 'Tạo khuyến mãi thành công');
     }
 
     public function create()
     {
-
         $products = Products::all();
-        return Inertia::render('Admin/CreateSaleOff', compact('products'));
+        $saleOffs = SaleOff::with('products')->get()->map(function($saleOff) use ($products) {
+            $product = $products->firstWhere('id', $saleOff->p_id);
+            $saleOff->product_name = $product ? $product->p_name : 'Không xác định';
+            return $saleOff;
+        });
+        return Inertia::render('Admin/CreateSaleOff', compact('products', 'saleOffs'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        //
-    }
+    // public function createVoucher(Request $request)
+    // {
+    //     $voucher = SaleOff::create([
+    //         's_name' => $request->s_name,
+    //         's_start' => $request->s_start,
+    //         's_end' => $request->s_end,
+    //         's_type' => $request->s_type,
+    //         's_code' => $request->s_code,
+    //         's_value_min' => $request->s_value_min,
+    //         's_value_max' => $request->s_value_max,
+    //         's_percent' => $request->s_percent,
+    //     ]);
+    //     return redirect()->route('admin.sale-off.index')->with('success', 'Tạo voucher thành công');
+    // }
 
     /**
      * Display the specified resource.
@@ -104,5 +140,13 @@ class SaleOffController extends Controller
         $saleOff->products()->detach();
         $saleOff->delete();
         return redirect()->route('admin.sale-off.index')->with('success', 'Xóa khuyến mãi thành công');
+    }
+
+    public function deleteSaleOff($id)
+    {
+        $saleOff = SaleOff::findOrFail($id);
+        // $saleOff->products()->detach();
+        $saleOff->delete();
+        return redirect()->back()->with('success', 'Sản phẩm đã được xóa thành công');
     }
 }

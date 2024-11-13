@@ -86,7 +86,7 @@ export default function Main({ children }) {
         setShowSearch(false);
         setSearchResult([]);
         setSearchValue('');
-        router.get(`/user/detail-product/${productId}`);
+        router.get(`/detail-product/${productId}`);
     };
 
     const formatPrice = (price) => {
@@ -186,7 +186,7 @@ export default function Main({ children }) {
                                         key={category.id} 
                                         onClick={handleProductClose} 
                                         component={Link} 
-                                        href={`/user/category-product/${category.id}`}
+                                        href={`/category-product/${category.id}`}
                                         sx={{ minWidth: 180, color: 'black' }}
                                     >
                                         {category.c_name}

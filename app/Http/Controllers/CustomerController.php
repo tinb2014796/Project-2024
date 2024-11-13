@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Http\Controllers\UserController;
-
+use App\Models\Oders;
+use App\Models\Products;
 class CustomerController extends Controller
 {
     public function signin(Request $request)
@@ -148,5 +149,19 @@ class CustomerController extends Controller
     public function destroy(Customer $customer)
     {
         //
+    }
+
+    public function ListCustomers()
+    {
+        $customers = Customer::all();
+        $customers = Customer::with('orders')->get();
+        return Inertia::render('Admin/Customer', ['customers' => $customers]);
+
+    }
+
+    public function DetailCustomer($id)
+    {
+        $customer = Customer::with('orders')->find($id);
+        return Inertia::render('Admin/DetailCustomer', ['customer' => $customer]);
     }
 }

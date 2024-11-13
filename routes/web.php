@@ -23,7 +23,9 @@ Route::get('/repay', [UserController::class, 'repay']);
 Route::get('/report', [UserController::class, 'report']);
 
 Route::get('/category-product/{id}', [CategoryController::class, 'categoryProduct']);
-
+Route::get('/detail-product/{id}', [UserController::class, 'detailProduct']);
+Route::get('/category-product/{id}', [CategoryController::class, 'categoryProduct']);
+Route::get('/detail-product/{id}', [UserController::class, 'detailProduct']);
 Route::get('/user', [UserController::class, 'user']);
 
 Route::get('/user/home', [UserController::class, 'home'])->name('user.home');
@@ -65,8 +67,11 @@ Route::middleware(AdminMiddleware::class)->prefix('admin')->group(function () {
     Route::get('/sale-off', [PageController::class, 'saleOff'])->name('admin.sale-off.index');
     Route::post('/sale-off/create', [SaleOffController::class, 'createSaleOff']);
     Route::get('/sale-off/create', [SaleOffController::class, 'create']);
+    Route::delete('/sale-off/delete/{id}', [SaleOffController::class, 'deleteSaleOff']);
+    // Route::post('/sale-off/create', [SaleOffController::class, 'createVoucher']);
 
-    
+    Route::get('/customers', [CustomerController::class, 'ListCustomers']);
+    Route::get('/customers/{id}', [CustomerController::class, 'DetailCustomer']);
 
 
 });
@@ -75,8 +80,7 @@ Route::middleware(AdminMiddleware::class)->prefix('admin')->group(function () {
 Route::middleware(UserAuthMiddleware::class)->prefix('user')->group(function () {
 
    
-    Route::get('/category-product/{id}', [CategoryController::class, 'categoryProduct']);
-    Route::get('/detail-product/{id}', [UserController::class, 'detailProduct']);
+
 
     Route::post('/logout', [CustomerController::class, 'logout']);
 

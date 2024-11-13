@@ -38,7 +38,8 @@ class UserController extends Controller
     }
     public function detailProduct($id)
     {
-        $product = Products::with('images','saleOff')->find($id);
+        $product = Products::with('images','saleOff','orderDetails.order')->find($id);
+        
         $categories = Category::all();
         $brands = Brand::all();
         
@@ -66,7 +67,9 @@ class UserController extends Controller
         $customer = $request->customer_id;
         $customer = Customer::find($customer);
         $cart = $request->all();
-        $products = Products::with('images','saleOff')->get();
+        $products = Products::with('images')->with(['saleOff' => function($query) {
+            $query->where('s_end', '>', now());
+        }])->get();
         return Inertia::render('User/Pay', compact('cart', 'products','customer'));
 
     }

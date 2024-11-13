@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import {
   Box, Typography, Button, TextField, Grid, List, ListItem, ListItemText, ListItemAvatar, Avatar, Container, Paper,
-  Modal, Fade, Backdrop
+  Modal, Fade, Backdrop, IconButton
 } from '@mui/material';
 import { router } from '@inertiajs/react';
+import AddIcon from '@mui/icons-material/Add';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function Category({ categories }) {
   const [newCategory, setNewCategory] = useState({ c_name: '', c_image: null });
@@ -23,8 +26,6 @@ export default function Category({ categories }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     router.post('/admin/categories/create', newCategory);
-    // Xử lý logic thêm danh mục ở đây
-    console.log('Danh mục mới:', newCategory);
     setNewCategory({ c_name: '', c_image: null });
     handleClose();
   };
@@ -34,39 +35,85 @@ export default function Category({ categories }) {
   };
 
   return (
-    <Container maxWidth="md">
-      <Box sx={{ my: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Quản lý danh mục
-          </Typography>
-          <Button variant="outlined" onClick={handleBack}>
-            Quay lại
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          mb: 4,
+          bgcolor: '#fff',
+          p: 2,
+          borderRadius: 2,
+          boxShadow: 1
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <IconButton onClick={handleBack} sx={{ mr: 2 }}>
+              <ArrowBackIcon />
+            </IconButton>
+            <Typography variant="h5" sx={{ fontWeight: 500 }}>
+              Quản lý danh mục
+            </Typography>
+          </Box>
+          <Button 
+            variant="contained" 
+            startIcon={<AddIcon />}
+            onClick={handleOpen}
+            sx={{
+              bgcolor: '#00bcd4',
+              '&:hover': {
+                bgcolor: '#00acc1'
+              }
+            }}
+          >
+            Thêm danh mục
           </Button>
         </Box>
         
-        <Paper elevation={3} sx={{ p: 2, mb: 4 }}>
+        <Paper elevation={2} sx={{ borderRadius: 2 }}>
           {categories.length > 0 ? (
             <List>
               {categories.map((category, index) => (
-                <ListItem key={index}>
+                <ListItem 
+                  key={index}
+                  sx={{
+                    '&:hover': {
+                      bgcolor: '#f5f5f5'
+                    },
+                    borderBottom: '1px solid #eee'
+                  }}
+                  secondaryAction={
+                    <Box>
+                      <IconButton edge="end" sx={{ color: '#f44336' }}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  }
+                >
                   <ListItemAvatar>
-                    <Avatar src={category.c_image || 'https://via.placeholder.com/40'} />
+                    <Avatar 
+                      src={category.c_image || 'https://via.placeholder.com/40'} 
+                      variant="rounded"
+                      sx={{ width: 56, height: 56 }}
+                    />
                   </ListItemAvatar>
-                  <ListItemText primary={category.c_name} />
+                  <ListItemText 
+                    primary={category.c_name}
+                    primaryTypographyProps={{
+                      sx: { fontWeight: 500 }
+                    }}
+                  />
                 </ListItem>
               ))}
             </List>
           ) : (
-            <Typography variant="body1" align="center">
-              Chưa có danh mục nào được thêm.
-            </Typography>
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="body1" color="text.secondary">
+                Chưa có danh mục nào được thêm.
+              </Typography>
+            </Box>
           )}
         </Paper>
-
-        <Button onClick={handleOpen} variant="contained" color="primary">
-          Thêm danh mục
-        </Button>
 
         <Modal
           open={open}
@@ -85,14 +132,15 @@ export default function Category({ categories }) {
               transform: 'translate(-50%, -50%)',
               width: 400,
               bgcolor: 'background.paper',
+              borderRadius: 2,
               boxShadow: 24,
               p: 4,
             }}>
-              <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
+              <Typography variant="h6" sx={{ mb: 3, fontWeight: 500 }}>
                 Thêm danh mục mới
               </Typography>
               <form onSubmit={handleSubmit}>
-                <Grid container spacing={2}>
+                <Grid container spacing={3}>
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
@@ -101,6 +149,7 @@ export default function Category({ categories }) {
                       value={newCategory.c_name}
                       onChange={handleChange}
                       required
+                      variant="outlined"
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -113,21 +162,53 @@ export default function Category({ categories }) {
                       style={{ display: 'none' }}
                     />
                     <label htmlFor="c_image">
-                      <Button variant="contained" component="span">
+                      <Button 
+                        variant="outlined"
+                        component="span"
+                        fullWidth
+                        sx={{
+                          color: '#00bcd4',
+                          borderColor: '#00bcd4',
+                          '&:hover': {
+                            borderColor: '#00acc1'
+                          }
+                        }}
+                      >
                         Chọn ảnh danh mục
                       </Button>
                     </label>
                     {newCategory.c_image && (
-                      <Typography variant="body2" sx={{ mt: 1 }}>
+                      <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
                         Đã chọn: {newCategory.c_image.name}
                       </Typography>
                     )}
                   </Grid>
-                  <Grid item xs={12}>
-                    <Button type="submit" variant="contained" color="primary">
+                  <Grid item xs={12} sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                    <Button 
+                      type="submit" 
+                      variant="contained"
+                      fullWidth
+                      sx={{
+                        bgcolor: '#00bcd4',
+                        '&:hover': {
+                          bgcolor: '#00acc1'
+                        }
+                      }}
+                    >
                       Thêm danh mục
                     </Button>
-                    <Button onClick={handleClose} sx={{ ml: 2 }}>
+                    <Button 
+                      onClick={handleClose}
+                      variant="outlined"
+                      fullWidth
+                      sx={{
+                        color: '#757575',
+                        borderColor: '#757575',
+                        '&:hover': {
+                          borderColor: '#616161'
+                        }
+                      }}
+                    >
                       Hủy
                     </Button>
                   </Grid>

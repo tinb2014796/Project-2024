@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\SaleOff;
 use App\Models\ImageProduct;
 use App\Models\Category;
+use App\Models\DetailOrders;
+
 
 class Products extends Model
 {
@@ -35,5 +37,9 @@ class Products extends Model
     {
         return $this->hasMany(SaleOff::class, 'p_id', 'id')
                     ->where('s_end', '>', now());
+    }
+    public function orderDetails()
+    {
+        return $this->hasMany(DetailOrders::class, 'p_id', 'id');
     }
 }

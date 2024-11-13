@@ -14,14 +14,18 @@ return new class extends Migration
         Schema::create('sale_offs', function (Blueprint $table) {
             $table->id();
             $table->string('s_name');
-            $table->string('s_value_min');
-            $table->string('s_value_max');
-            $table->float('s_percent');
+            $table->string('s_type');
+            $table->string('s_code')->nullable();
+            $table->float('s_percent')->nullable();
             $table->dateTime('s_start');
             $table->dateTime('s_end');
+            $table->string('s_quantity')->nullable();
+            $table->string('s_catalory')->nullable();
+            $table->string('s_value_min')->nullable();
+            $table->string('s_value_max')->nullable();
             $table->timestamps();
             
-            $table->foreignId('p_id')->constrained('products')->onDelete('cascade');
+            $table->foreignId('p_id')->nullable()->constrained('products')->onDelete('cascade');
         });
     }
 

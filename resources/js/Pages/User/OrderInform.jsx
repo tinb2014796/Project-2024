@@ -4,12 +4,13 @@ import { usePage, Link } from '@inertiajs/react';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const OrderInform = () => {
-    const { orders } = usePage().props;
+    const { orders } = usePage().props
     console.log(orders);
     const calculateTotal = () => {
-        return orders.order_details?.reduce((total, item) => {
+        const subtotal = orders.order_details?.reduce((total, item) => {
             return total + (item.quantity * parseInt(item.total/item.quantity));
         }, 0);
+        return subtotal - (orders.order_details?.[0]?.discount || 0);
     };
     
     return (
@@ -75,6 +76,11 @@ const OrderInform = () => {
                                     <Typography variant='subtitle1' sx={{ mb: 1 }}>{item.product?.p_name}</Typography>
                                     <Typography variant='body2' sx={{ color: '#757575' }}>Số lượng: x{item.quantity}</Typography>
                                     <Typography variant='body2' sx={{ color: '#ee4d2d' }}>{parseInt(item.total/item.quantity).toLocaleString()}đ</Typography>
+                                    {item.discount > 0 && (
+                                        <Typography variant='body2' sx={{ color: '#00C853' }}>
+                                            Giảm giá: -{parseInt(item.discount).toLocaleString()}đ
+                                        </Typography>
+                                    )}
                                 </Box>
                             </Box>
                         ))}
@@ -85,8 +91,16 @@ const OrderInform = () => {
                             borderTop: '1px solid #f5f5f5',
                             textAlign: 'right' 
                         }}>
+                            <Typography variant='body1' sx={{ mb: 1 }}>
+                                Tổng tiền hàng: {parseInt(orders.order_details?.reduce((total, item) => total + item.total, 0)).toLocaleString()}đ
+                            </Typography>
+                            {orders.order_details?.[0]?.discount > 0 && (
+                                <Typography variant='body1' sx={{ color: '#00C853', mb: 1 }}>
+                                    Giảm giá: -{parseInt(orders.order_details[0].discount).toLocaleString()}đ
+                                </Typography>
+                            )}
                             <Typography variant='h6' sx={{ color: '#ee4d2d' }}>
-                                Tổng tiền: {calculateTotal().toLocaleString()}đ
+                                Thành tiền: {calculateTotal().toLocaleString()}đ
                             </Typography>
                         </Box>
                     </Paper>

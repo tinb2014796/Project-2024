@@ -67,11 +67,17 @@ function DashboardCharts() {
     <Grid container spacing={3}>
       <Grid item xs={12} md={8}>
         <Paper sx={{ 
-          p: 3, 
-          boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-          borderRadius: 2 
+          p: 3,
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          borderRadius: 2,
+          background: 'linear-gradient(to right bottom, #ffffff, #f8f9fa)'
         }}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
+          <Typography variant="h6" gutterBottom sx={{ 
+            fontWeight: 'bold',
+            color: '#2c3e50',
+            borderBottom: '2px solid #e9ecef',
+            pb: 1
+          }}>
             Doanh thu & Mua hàng
           </Typography>
           <Box sx={{ 
@@ -84,7 +90,19 @@ function DashboardCharts() {
               exclusive
               onChange={handleTimeRangeChange}
               size="small"
-              sx={{ '& .MuiToggleButton-root': { px: 3 } }}
+              sx={{ 
+                '& .MuiToggleButton-root': { 
+                  px: 3,
+                  color: '#6c757d',
+                  '&.Mui-selected': {
+                    backgroundColor: '#4dabf5',
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: '#3d8bd4'
+                    }
+                  }
+                }
+              }}
             >
               <ToggleButton value="daily" aria-label="daily">
                 Ngày
@@ -100,32 +118,58 @@ function DashboardCharts() {
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={salesPurchaseData[timeRange]}>
               <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-              <XAxis dataKey="name" />
-              <YAxis />
+              <XAxis dataKey="name" stroke="#6c757d" />
+              <YAxis stroke="#6c757d" />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
                   border: 'none',
-                  borderRadius: '4px',
-                  boxShadow: '0 0 10px rgba(0,0,0,0.1)'
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  padding: '10px'
                 }}
               />
-              <Legend />
-              <Bar dataKey="Purchase" fill="#4dabf5" name="Mua hàng" />
-              <Bar dataKey="Sales" fill="#ff6b6b" name="Doanh thu" />
+              <Legend wrapperStyle={{paddingTop: '20px'}}/>
+              <Bar dataKey="Purchase" fill="#4dabf5" name="Mua hàng" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Sales" fill="#ff6b6b" name="Doanh thu" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Paper>
       </Grid>
       <Grid item xs={12} md={4}>
-        <Paper sx={{ p: 2 }}>
-          <Typography variant="h6" gutterBottom>Tổng quan đơn hàng</Typography>
+        <Paper sx={{ 
+          p: 3,
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          borderRadius: 2,
+          background: 'linear-gradient(to right bottom, #ffffff, #f8f9fa)'
+        }}>
+          <Typography variant="h6" gutterBottom sx={{
+            fontWeight: 'bold',
+            color: '#2c3e50',
+            borderBottom: '2px solid #e9ecef',
+            pb: 1
+          }}>
+            Tổng quan đơn hàng
+          </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
             <ToggleButtonGroup
               value={timeRange}
               exclusive
               onChange={handleTimeRangeChange}
-              aria-label="time range"
+              size="small"
+              sx={{ 
+                '& .MuiToggleButton-root': { 
+                  px: 3,
+                  color: '#6c757d',
+                  '&.Mui-selected': {
+                    backgroundColor: '#4dabf5',
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: '#3d8bd4'
+                    }
+                  }
+                }
+              }}
             >
               <ToggleButton value="daily" aria-label="daily">
                 Ngày
@@ -140,13 +184,21 @@ function DashboardCharts() {
           </Box>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={orderSummaryData[timeRange]}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="Ordered" stroke="#8884d8" name="Đã đặt" />
-              <Line type="monotone" dataKey="Delivered" stroke="#82ca9d" name="Đã giao" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+              <XAxis dataKey="name" stroke="#6c757d" />
+              <YAxis stroke="#6c757d" />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  padding: '10px'
+                }}
+              />
+              <Legend wrapperStyle={{paddingTop: '20px'}}/>
+              <Line type="monotone" dataKey="Ordered" stroke="#8884d8" name="Đã đặt" strokeWidth={2} dot={{r: 4}} />
+              <Line type="monotone" dataKey="Delivered" stroke="#82ca9d" name="Đã giao" strokeWidth={2} dot={{r: 4}} />
             </LineChart>
           </ResponsiveContainer>
         </Paper>

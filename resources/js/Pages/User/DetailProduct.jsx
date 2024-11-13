@@ -25,9 +25,11 @@ const ProductDetail = () => {
   };
 
   const handleIncreaseQuantity = () => {
-    if (quantity < product.p_quantity) {
-      setQuantity(prevQuantity => prevQuantity + 1);
+    if (quantity >= product.p_quantity) {
+      alert('Số lượng sản phẩm không đủ');
+      return;
     }
+    setQuantity(prevQuantity => prevQuantity + 1);
   };
 
   const handleDecreaseQuantity = () => {
@@ -101,18 +103,27 @@ const ProductDetail = () => {
     return product.p_selling - discountAmount;
   };
 
+  // Tính tổng số lượng đã bán
+  const calculateTotalSold = () => {
+    if (!product.order_details) return 0;
+    
+    return product.order_details.reduce((total, detail) => {
+      if (detail.order && detail.order.or_status === '4') {
+        return total + detail.quantity;
+      }
+      return total;
+    }, 0);
+  };
+
   return (
-    <Container maxWidth="lg" sx={{ backgroundColor: '#fff', py: 4, borderRadius: 2, boxShadow: 2, marginBottom: 6, marginTop: 6 }}>
-      <Box sx={{ py: 2 }}>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={6}>
-            <Paper elevation={5} sx={{ 
-              p: 2, 
-              position: 'relative', 
-              borderRadius: '12px', 
-              overflow: 'hidden', 
-              height: '500px',
-              backgroundColor: '#f8f9fa'
+    <Container maxWidth="lg" sx={{ backgroundColor: '#f5f5f5', py: 2, marginBottom: 6, marginTop: 6 }}>
+      <Box sx={{ backgroundColor: '#fff', p: 2, borderRadius: 1 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={5}>
+            <Paper elevation={0} sx={{ 
+              position: 'relative',
+              height: '450px',
+              border: '1px solid #e8e8e8'
             }}>
               <img 
                 src={product.images[currentImageIndex].ip_image} 
@@ -120,8 +131,7 @@ const ProductDetail = () => {
                 style={{ 
                   width: '100%', 
                   height: '100%', 
-                  objectFit: 'contain',
-                  transition: 'transform 0.3s ease'
+                  objectFit: 'contain'
                 }} 
               />
               <IconButton 
@@ -129,11 +139,10 @@ const ProductDetail = () => {
                 sx={{ 
                   position: 'absolute', 
                   top: '50%', 
-                  left: 10, 
-                  backgroundColor: 'rgba(255,255,255,0.9)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,1)'
-                  }
+                  left: 10,
+                  bgcolor: 'rgba(0,0,0,0.4)',
+                  color: 'white',
+                  '&:hover': { bgcolor: 'rgba(0,0,0,0.6)' }
                 }}
               >
                 <ArrowBackIosIcon />
@@ -143,289 +152,227 @@ const ProductDetail = () => {
                 sx={{ 
                   position: 'absolute', 
                   top: '50%', 
-                  right: 10, 
-                  backgroundColor: 'rgba(255,255,255,0.9)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,1)'
-                  }
+                  right: 10,
+                  bgcolor: 'rgba(0,0,0,0.4)', 
+                  color: 'white',
+                  '&:hover': { bgcolor: 'rgba(0,0,0,0.6)' }
                 }}
               >
                 <ArrowForwardIosIcon />
               </IconButton>
             </Paper>
             
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              mt: 2, 
-              gap: 1,
-              flexWrap: 'wrap'
-            }}>
+            <Box sx={{ display: 'flex', mt: 2, gap: 1, overflowX: 'auto' }}>
               {product.images.map((image, index) => (
-                <Paper
+                <Box
                   key={index}
-                  elevation={3}
+                  component="img"
+                  src={image.ip_image}
+                  alt={`Thumbnail ${index + 1}`}
                   sx={{
-                    p: 0.5,
-                    borderRadius: 2,
+                    width: 80,
+                    height: 80,
+                    objectFit: 'cover',
                     cursor: 'pointer',
-                    transform: currentImageIndex === index ? 'scale(1.1)' : 'scale(1)',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      transform: 'scale(1.1)'
-                    }
+                    border: currentImageIndex === index ? '2px solid #00bcd4' : '1px solid #e8e8e8',
+                    '&:hover': { borderColor: '#00bcd4' },
                   }}
-                >
-                  <img
-                    src={image.ip_image}
-                    alt={`Thumbnail ${index + 1}`}
-                    style={{
-                      width: 60,
-                      height: 60,
-                      objectFit: 'contain',
-                      borderRadius: 8
-                    }}
-                    onClick={() => setCurrentImageIndex(index)}
-                  />
-                </Paper>
+                  onClick={() => setCurrentImageIndex(index)}
+                />
               ))}
             </Box>
           </Grid>
 
-          <Grid item xs={12} md={6}>
-            <Box sx={{ p: 2 }}>
-              <Typography 
-                variant="h4" 
-                gutterBottom 
-                sx={{ 
-                  fontWeight: 600,
-                  color: '#2c3e50',
-                  mb: 2
-                }}
-              >
+          <Grid item xs={12} md={7}>
+            <Box sx={{ pl: 2 }}>
+              <Typography variant="h5" sx={{ fontWeight: 500, mb: 2 }}>
                 {product.p_name}
               </Typography>
 
-              <Box sx={{ mb: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Rating value={4.5} readOnly precision={0.5} />
+                <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Đã bán {calculateTotalSold()}
+                </Typography>
+              </Box>
+
+              <Box sx={{ 
+                bgcolor: '#f5f5f5',
+                p: 2,
+                borderRadius: 1,
+                mb: 2
+              }}>
                 {validSaleOffs.length > 0 ? (
-                  <Box>
+                  <>
+                    <Typography variant="h4" sx={{ color: '#00bcd4', fontWeight: 500 }}>
+                      {formatCurrency(calculateDiscountedPrice())}
+                    </Typography>
                     <Typography 
-                      variant="h6" 
+                      variant="body1" 
                       sx={{ 
                         textDecoration: 'line-through',
-                        color: '#95a5a6'
+                        color: '#757575'
                       }}
                     >
                       {formatCurrency(product.p_selling)}
                     </Typography>
-                    <Typography 
-                      variant="h4" 
-                      sx={{ 
-                        color: '#e74c3c',
-                        fontWeight: 600
-                      }}
-                    >
-                      {formatCurrency(calculateDiscountedPrice())}
-                    </Typography>
-                  </Box>
+                  </>
                 ) : (
-                  <Typography 
-                    variant="h4" 
-                    sx={{ 
-                      color: '#e74c3c',
-                      fontWeight: 600
-                    }}
-                  >
+                  <Typography variant="h4" sx={{ color: '#00bcd4', fontWeight: 500 }}>
                     {formatCurrency(product.p_selling)}
                   </Typography>
                 )}
               </Box>
 
               <Box sx={{ mb: 3 }}>
-                <Rating 
-                  value={4.5} 
-                  readOnly 
-                  precision={0.5}
-                  sx={{ color: '#f1c40f' }}
-                />
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    ml: 1, 
-                    color: '#7f8c8d',
-                    display: 'inline'
-                  }}
-                >
-                  (50 đánh giá)
-                </Typography>
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={3}>
+                    <Typography variant="body2" color="text.secondary">
+                      Vận chuyển
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={9}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <LocalShippingIcon sx={{ color: '#00bcd4', mr: 1 }} />
+                      <Typography variant="body2">
+                        Vận chuyển qua GHN
+                      </Typography>
+                    </Box>
+                  </Grid>
+
+                  <Grid item xs={3}>
+                    <Typography variant="body2" color="text.secondary">
+                      Danh mục
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={9}>
+                    <Typography variant="body2">
+                      {categories.find(cat => cat.id === product.c_id)?.c_name || 'Không xác định'}
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={3}>
+                    <Typography variant="body2" color="text.secondary">
+                      Thương hiệu
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={9}>
+                    <Typography variant="body2">
+                      {brands.find(brand => brand.id === product.b_id)?.b_name || 'Không xác định'}
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={3}>
+                    <Typography variant="body2" color="text.secondary">
+                      Khuyến mãi
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={9}>
+                    {validSaleOffs.length > 0 ? (
+                      <Typography variant="body2">
+                        Giảm {Math.max(...validSaleOffs.map(sale => sale.s_percent))}%
+                      </Typography>
+                    ) : (
+                      <Typography variant="body2">
+                        Không có khuyến mãi
+                      </Typography>
+                    )}
+                  </Grid>
+                </Grid>
               </Box>
 
               <Box sx={{ mb: 3 }}>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Danh mục: 
-                  <Chip 
-                    label={categories.find(cat => cat.id === product.c_id)?.c_name || 'Không xác định'} 
-                    sx={{ 
-                      ml: 1,
-                      backgroundColor: '#3498db',
-                      color: 'white'
-                    }} 
-                  />
-                </Typography>
-
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Thương hiệu:
-                  <Chip 
-                    label={brands.find(brand => brand.id === product.b_id)?.b_name || 'Không xác định'} 
-                    sx={{ 
-                      ml: 1,
-                      backgroundColor: '#2ecc71',
-                      color: 'white'
-                    }}
-                  />
-                </Typography>
-
-                {validSaleOffs.length > 0 && (
-                  <Typography variant="body1">
-                    Khuyến mãi:
-                    {validSaleOffs.map((sale, index) => (
-                      <Chip 
-                        key={index}
-                        label={`Giảm ${sale.s_percent}%`} 
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={3}>
+                    <Typography variant="body2" color="text.secondary">
+                      Số lượng
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={9}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Button 
+                        variant="outlined" 
+                        onClick={handleDecreaseQuantity}
                         sx={{ 
-                          ml: 1,
-                          backgroundColor: '#e74c3c',
-                          color: 'white'
+                          minWidth: 'unset',
+                          p: 0,
+                          width: 32,
+                          height: 32,
+                          borderColor: '#e0e0e0',
+                          color: '#00bcd4'
                         }}
-                      />
-                    ))}
-                  </Typography>
-                )}
+                      >
+                        -
+                      </Button>
+                      <Typography sx={{ mx: 2, minWidth: 40, textAlign: 'center' }}>
+                        {quantity}
+                      </Typography>
+                      <Button 
+                        variant="outlined"
+                        onClick={handleIncreaseQuantity}
+                        sx={{ 
+                          minWidth: 'unset',
+                          p: 0,
+                          width: 32,
+                          height: 32,
+                          borderColor: '#e0e0e0',
+                          color: '#00bcd4'
+                        }}
+                      >
+                        +
+                      </Button>
+                      <Typography variant="body2" sx={{ ml: 2, color: '#757575' }}>
+                        {product.p_quantity} sản phẩm có sẵn
+                      </Typography>
+                    </Box>
+                  </Grid>
+                </Grid>
               </Box>
 
-              <Divider sx={{ my: 3 }} />
-
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="body1" sx={{ mb: 2 }}>
-                  {product.p_description}
-                </Typography>
-              </Box>
-
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center',
-                mb: 3,
-                p: 2,
-                backgroundColor: '#f8f9fa',
-                borderRadius: 2
-              }}>
-                <Typography variant="body1" sx={{ mr: 2 }}>Số lượng:</Typography>
-                <Button 
-                  variant="outlined" 
-                  onClick={handleDecreaseQuantity}
-                  sx={{
-                    minWidth: '40px',
-                    height: '40px',
-                    borderRadius: '50%'
-                  }}
-                >
-                  -
-                </Button>
-                <Typography sx={{ mx: 3, fontSize: '1.2rem' }}>{quantity}</Typography>
-                <Button 
-                  variant="outlined" 
-                  onClick={handleIncreaseQuantity}
-                  sx={{
-                    minWidth: '40px',
-                    height: '40px',
-                    borderRadius: '50%'
-                  }}
-                >
-                  +
-                </Button>
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    ml: 2, 
-                    color: product.p_quantity > 0 ? '#27ae60' : '#e74c3c'
-                  }}
-                >
-                  ({product.p_quantity} sản phẩm có sẵn)
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-                <Button 
-                  variant="contained" 
-                  startIcon={<ShoppingCartIcon />} 
+              <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<ShoppingCartIcon />}
                   onClick={handleAddToCart}
-                  disabled={product.p_quantity === 0}
                   sx={{
                     flex: 1,
-                    py: 1.5,
-                    backgroundColor: '#3498db',
+                    height: 48,
+                    borderColor: '#00bcd4',
+                    color: '#00bcd4',
                     '&:hover': {
-                      backgroundColor: '#2980b9'
+                      borderColor: '#00acc1',
+                      bgcolor: 'rgba(0, 188, 212, 0.04)'
                     }
                   }}
                 >
                   Thêm vào giỏ hàng
                 </Button>
-                <Button 
+                <Button
                   variant="contained"
                   onClick={handleBuyNow}
-                  disabled={product.p_quantity === 0}
                   sx={{
                     flex: 1,
-                    py: 1.5,
-                    backgroundColor: '#e74c3c',
+                    height: 48,
+                    bgcolor: '#00bcd4',
                     '&:hover': {
-                      backgroundColor: '#c0392b'
+                      bgcolor: '#00acc1'
                     }
                   }}
                 >
                   Mua ngay
                 </Button>
               </Box>
-
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center',
-                p: 2,
-                backgroundColor: '#f8f9fa',
-                borderRadius: 2
-              }}>
-                <LocalShippingIcon sx={{ color: '#3498db' }} />
-                <Typography variant="body1" sx={{ ml: 1, color: '#2c3e50' }}>
-                  Miễn phí vận chuyển toàn quốc
-                </Typography>
-              </Box>
             </Box>
           </Grid>
         </Grid>
       </Box>
 
-      <Divider sx={{ my: 4 }} />
-      
-      <Box sx={{ p: 3, backgroundColor: '#f8f9fa', borderRadius: 2 }}>
-        <Typography 
-          variant="h5" 
-          gutterBottom 
-          sx={{ 
-            color: '#2c3e50',
-            fontWeight: 600,
-            mb: 2
-          }}
-        >
-          Mô tả sản phẩm
+      <Box sx={{ mt: 2, bgcolor: '#fff', p: 2, borderRadius: 1 }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 500 }}>
+          MÔ TẢ SẢN PHẨM
         </Typography>
-        <Typography 
-          variant="body1" 
-          sx={{ 
-            color: '#34495e',
-            lineHeight: 1.8
-          }}
-        >
+        <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
           {product.p_description}
         </Typography>
       </Box>

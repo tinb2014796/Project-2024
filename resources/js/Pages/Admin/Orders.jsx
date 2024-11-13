@@ -260,7 +260,12 @@ const DonHang = () => {
                     }}>
                       {Object.entries(order.status)
                         .filter(([key]) => key === (tabValue + 1).toString())
-                        .map(([key, value]) => value)}
+                        .map(([key, value]) => {
+                          if (key === '4') {
+                            return 'Đã giao';
+                          }
+                          return value;
+                        })}
                     </Box>
                   </TableCell>
                   <TableCell>

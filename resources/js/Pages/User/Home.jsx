@@ -10,7 +10,7 @@ import { Link } from '@inertiajs/react';
 function CategoryItem({ category }) {
   return (
     <Card elevation={0} sx={{ textAlign: 'center', p: 2 }}>
-      <Link href={`/user/category-product/${category.id}`}>
+      <Link href={`/category-product/${category.id}`}>
         <Box
           component="img"
           src={category.c_image}
@@ -43,7 +43,7 @@ function ProductItem({ product }) {
   };
 
   return (
-    <Link href={`/user/detail-product/${product.id}`} style={{ textDecoration: 'none' }}>
+    <Link href={`/detail-product/${product.id}`} style={{ textDecoration: 'none' }}>
       <Card sx={{ position: 'relative', borderRadius: 2, boxShadow: 3 }}>
         {maxDiscount > 0 && (
           <Box
@@ -111,6 +111,12 @@ function InfoItem({ icon, title, description }) {
 
 function Home() {
   const { products, categories } = usePage().props;
+  const currentDate = new Date();
+
+  const featuredProducts = products.filter(product => 
+    product.sale_off && product.sale_off.some(sale => new Date(sale.s_end) > currentDate)
+  );
+
   return (
     <Box sx={{ p: 4 }}>
       <Typography 
@@ -177,7 +183,7 @@ function Home() {
         Sản phẩm nổi bật
       </Typography>
       <Grid container spacing={2}>
-        {products.map((product, index) => (
+        {featuredProducts.map((product, index) => (
           <Grid item xs={6} sm={4} md={3} lg={2} key={index}>
             <ProductItem product={product} />
           </Grid>

@@ -9,7 +9,6 @@ import axios from 'axios';
 
 const Pays = () => {
     const { cart, products, customer } = usePage().props;
-    console.log(products);
     const [paymentMethod, setPaymentMethod] = React.useState('cod');
     const [openAddressDialog, setOpenAddressDialog] = useState(false);
     const [address, setAddress] = useState('');
@@ -24,6 +23,7 @@ const Pays = () => {
     const [shippingFee, setShippingFee] = useState(0);
     const [shopInfo, setShopInfo] = useState(null);
     const [cusAddressId, setCusAddressId] = useState(null);
+    const [discount, setDiscount] = useState(0);
 
     useEffect(() => {
         if (!customer || !customer.cus_address || !customer.cus_sdt) {
@@ -165,10 +165,8 @@ const Pays = () => {
     };
 
     const handleWardChange = (event) => {
-
         setSelectedWard(event.target.value);
         setCusAddressId(event.target.value);
-
     };
 
     const handlePaymentChange = (event, newPaymentMethod) => {
@@ -190,10 +188,12 @@ const Pays = () => {
       const product = products.find(p => p.id === productId);
       return product && product.images.length > 0 ? product.images[0].ip_image : '';
     };
+    
     const getProductName = (productId) => {
       const product = products.find(p => p.id === productId);
       return product ? product.p_name : '';
     };
+
     const handleAddressSubmit = () => {
         const customerId = customer.id;
         if (address && phone && selectedProvince && selectedDistrict && selectedWard) {
@@ -213,20 +213,27 @@ const Pays = () => {
             setOpenAddressDialog(false);
         }
     };
+
     const handlePaymentSubmit = () => {
       const data = {
-        paymentMethod : paymentMethod,
-        customer_id : customer.id,
-        products : [...cart.products],
-        note : note,
+        paymentMethod: paymentMethod,
+        customer_id: customer.id,
+        products: cart.products.map(product => {
+          const productInfo = products.find(p => p.id === product.id);
+          const saleOffPercent = productInfo?.sale_off?.[0]?.s_percent || 0;
+          const discountAmount = (product.price * saleOffPercent/100) * product.quantity;
+          return {
+            ...product,
+            discount: discountAmount
+          }
+        }),
+        note: note,
         shippingFee: shippingFee,
         cus_address_id: cusAddressId,
+        total: calculateTotal() + shippingFee,
       }
-        router.post('/user/create-order', data);
-
-        // setOpenAddressDialog(false);
+      router.post('/user/create-order', data);
     };
-
 
   return (
     <Box sx={{ p: 2 }}>

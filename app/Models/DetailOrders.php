@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Products;
+use App\Models\Oders;
 
 class DetailOrders extends Model
 {
@@ -20,5 +21,9 @@ class DetailOrders extends Model
     public function product()
     {
         return $this->belongsTo(Products::class, 'p_id')->with('images');
+    }
+    public function order()
+    {
+        return $this->belongsTo(Oders::class, 'or_id');
     }
 }
