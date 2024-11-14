@@ -1,61 +1,196 @@
 import React, { useState } from 'react';
 import { Grid, Paper, Typography, Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
-
-const salesPurchaseData = {
-  daily: [
-    { name: 'T2', Purchase: 5500, Sales: 4900 },
-    { name: 'T3', Purchase: 5800, Sales: 4800 },
-    { name: 'T4', Purchase: 4500, Sales: 5300 },
-    { name: 'T5', Purchase: 3600, Sales: 4300 },
-    { name: 'T6', Purchase: 4300, Sales: 4600 },
-    { name: 'T7', Purchase: 2800, Sales: 4100 },
-    { name: 'CN', Purchase: 5500, Sales: 4900 },
-  ],
-  weekly: [
-    { name: 'Tuần 1', Purchase: 25000, Sales: 22000 },
-    { name: 'Tuần 2', Purchase: 28000, Sales: 24000 },
-    { name: 'Tuần 3', Purchase: 22000, Sales: 26000 },
-    { name: 'Tuần 4', Purchase: 20000, Sales: 23000 },
-  ],
-  monthly: [
-    { name: 'T1', Purchase: 55000, Sales: 49000 },
-    { name: 'T2', Purchase: 58000, Sales: 48000 },
-    { name: 'T3', Purchase: 45000, Sales: 53000 },
-    { name: 'T4', Purchase: 36000, Sales: 43000 },
-    { name: 'T5', Purchase: 43000, Sales: 46000 },
-    { name: 'T6', Purchase: 28000, Sales: 41000 },
-  ],
-};
-
-const orderSummaryData = {
-  daily: [
-    { name: 'T2', Ordered: 380, Delivered: 320 },
-    { name: 'T3', Ordered: 180, Delivered: 380 },
-    { name: 'T4', Ordered: 280, Delivered: 360 },
-    { name: 'T5', Ordered: 260, Delivered: 380 },
-    { name: 'T6', Ordered: 220, Delivered: 340 },
-    { name: 'T7', Ordered: 300, Delivered: 350 },
-    { name: 'CN', Ordered: 240, Delivered: 330 },
-  ],
-  weekly: [
-    { name: 'Tuần 1', Ordered: 1800, Delivered: 1600 },
-    { name: 'Tuần 2', Ordered: 1200, Delivered: 1800 },
-    { name: 'Tuần 3', Ordered: 1400, Delivered: 1700 },
-    { name: 'Tuần 4', Ordered: 1300, Delivered: 1900 },
-  ],
-  monthly: [
-    { name: 'T1', Ordered: 3800, Delivered: 3200 },
-    { name: 'T2', Ordered: 1800, Delivered: 3800 },
-    { name: 'T3', Ordered: 2800, Delivered: 3600 },
-    { name: 'T4', Ordered: 2600, Delivered: 3800 },
-    { name: 'T5', Ordered: 2200, Delivered: 3400 },
-    { name: 'T6', Ordered: 3000, Delivered: 3500 },
-  ],
-};
+import { usePage } from '@inertiajs/react';
 
 function DashboardCharts() {
   const [timeRange, setTimeRange] = useState('daily');
+  const { orders, details } = usePage().props;
+
+  // Tìm giá trị or_total cao nhất
+  const maxTotal = Math.max(...orders.map(order => order.or_total));
+
+  // Tính tổng doanh thu theo giờ trong ngày
+  const calculateDailyRevenue = () => {
+    const hours = Array.from({length: 24}, (_, i) => `${i}h`);
+    const dailyRevenue = {};
+    
+    // Khởi tạo giá trị 0 cho tất cả các giờ
+    hours.forEach(hour => {
+      dailyRevenue[hour] = 0;
+    });
+
+    // Cộng dồn doanh thu cho các giờ có đơn hàng
+    orders.forEach(order => {
+      const date = new Date(order.created_at);
+      const hour = `${date.getHours()}h`;
+      dailyRevenue[hour] += order.or_total;
+    });
+
+    return hours.map(hour => ({
+      name: hour,
+      Sales: dailyRevenue[hour]
+    }));
+  };
+
+  // Tính tổng doanh thu theo 7 ngày gần nhất
+  const calculateWeeklyRevenue = () => {
+    const days = Array.from({length: 7}, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      return d.toLocaleDateString('vi-VN', {weekday: 'short'});
+    }).reverse();
+    
+    const weeklyRevenue = {};
+    days.forEach(day => {
+      weeklyRevenue[day] = 0;
+    });
+
+    orders.forEach(order => {
+      const date = new Date(order.created_at);
+      const day = date.toLocaleDateString('vi-VN', {weekday: 'short'});
+      if (weeklyRevenue[day] !== undefined) {
+        weeklyRevenue[day] += order.or_total;
+      }
+    });
+
+    return days.map(day => ({
+      name: day,
+      Sales: weeklyRevenue[day]
+    }));
+  };
+
+  // Tính tổng doanh thu theo tuần trong tháng
+  const calculateMonthlyRevenue = () => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const weeksInMonth = [];
+    let currentWeek = 1;
+
+    // Tạo mảng các tuần trong tháng
+    const firstDay = new Date(currentDate.getFullYear(), currentMonth, 1);
+    const lastDay = new Date(currentDate.getFullYear(), currentMonth + 1, 0);
+    
+    for (let d = firstDay; d <= lastDay; d.setDate(d.getDate() + 7)) {
+      weeksInMonth.push(`Tuần ${currentWeek++}`);
+    }
+
+    const monthlyRevenue = {};
+    weeksInMonth.forEach(week => {
+      monthlyRevenue[week] = 0;
+    });
+
+    orders.forEach(order => {
+      const date = new Date(order.created_at);
+      if (date.getMonth() === currentMonth) {
+        const weekNumber = Math.ceil(date.getDate() / 7);
+        const weekName = `Tuần ${weekNumber}`;
+        monthlyRevenue[weekName] = (monthlyRevenue[weekName] || 0) + order.or_total;
+      }
+    });
+
+    return weeksInMonth.map(week => ({
+      name: week,
+      Sales: monthlyRevenue[week]
+    }));
+  };
+
+  const revenueData = {
+    daily: calculateDailyRevenue(),
+    weekly: calculateWeeklyRevenue(),
+    monthly: calculateMonthlyRevenue()
+  };
+
+  const orderSummaryData = {
+    daily: (() => {
+      const hours = Array.from({length: 24}, (_, i) => `${i}h`);
+      const initialData = hours.map(hour => ({
+        name: hour,
+        Ordered: 0,
+        Delivered: 0,
+        Difference: 0
+      }));
+
+      orders.forEach(order => {
+        const date = new Date(order.created_at);
+        const hour = date.getHours();
+        const status = order.or_status;
+        
+        if (status === 'pending') initialData[hour].Ordered++;
+        if (status === 'delivered') initialData[hour].Delivered++;
+      });
+
+      initialData.forEach(data => {
+        data.Difference = data.Ordered - data.Delivered;
+      });
+
+      return initialData;
+    })(),
+    weekly: (() => {
+      const days = Array.from({length: 7}, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        return d.toLocaleDateString('vi-VN', {weekday: 'short'});
+      }).reverse();
+
+      return days.map(day => {
+        const dayData = {
+          name: day,
+          Ordered: 0,
+          Delivered: 0,
+          Difference: 0
+        };
+
+        orders.forEach(order => {
+          const orderDate = new Date(order.created_at);
+          const orderDay = orderDate.toLocaleDateString('vi-VN', {weekday: 'short'});
+          if (orderDay === day) {
+            if (order.or_status === 'pending') dayData.Ordered++;
+            if (order.or_status === 'delivered') dayData.Delivered++;
+          }
+        });
+
+        dayData.Difference = dayData.Ordered - dayData.Delivered;
+        return dayData;
+      });
+    })(),
+    monthly: (() => {
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth();
+      const weeksInMonth = [];
+      let currentWeek = 1;
+
+      const firstDay = new Date(currentDate.getFullYear(), currentMonth, 1);
+      const lastDay = new Date(currentDate.getFullYear(), currentMonth + 1, 0);
+      
+      for (let d = firstDay; d <= lastDay; d.setDate(d.getDate() + 7)) {
+        weeksInMonth.push(`Tuần ${currentWeek++}`);
+      }
+
+      return weeksInMonth.map(week => {
+        const weekData = {
+          name: week,
+          Ordered: 0,
+          Delivered: 0,
+          Difference: 0
+        };
+
+        orders.forEach(order => {
+          const orderDate = new Date(order.created_at);
+          if (orderDate.getMonth() === currentMonth) {
+            const orderWeek = `Tuần ${Math.ceil(orderDate.getDate() / 7)}`;
+            if (orderWeek === week) {
+              if (order.or_status === 'pending') weekData.Ordered++;
+              if (order.or_status === 'delivered') weekData.Delivered++;
+            }
+          }
+        });
+
+        weekData.Difference = weekData.Ordered - weekData.Delivered;
+        return weekData;
+      });
+    })()
+  };
 
   const handleTimeRangeChange = (event, newTimeRange) => {
     if (newTimeRange !== null) {
@@ -78,7 +213,7 @@ function DashboardCharts() {
             borderBottom: '2px solid #e9ecef',
             pb: 1
           }}>
-            Doanh thu & Mua hàng
+            Doanh thu
           </Typography>
           <Box sx={{ 
             display: 'flex', 
@@ -116,10 +251,22 @@ function DashboardCharts() {
             </ToggleButtonGroup>
           </Box>
           <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={salesPurchaseData[timeRange]}>
+            <BarChart data={revenueData[timeRange]}>
               <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
               <XAxis dataKey="name" stroke="#6c757d" />
-              <YAxis stroke="#6c757d" />
+              <YAxis 
+                stroke="#6c757d"
+                domain={[0, maxTotal]}
+                tickFormatter={(value) => {
+                  if (value === 0) return '0';
+                  if (value >= 1000000) {
+                    return `${(value / 1000000).toLocaleString('vi-VN')}M`;
+                  } else if (value >= 1000) {
+                    return `${(value / 1000).toLocaleString('vi-VN')}K`;
+                  }
+                  return value.toLocaleString('vi-VN');
+                }}
+              />
               <Tooltip 
                 contentStyle={{ 
                   backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -128,9 +275,9 @@ function DashboardCharts() {
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                   padding: '10px'
                 }}
+                formatter={(value) => `${parseInt(value).toLocaleString('vi-VN')} VNĐ`}
               />
               <Legend wrapperStyle={{paddingTop: '20px'}}/>
-              <Bar dataKey="Purchase" fill="#4dabf5" name="Mua hàng" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Sales" fill="#ff6b6b" name="Doanh thu" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -195,10 +342,17 @@ function DashboardCharts() {
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                   padding: '10px'
                 }}
+                formatter={(value, name) => {
+                  if (name === 'Difference') {
+                    return value > 0 ? `+${value}` : value;
+                  }
+                  return value;
+                }}
               />
               <Legend wrapperStyle={{paddingTop: '20px'}}/>
               <Line type="monotone" dataKey="Ordered" stroke="#8884d8" name="Đã đặt" strokeWidth={2} dot={{r: 4}} />
               <Line type="monotone" dataKey="Delivered" stroke="#82ca9d" name="Đã giao" strokeWidth={2} dot={{r: 4}} />
+              <Line type="monotone" dataKey="Difference" stroke="#ff6b6b" name="Chênh lệch" strokeWidth={2} dot={{r: 4}} />
             </LineChart>
           </ResponsiveContainer>
         </Paper>

@@ -14,6 +14,7 @@ use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\DetailOrdersController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\SaleOffController;
+use App\Http\Controllers\RatingController;
 
 
 Route::get('/customers', [PageController::class, 'customers']);
@@ -72,6 +73,9 @@ Route::middleware(AdminMiddleware::class)->prefix('admin')->group(function () {
 
     Route::get('/customers', [CustomerController::class, 'ListCustomers']);
     Route::get('/customers/{id}', [CustomerController::class, 'DetailCustomer']);
+    
+
+    
 
 
 });
@@ -116,6 +120,8 @@ Route::middleware(UserAuthMiddleware::class)->prefix('user')->group(function () 
 
 
     Route::post('/check-voucher', [OrdersController::class, 'checkVoucher']);
+
+    Route::post('/rating', [RatingController::class, 'createRating']);
     
 });
 

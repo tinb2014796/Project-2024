@@ -8,7 +8,7 @@ use App\Models\SaleOff;
 use App\Models\ImageProduct;
 use App\Models\Category;
 use App\Models\DetailOrders;
-
+use App\Models\Rating;
 
 class Products extends Model
 {
@@ -41,5 +41,9 @@ class Products extends Model
     public function orderDetails()
     {
         return $this->hasMany(DetailOrders::class, 'p_id', 'id');
+    }
+    public function rating()
+    {
+        return $this->hasMany(Rating::class, 'p_id', 'id');
     }
 }

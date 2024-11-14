@@ -1,5 +1,4 @@
 import React from "react"
-// import Main from "../../Layout/Main.jsx"
 import { Grid, Box, Typography, Paper, Button } from "@mui/material"
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag'
 import TrendingUpIcon from '@mui/icons-material/TrendingUp'
@@ -7,6 +6,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import PeopleIcon from '@mui/icons-material/People'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import DashboardCharts from '../../Components/DashboardCharts.jsx'
+import { usePage } from '@inertiajs/react'
 
 function StatCard({ bgcolor, icon, value, label }) {
     return (
@@ -35,7 +35,7 @@ function StatCard({ bgcolor, icon, value, label }) {
                     sx={{ color: 'white', p: 0, textTransform: 'none', justifyContent: 'flex-start' }}
                     endIcon={<ArrowForwardIcon />}
                 >
-                    More info
+                    Xem thêm
                 </Button>
             </Paper>
         </Grid>
@@ -43,6 +43,8 @@ function StatCard({ bgcolor, icon, value, label }) {
 }
 
 function Home({ title }) {
+    const { orders, customers } = usePage().props;
+
     return (
             <Box sx={{ p: 2 }}>
                 <Typography variant="h5" fontWeight="bold" gutterBottom>Quản lý doanh thu</Typography>
@@ -53,26 +55,26 @@ function Home({ title }) {
                     <StatCard 
                         bgcolor="#17a2b8" 
                         icon={<ShoppingBagIcon />} 
-                        value="150" 
-                        label="New Orders" 
+                        value={orders.length} 
+                        label="Tổng số đơn hàng" 
                     />
                     <StatCard 
                         bgcolor="#28a745" 
                         icon={<TrendingUpIcon />} 
                         value="53%" 
-                        label="Bounce Rate" 
+                        label="Tỷ lệ tăng trưởng" 
                     />
                     <StatCard 
                         bgcolor="#ffc107" 
                         icon={<PersonAddIcon />} 
-                        value="44" 
-                        label="User Registrations" 
+                        value={customers.length} 
+                        label="Tổng số khách hàng" 
                     />
                     <StatCard 
                         bgcolor="#dc3545" 
                         icon={<PeopleIcon />} 
                         value="65" 
-                        label="Unique Visitors" 
+                        label="Lượt truy cập" 
                     />
                 </Grid>
                 <Box sx={{ mt: 6 }}>
@@ -83,4 +85,3 @@ function Home({ title }) {
 }
 
 export default Home
-

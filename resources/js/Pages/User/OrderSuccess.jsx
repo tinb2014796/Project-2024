@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab, FormControl, InputLabel, Select, MenuItem, TablePagination, Stepper, Step, StepLabel } from '@mui/material';
+import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab, FormControl, InputLabel, Select, MenuItem, TablePagination, Stepper, Step, StepLabel, Rating, Avatar, Checkbox } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import RateReviewIcon from '@mui/icons-material/RateReview';
 import { usePage, router } from '@inertiajs/react';
 import axios from 'axios';
+import DetailOrders from './ChildPage/DetailOrders';
+import { getAddressDetails, getProvinces, getDistricts, getWards } from './Function';
 
 const OrderSuccess = () => {
   const { orders } = usePage().props;
-  console.log(orders);
   const [tabValue, setTabValue] = useState(0);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [openDetailDialog, setOpenDetailDialog] = useState(false);
+  const [openReviewDialog, setOpenReviewDialog] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [selectedProducts, setSelectedProducts] = useState([]);
   const [addressDetails, setAddressDetails] = useState({});
   const [provinceList, setProvinceList] = useState([]);
   const [districtList, setDistrictList] = useState([]);
@@ -20,40 +26,34 @@ const OrderSuccess = () => {
     ward: null
   });
 
-  const donHangGoc = orders.map(order => ({
-    id: order.id,
-    ngayDat: order.or_date,
-    customer: order.customer,
-    payment: order.payment,   
-    tongTien: order.or_total,
-    ghiChu: order.or_note,
-    status: order.or_status,
-    orderDetails: order.order_details?.map(detail => ({
-      p_name: detail.product?.p_name,
-      quantity: detail.quantity,
-      p_selling: detail.product?.p_selling,
-      total: detail.total
-    })),
-  }));
+  const donHangGoc = orders.map(order => {
+    // Tính tổng discount từ order details
+    const totalDetailDiscount = order.order_details?.reduce((sum, detail) => sum + (parseInt(detail.discount) || 0), 0);
+    
+    return {
+      id: order.id,
+      ngayDat: order.or_date,
+      customer: order.customer,
+      payment: order.payment,   
+      tongTien: order.or_total - totalDetailDiscount - (order.or_discount || 0),
+      ghiChu: order.or_note,
+      status: order.or_status,
+      orderDetails: order.order_details?.map(detail => ({
+        p_id: detail.product?.id,
+        p_name: detail.product?.p_name,
+        quantity: detail.quantity,
+        p_selling: detail.product?.p_selling,
+        total: detail.total - (detail.discount || 0)
+      })),
+      totalDetailDiscount: totalDetailDiscount,
+      orderDiscount: order.or_discount || 0
+    }
+  });
+
 
   useEffect(() => {
-    const getAddressDetails = async (address) => {
-      try {
-        const response = await axios.get(`https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`, {
-          headers: {
-            'Token': '62124d79-4ffa-11ee-b1d4-92b443b7a897',
-            'Content-Type': 'application/json'
-          }
-        });
-        return response.data;
-      } catch (error) {
-        console.error('Error fetching address:', error);
-        return null;
-      }
-    };
-
     if (selectedOrder?.customer?.cus_address) {
-      getAddressDetails(selectedOrder.customer.cus_address)
+      getAddressDetails()
         .then(details => {
           if (details) {
             setAddressDetails(details);
@@ -63,61 +63,28 @@ const OrderSuccess = () => {
   }, [selectedOrder]);
 
   useEffect(() => {
-    const getProvinces = async () => {
-      try {
-        const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province', {
-          headers: {
-            'Token': '62124d79-4ffa-11ee-b1d4-92b443b7a897'
-          }
-        });
-        setProvinceList(response.data.data);
-      } catch (error) {
-        console.error('Lỗi khi lấy danh sách tỉnh/thành:', error);
-      }
-    };
-    getProvinces();
+    getProvinces()
+      .then(provinces => {
+        setProvinceList(provinces);
+      });
   }, []);
 
   useEffect(() => {
-    const getDistricts = async () => {
-      if (!selectedOrder?.customer?.province_id) return;
-      
-      try {
-        const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district', {
-          headers: {
-            'Token': '62124d79-4ffa-11ee-b1d4-92b443b7a897'
-          },
-          params: {
-            province_id: selectedOrder.customer.province_id
-          }
+    if (selectedOrder?.customer?.province_id) {
+      getDistricts(selectedOrder.customer.province_id)
+        .then(districts => {
+          setDistrictList(districts);
         });
-        setDistrictList(response.data.data);
-      } catch (error) {
-        console.error('Lỗi khi lấy danh sách quận/huyện:', error);
-      }
-    };
-    getDistricts();
+    }
   }, [selectedOrder?.customer?.province_id]);
 
   useEffect(() => {
-    const getWards = async () => {
-      if (!selectedOrder?.customer?.district_id) return;
-
-      try {
-        const response = await axios.get('https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
-          headers: {
-            'Token': '62124d79-4ffa-11ee-b1d4-92b443b7a897'
-          },
-          params: {
-            district_id: selectedOrder.customer.district_id
-          }
+    if (selectedOrder?.customer?.district_id) {
+      getWards(selectedOrder.customer.district_id)
+        .then(wards => {
+          setWardList(wards); 
         });
-        setWardList(response.data.data);
-      } catch (error) {
-        console.error('Lỗi khi lấy danh sách phường/xã:', error);
-      }
-    };
-    getWards();
+    }
   }, [selectedOrder?.customer?.district_id]);
 
   useEffect(() => {
@@ -152,36 +119,39 @@ const OrderSuccess = () => {
     setSelectedOrder(null);
   };
 
-  const getProvinceName = (provinceId) => {
-    const province = provinceList.find(p => p.ProvinceID === parseInt(provinceId));
-    return province ? province.ProvinceName : '';
+  const handleOpenReviewDialog = (order) => {
+    setSelectedOrder(order);
+    setOpenReviewDialog(true);
   };
 
-  const getDistrictName = (districtId) => {
-    const district = districtList.find(d => d.DistrictID === parseInt(districtId));
-    return district ? district.DistrictName : '';
+  const handleCloseReviewDialog = () => {
+    setOpenReviewDialog(false);
+    setSelectedOrder(null);
+    setRating(5);
+    setComment('');
+    setSelectedProducts([]);
   };
 
-  const getWardName = (wardCode) => {
-    const ward = wardList.find(w => w.WardCode === wardCode);
-    return ward ? ward.WardName : '';
+  const handleProductSelect = (productId) => {
+    setSelectedProducts(prev => {
+      if (prev.includes(productId)) {
+        return prev.filter(p => p !== productId);
+      } else {
+        return [...prev, productId];
+      }
+    });
   };
 
-  const getOrderStatusSteps = (status) => {
-    const steps = [
-      { label: 'Chờ xử lý', completed: false },
-      { label: 'Đã xác nhận', completed: false },
-      { label: 'Đang giao', completed: false },
-      { label: 'Đã giao', completed: false }
-    ];
-
-    const currentStatus = parseInt(Object.keys(status)[Object.keys(status).length - 1]);
-    
-    for (let i = 0; i < currentStatus; i++) {
-      steps[i].completed = true;
-    }
-    
-    return steps;
+  const handleSubmitReview = () => {
+    const data = {
+      productIds: selectedProducts,
+      ra_score: rating,
+      ra_comment: comment,
+    };
+    console.log(data);
+    router.post('/user/rating', data);
+    handleCloseReviewDialog();
+    alert('Cảm ơn bạn đã đánh giá sản phẩm!');
   };
 
   return (
@@ -240,6 +210,17 @@ const OrderSuccess = () => {
                     >
                       Chi tiết
                     </Button>
+                    {tabValue === 3 && (
+                      <Button
+                        variant="contained"
+                        color="success"
+                        startIcon={<RateReviewIcon />}
+                        onClick={() => handleOpenReviewDialog(order)}
+                        sx={{ borderRadius: 2 }}
+                      >
+                        Đánh giá
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -248,117 +229,90 @@ const OrderSuccess = () => {
         </TableContainer>
       </Paper>
 
-      <Dialog 
-        open={openDetailDialog} 
-        onClose={handleCloseDetailDialog} 
-        maxWidth="md" 
+      <DetailOrders
+        openDetailDialog={openDetailDialog}
+        handleCloseDetailDialog={handleCloseDetailDialog}
+        selectedOrder={selectedOrder}
+        addressDetails={addressDetails}
+        provinceList={provinceList}
+        districtList={districtList}
+        wardList={wardList}
+        selectedAddress={selectedAddress}
+      />
+      <Dialog
+        open={openReviewDialog}
+        onClose={handleCloseReviewDialog}
+        maxWidth="md"
         fullWidth
         PaperProps={{
           sx: { borderRadius: 2 }
         }}
       >
-        <DialogTitle sx={{ bgcolor: '#f5f5f5', py: 2 }}>
-          Chi tiết đơn hàng #{selectedOrder?.id}
+        <DialogTitle sx={{ bgcolor: '#f5f5f5', py: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Avatar sx={{ bgcolor: '#1976d2' }}>Đ</Avatar>
+          <Box>
+            <Typography variant="h6">Đánh giá đơn hàng #{selectedOrder?.id}</Typography>
+            <Typography variant="caption" color="text.secondary">
+              Hãy chia sẻ nhận xét của bạn về sản phẩm
+            </Typography>
+          </Box>
         </DialogTitle>
-        <DialogContent sx={{ mt: 2 }}>
-          {selectedOrder && (
-            <Box>
-              <Paper elevation={1} sx={{ p: 2, mb: 3, borderRadius: 2 }}>
-                <Typography variant="h6" gutterBottom sx={{ color: '#1976d2' }}>
-                  Trạng thái đơn hàng
-                </Typography>
-                <Stepper activeStep={parseInt(Object.keys(selectedOrder.status)[Object.keys(selectedOrder.status).length - 1]) - 1}>
-                  {getOrderStatusSteps(selectedOrder.status).map((step, index) => (
-                    <Step key={index} completed={step.completed}>
-                      <StepLabel>{step.label}</StepLabel>
-                    </Step>
-                  ))}
-                </Stepper>
-              </Paper>
-
-              <Paper elevation={1} sx={{ p: 2, mb: 3, borderRadius: 2 }}>
-                <Typography variant="h6" gutterBottom sx={{ color: '#1976d2' }}>
-                  Thông tin khách hàng
-                </Typography>
-                <Box sx={{ pl: 2 }}>
-                  <Typography sx={{ mb: 1 }}>
-                    <strong>Tên:</strong> {selectedOrder.customer?.cus_name} {selectedOrder.customer?.cus_familyname}
-                  </Typography>
-                  <Typography sx={{ mb: 1 }}>
-                    <strong>Địa chỉ:</strong> {selectedOrder.customer?.cus_address}, {' '}
-                    {getWardName(selectedOrder.customer?.ward_code)}, {' '}
-                    {getDistrictName(selectedOrder.customer?.district_id)}, {' '}
-                    {getProvinceName(selectedOrder.customer?.province_id)}
-                  </Typography>
-                  <Typography sx={{ mb: 1 }}>
-                    <strong>Số điện thoại:</strong> {selectedOrder.customer?.cus_sdt}
-                  </Typography>
-                  <Typography>
-                    <strong>Email:</strong> {selectedOrder.customer?.cus_email}
-                  </Typography>
+        <DialogContent sx={{ mt: 4 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <FormControl fullWidth variant="outlined" sx={{ fontWeight: 'bold', mt: 2 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>Chọn sản phẩm cần đánh giá</Typography>
+              {selectedOrder?.orderDetails?.map((detail, index) => (
+                <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1, p: 1, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+                  <Checkbox
+                    checked={selectedProducts.includes(detail.p_id)}
+                    onChange={() => handleProductSelect(detail.p_id)}
+                  />
+                  <Avatar variant="rounded" sx={{ bgcolor: '#e3f2fd' }}>
+                    {detail.p_name[0]}
+                  </Avatar>
+                  <Typography>{detail.p_name}</Typography>
                 </Box>
-              </Paper>
+              ))}
+            </FormControl>
 
-              <Paper elevation={1} sx={{ p: 2, mb: 3, borderRadius: 2 }}>
-                <Typography variant="h6" gutterBottom sx={{ color: '#1976d2' }}>
-                  Thông tin đơn hàng
-                </Typography>
-                <Box sx={{ pl: 2 }}>
-                  <Typography sx={{ mb: 1 }}>
-                    <strong>Ngày đặt:</strong> {new Date(selectedOrder.ngayDat).toLocaleString()}
-                  </Typography>
-                  <Typography sx={{ mb: 1 }}>
-                    <strong>Phương thức thanh toán:</strong> {selectedOrder.payment?.pa_type}
-                  </Typography>
-                  <Typography>
-                    <strong>Ghi chú:</strong> {selectedOrder.ghiChu || 'Không có'}
-                  </Typography>
-                </Box>
-              </Paper>
-
-              <Paper elevation={1} sx={{ p: 2, borderRadius: 2 }}>
-                <Typography variant="h6" gutterBottom sx={{ color: '#1976d2' }}>
-                  Chi tiết sản phẩm
-                </Typography>
-                <TableContainer>
-                  <Table>
-                    <TableHead>
-                      <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Sản phẩm</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Số lượng</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Đơn giá</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Thành tiền</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {selectedOrder.orderDetails?.map((detail, index) => (
-                        <TableRow key={index} hover>
-                          <TableCell>{detail.p_name}</TableCell>
-                          <TableCell align="right">{detail.quantity}</TableCell>
-                          <TableCell align="right">{parseInt(detail.p_selling).toLocaleString('vi-VN')}đ</TableCell>
-                          <TableCell align="right">{parseInt(detail.total).toLocaleString('vi-VN')}đ</TableCell>
-                        </TableRow>
-                      ))}
-                      <TableRow>
-                        <TableCell colSpan={3} align="right" sx={{ fontWeight: 'bold' }}>Tổng cộng:</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-                          {parseInt(selectedOrder.tongTien).toLocaleString('vi-VN')}đ
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Paper>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h6" gutterBottom>Bạn cảm thấy sản phẩm này như thế nào?</Typography>
+              <Rating
+                value={rating}
+                onChange={(event, newValue) => setRating(newValue)}
+                size="large"
+                sx={{ fontSize: '2.5rem', color: '#f57c00' }}
+              />
             </Box>
-          )}
+
+            <TextField
+              label="Chia sẻ thêm về trải nghiệm của bạn"
+              multiline
+              rows={4}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              fullWidth
+              variant="outlined"
+              placeholder="Sản phẩm có tốt không? Chất lượng thế nào?"
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            />
+          </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button 
-            onClick={handleCloseDetailDialog}
-            variant="contained"
-            sx={{ borderRadius: 2 }}
+        <DialogActions sx={{ p: 3, gap: 2 }}>
+          <Button
+            onClick={handleCloseReviewDialog}
+            variant="outlined"
+            sx={{ borderRadius: 2, px: 3 }}
           >
-            Đóng
+            Hủy
+          </Button>
+          <Button
+            onClick={handleSubmitReview}
+            variant="contained"
+            sx={{ borderRadius: 2, px: 3 }}
+            disabled={selectedProducts.length === 0 || !rating || !comment}
+          >
+            Gửi đánh giá
           </Button>
         </DialogActions>
       </Dialog>

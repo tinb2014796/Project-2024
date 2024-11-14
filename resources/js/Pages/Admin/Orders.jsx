@@ -29,11 +29,13 @@ const DonHang = () => {
     tongTien: order.or_total,
     ghiChu: order.or_note,
     status: order.or_status,
+    or_discount: order.or_discount,
     orderDetails: order.order_details?.map(detail => ({
       p_name: detail.product?.p_name,
       quantity: detail.quantity,
       p_selling: detail.product?.p_selling,
-      total: detail.total
+      total: detail.quantity * detail.product?.p_selling - detail.discount,
+      discount: detail.discount
     })),
   }));
 
@@ -249,7 +251,7 @@ const DonHang = () => {
                   <TableCell>#{order.id}</TableCell>
                   <TableCell>{order.customer?.cus_name}</TableCell>
                   <TableCell>{new Date(order.ngayDat).toLocaleDateString()}</TableCell>
-                  <TableCell>{order.tongTien?.toLocaleString('vi-VN')}đ</TableCell>
+                  <TableCell>{(order.orderDetails?.reduce((total, detail) => total + (detail.quantity * detail.p_selling - detail.discount), 0) - order.or_discount).toLocaleString('vi-VN')}đ</TableCell>
                   <TableCell>
                     <Box sx={{ 
                       bgcolor: '#e3f2fd',
@@ -380,7 +382,7 @@ const DonHang = () => {
                     <strong>Phương thức thanh toán:</strong> {selectedOrder.payment?.pa_type}
                   </Typography>
                   <Typography>
-                    <strong>Ghi chú:</strong> {selectedOrder.ghiChu || 'Không có'}
+                    <strong>Ghi chú:</strong> {selectedOrder.ghiChu || 'Không có ghi chú'}
                   </Typography>
                 </Box>
               </Paper>
@@ -394,8 +396,9 @@ const DonHang = () => {
                     <TableHead>
                       <TableRow sx={{ bgcolor: '#f5f5f5' }}>
                         <TableCell sx={{ fontWeight: 'bold' }}>Sản phẩm</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Số lượng</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 'bold' }}>Số lượng</TableCell>
                         <TableCell align="right" sx={{ fontWeight: 'bold' }}>Đơn giá</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 'bold' }}>Khuyến mãi</TableCell>
                         <TableCell align="right" sx={{ fontWeight: 'bold' }}>Thành tiền</TableCell>
                       </TableRow>
                     </TableHead>
@@ -403,15 +406,30 @@ const DonHang = () => {
                       {selectedOrder.orderDetails?.map((detail, index) => (
                         <TableRow key={index} hover>
                           <TableCell>{detail.p_name}</TableCell>
-                          <TableCell align="right">{detail.quantity}</TableCell>
+                          <TableCell align="center">{detail.quantity}</TableCell>
                           <TableCell align="right">{parseInt(detail.p_selling).toLocaleString('vi-VN')}đ</TableCell>
-                          <TableCell align="right">{parseInt(detail.total).toLocaleString('vi-VN')}đ</TableCell>
+                          <TableCell align="right" sx={{ color: '#00C853' }}>
+                            -{parseInt(detail.discount).toLocaleString('vi-VN')}đ
+                          </TableCell>
+                          <TableCell align="right">{(detail.quantity * detail.p_selling - detail.discount).toLocaleString('vi-VN')}đ</TableCell>
                         </TableRow>
                       ))}
                       <TableRow>
-                        <TableCell colSpan={3} align="right" sx={{ fontWeight: 'bold' }}>Tổng cộng:</TableCell>
-                        <TableCell align="right" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-                          {parseInt(selectedOrder.tongTien).toLocaleString('vi-VN')}đ
+                        <TableCell colSpan={3} align="right" sx={{ fontWeight: 'bold' }}>Tổng tiền hàng:</TableCell>
+                        <TableCell colSpan={2} align="right" sx={{ fontWeight: 'bold' }}>
+                          {selectedOrder.orderDetails?.reduce((total, detail) => total + (detail.quantity * detail.p_selling - detail.discount), 0).toLocaleString('vi-VN')}đ
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={3} align="right" sx={{ fontWeight: 'bold', color: '#00C853' }}>Giảm giá đơn hàng:</TableCell>
+                        <TableCell colSpan={2} align="right" sx={{ fontWeight: 'bold', color: '#00C853' }}>
+                          -{parseInt(selectedOrder.or_discount).toLocaleString('vi-VN')}đ
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell colSpan={3} align="right" sx={{ fontWeight: 'bold', color: '#1976d2' }}>Tổng cộng:</TableCell>
+                        <TableCell colSpan={2} align="right" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
+                          {(selectedOrder.orderDetails?.reduce((total, detail) => total + (detail.quantity * detail.p_selling - detail.discount), 0) - selectedOrder.or_discount).toLocaleString('vi-VN')}đ
                         </TableCell>
                       </TableRow>
                     </TableBody>

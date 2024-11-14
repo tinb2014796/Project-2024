@@ -281,6 +281,7 @@ class OrdersController extends Controller
         }
 
         $order->or_status = json_encode($currentStatus);
+        $order->status = $status;
         $order->save();
         return redirect()->back();
     }

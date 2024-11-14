@@ -14,7 +14,7 @@ import InstagramIcon from '@mui/icons-material/Instagram';
 import TwitterIcon from '@mui/icons-material/Twitter';
 
 export default function Main({ children }) {
-    const { customer, categories, products } = usePage().props;
+    const { customer, categories, products ,carts} = usePage().props;
     const [productAnchorEl, setProductAnchorEl] = useState(null);
     const [userAnchorEl, setUserAnchorEl] = useState(null);
     const [showSearch, setShowSearch] = useState(false);
@@ -56,6 +56,7 @@ export default function Main({ children }) {
     const handleLogout = () => {
         localStorage.removeItem('customer');
         router.post('/user/logout');
+        window.location.reload();
         handleUserClose();
     };
 
@@ -318,7 +319,7 @@ export default function Main({ children }) {
                                     href="/user/cart"
                                     sx={{ color: 'black', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                                 >
-                                    <Badge badgeContent={0} sx={{ color: 'black' }}>
+                                    <Badge badgeContent={carts ? carts.length : 0} color="error">
                                         <ShoppingCartIcon />
                                     </Badge>
                                 </IconButton>

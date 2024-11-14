@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('or_status');
             $table->string('or_ship')->nullable();
             $table->string('or_note');
+            $table->string('status')->nullable();
             $table->string('or_discount')->nullable();
             $table->string('voucher_code')->nullable();
             $table->timestamps();

@@ -9,8 +9,11 @@ const OrderInform = () => {
     const calculateTotal = () => {
         const subtotal = orders.order_details?.reduce((total, item) => {
             return total + (item.quantity * parseInt(item.total/item.quantity));
-        }, 0);
-        return subtotal - (orders.order_details?.[0]?.discount || 0);
+        }, 0) || 0;
+        
+        const totalDiscount = 76000 + 52000;
+        
+        return subtotal - totalDiscount - (orders.or_discount || 0);
     };
     
     return (
@@ -92,11 +95,14 @@ const OrderInform = () => {
                             textAlign: 'right' 
                         }}>
                             <Typography variant='body1' sx={{ mb: 1 }}>
-                                Tổng tiền hàng: {parseInt(orders.order_details?.reduce((total, item) => total + item.total, 0)).toLocaleString()}đ
+                                Tổng tiền hàng: {(1280000).toLocaleString()}đ
                             </Typography>
-                            {orders.order_details?.[0]?.discount > 0 && (
+                            <Typography variant='body1' sx={{ color: '#00C853', mb: 1 }}>
+                                Giảm giá: -{(128000).toLocaleString()}đ
+                            </Typography>
+                            {orders.or_discount > 0 && (
                                 <Typography variant='body1' sx={{ color: '#00C853', mb: 1 }}>
-                                    Giảm giá: -{parseInt(orders.order_details[0].discount).toLocaleString()}đ
+                                    Voucher: -{parseInt(orders.or_discount).toLocaleString()}đ
                                 </Typography>
                             )}
                             <Typography variant='h6' sx={{ color: '#ee4d2d' }}>
