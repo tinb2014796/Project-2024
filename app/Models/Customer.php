@@ -29,5 +29,8 @@ class Customer extends Model
     {
         return $this->hasMany(Oders::class, 'cus_id', 'id');
     }
-    
+    public function saleOffs()
+    {
+        return $this->hasMany(SaleOff::class, 'cus_id', 'id');
+    }
 }

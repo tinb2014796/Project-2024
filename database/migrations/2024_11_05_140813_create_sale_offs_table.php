@@ -23,9 +23,11 @@ return new class extends Migration
             $table->string('s_catalory')->nullable();
             $table->string('s_value_min')->nullable();
             $table->string('s_value_max')->nullable();
+            $table->string('s_description')->nullable();
             $table->timestamps();
             
             $table->foreignId('p_id')->nullable()->constrained('products')->onDelete('cascade');
+            $table->foreignId('cus_id')->nullable()->constrained('customers')->onDelete('cascade');
         });
     }
 

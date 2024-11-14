@@ -15,6 +15,7 @@ use App\Http\Controllers\DetailOrdersController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Controllers\SaleOffController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\GoodsReceiptController;
 
 
 Route::get('/customers', [PageController::class, 'customers']);
@@ -74,7 +75,9 @@ Route::middleware(AdminMiddleware::class)->prefix('admin')->group(function () {
     Route::get('/customers', [CustomerController::class, 'ListCustomers']);
     Route::get('/customers/{id}', [CustomerController::class, 'DetailCustomer']);
     
-
+    Route::get('/goods-receipt', [GoodsReceiptController::class, 'index']);
+    Route::post('/goods-receipt/create', [GoodsReceiptController::class, 'createGoodsReceipt']);
+    Route::put('/goods-receipt/update/{id}', [GoodsReceiptController::class, 'updateGoodsReceipt']);
     
 
 
@@ -122,7 +125,9 @@ Route::middleware(UserAuthMiddleware::class)->prefix('user')->group(function () 
     Route::post('/check-voucher', [OrdersController::class, 'checkVoucher']);
 
     Route::post('/rating', [RatingController::class, 'createRating']);
-    
+
+    Route::get('/trade-point', [CustomerController::class, 'tradePoint']);
+    Route::post('/trade-point', [SaleOffController::class, 'useVoucher']);
 });
 
 //http://localhost:8000/return-vnpay?vnp_Amount=280000000&vnp_BankCode=NCB&vnp_BankTranNo=VNP14620894&vnp_CardType=ATM&vnp_OrderInfo=Thanh+to%C3%A1n+h%C3%B3a+%C4%91%C6%A1n+ph%C3%AD+d%E1%BB%8Bch+v%E1%BB%A5&vnp_PayDate=20241018230639&vnp_ResponseCode=00&vnp_TmnCode=3DR25O0Z&vnp_TransactionNo=14620894&vnp_TransactionStatus=00&vnp_TxnRef=61&vnp_SecureHash=b37a2c8d3b7401c6577b601016bda39265765fcc38433943ba1c5faebe770ba565f86ea395db55de570cef1b4d569cbd7e65111e32dbb06ed7d656b3816a76dd

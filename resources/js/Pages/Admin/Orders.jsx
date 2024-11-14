@@ -187,7 +187,7 @@ const DonHang = () => {
   const canUpdateStatus = (order) => {
     const orderStatus = Object.entries(order.status);
     const latestStatus = orderStatus[orderStatus.length - 1];
-    return latestStatus[0] !== '4' && latestStatus[0] !== '5';
+    return latestStatus[0] !== '5';
   };
 
   const getProvinceName = (provinceId) => {
@@ -227,6 +227,7 @@ const DonHang = () => {
           >
             <Tab label="Chờ xử lý" />
             <Tab label="Đã xác nhận" />
+            <Tab label="Đã giao bên vận chuyển"/>
             <Tab label="Đang giao" />
             <Tab label="Đã giao" />
             <Tab label="Đã hủy" />
@@ -263,7 +264,11 @@ const DonHang = () => {
                       {Object.entries(order.status)
                         .filter(([key]) => key === (tabValue + 1).toString())
                         .map(([key, value]) => {
-                          if (key === '4') {
+                          if (key === '3') {
+                            return 'Đã giao cho đơn vị vận chuyển';
+                          } else if (key === '4') {
+                            return 'Đang giao';
+                          } else if (key === '5') {
                             return 'Đã giao';
                           }
                           return value;

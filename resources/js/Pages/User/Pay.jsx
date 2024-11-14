@@ -6,6 +6,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import ChatIcon from '@mui/icons-material/Chat';
 import { usePage, router } from "@inertiajs/react";
 import axios from 'axios';
+import { getAddressDetails, getProvinces, getDistricts, getWards } from './Function';
 
 const Pays = () => {
     const { cart, products, customer, saleOffs } = usePage().props;
@@ -266,50 +267,69 @@ const Pays = () => {
         note: note,
         shippingFee: shippingFee,
         cus_address_id: cusAddressId,
-        voucher_code: appliedVoucher?.code,
+        voucher_code: appliedVoucher?.s_code,
         discount: discount,
       }
       router.post('/user/create-order', data);
     };
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
+    <Box sx={{ p: 2, backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
+      <Paper elevation={3} sx={{ p: 3, mb: 3, borderRadius: '12px' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <LocationOnIcon color="error" />
-          <Typography variant="h6" sx={{ ml: 1 }}>Địa Chỉ Nhận Hàng</Typography>
+          <LocationOnIcon color="error" sx={{ fontSize: 28 }} />
+          <Typography variant="h6" sx={{ ml: 1, fontWeight: 600 }}>Địa Chỉ Nhận Hàng</Typography>
         </Box>
         {customer && customer.cus_address && customer.cus_sdt ? (
-            <>
-                <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
+            <Box sx={{ backgroundColor: '#f8f9fa', p: 2, borderRadius: '8px' }}>
+                <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
                     {customer.cus_name} (+84) {customer.cus_sdt}
                 </Typography>
-                <Typography variant="body2">
+                <Typography variant="body2" sx={{ color: '#666' }}>
                     {customer.cus_address}
                 </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                    <Chip label="Mặc Định" size="small" sx={{ mr: 1 }} />
-                    <Button variant="text" color="primary" size="small" onClick={() => setOpenAddressDialog(true)}>Thay Đổi</Button>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                    <Chip label="Mặc Định" size="small" sx={{ mr: 1, backgroundColor: '#e3f2fd' }} />
+                    <Button 
+                        variant="outlined" 
+                        color="primary" 
+                        size="small" 
+                        onClick={() => setOpenAddressDialog(true)}
+                        sx={{ borderRadius: '20px' }}
+                    >
+                        Thay Đổi
+                    </Button>
                 </Box>
-            </>
+            </Box>
         ) : (
-            <Typography variant="body1" color="error">
+            <Typography variant="body1" color="error" sx={{ p: 2, backgroundColor: '#fff3f3', borderRadius: '8px' }}>
                 Vui lòng thêm địa chỉ nhận hàng và số điện thoại
             </Typography>
         )}
       </Paper>
 
-      <Dialog open={openAddressDialog} onClose={() => setOpenAddressDialog(false)} fullWidth maxWidth="sm">
-        <DialogTitle>Thêm Địa Chỉ Mới</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2}>
+      <Dialog 
+        open={openAddressDialog} 
+        onClose={() => setOpenAddressDialog(false)} 
+        fullWidth 
+        maxWidth="sm"
+        PaperProps={{
+          sx: { borderRadius: '12px' }
+        }}
+      >
+        <DialogTitle sx={{ borderBottom: '1px solid #eee', pb: 2 }}>
+          Thêm Địa Chỉ Mới
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2 }}>
+          <Grid container spacing={3}>
             <Grid item xs={12}>
-              <FormControl fullWidth margin="normal">
+              <FormControl fullWidth>
                 <InputLabel>Tỉnh/Thành phố</InputLabel>
                 <Select
                   value={selectedProvince}
                   onChange={handleProvinceChange}
                   label="Tỉnh/Thành phố"
+                  sx={{ borderRadius: '8px' }}
                 >
                   {provinces.map((province) => (
                     <MenuItem key={province.ProvinceID} value={province.ProvinceID}>
@@ -320,31 +340,37 @@ const Pays = () => {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <FormControl fullWidth margin="normal">
+              <FormControl fullWidth>
                 <InputLabel>Quận/Huyện</InputLabel>
                 <Select
                   value={selectedDistrict}
                   onChange={handleDistrictChange}
                   label="Quận/Huyện"
                   disabled={!selectedProvince}
+                  sx={{ borderRadius: '8px' }}
                 >
                   {districts.map((district) => (
-                    <MenuItem key={district.DistrictID} value={district.DistrictID}>{district.DistrictName}</MenuItem>
+                    <MenuItem key={district.DistrictID} value={district.DistrictID}>
+                      {district.DistrictName}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <FormControl fullWidth margin="normal">
+              <FormControl fullWidth>
                 <InputLabel>Phường/Xã</InputLabel>
                 <Select
                   value={selectedWard}
                   onChange={handleWardChange}
                   label="Phường/Xã"
                   disabled={!selectedDistrict}
+                  sx={{ borderRadius: '8px' }}
                 >
                   {wards.map((ward) => (
-                    <MenuItem key={ward.WardCode} value={ward.WardCode}>{ward.WardName}</MenuItem>
+                    <MenuItem key={ward.WardCode} value={ward.WardCode}>
+                      {ward.WardName}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -353,70 +379,109 @@ const Pays = () => {
               <TextField
                 label="Địa chỉ chi tiết"
                 fullWidth
-                margin="normal"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 label="Số điện thoại"
                 fullWidth
-                margin="normal"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 inputProps={{ maxLength: 10 }}
                 helperText="Nhập số điện thoại 10 chữ số"
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
               />
             </Grid>
           </Grid>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenAddressDialog(false)}>Hủy</Button>
-          <Button onClick={handleAddressSubmit} variant="contained" color="primary">Lưu</Button>
+        <DialogActions sx={{ p: 3 }}>
+          <Button 
+            onClick={() => setOpenAddressDialog(false)}
+            sx={{ borderRadius: '20px' }}
+          >
+            Hủy
+          </Button>
+          <Button 
+            onClick={handleAddressSubmit} 
+            variant="contained" 
+            color="primary"
+            sx={{ borderRadius: '20px' }}
+          >
+            Lưu
+          </Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={openVoucherDialog} onClose={() => setOpenVoucherDialog(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Nhập Mã Giảm Giá</DialogTitle>
-        <DialogContent>
+      <Dialog 
+        open={openVoucherDialog} 
+        onClose={() => setOpenVoucherDialog(false)} 
+        fullWidth 
+        maxWidth="xs"
+        PaperProps={{
+          sx: { borderRadius: '12px' }
+        }}
+      >
+        <DialogTitle sx={{ borderBottom: '1px solid #eee', pb: 2 }}>
+          Nhập Mã Giảm Giá
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2 }}>
           <TextField
             fullWidth
             label="Mã giảm giá"
             value={voucherCode}
             onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
-            margin="normal"
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenVoucherDialog(false)}>Hủy</Button>
-          <Button onClick={handleApplyVoucher} variant="contained" color="primary">Áp dụng</Button>
+        <DialogActions sx={{ p: 3 }}>
+          <Button 
+            onClick={() => setOpenVoucherDialog(false)}
+            sx={{ borderRadius: '20px' }}
+          >
+            Hủy
+          </Button>
+          <Button 
+            onClick={handleApplyVoucher} 
+            variant="contained" 
+            color="primary"
+            sx={{ borderRadius: '20px' }}
+          >
+            Áp dụng
+          </Button>
         </DialogActions>
       </Dialog>
 
-      <Paper elevation={3} sx={{ p: 2 }}>
-        <Grid container spacing={2} sx={{ mb: 2 }}>
+      <Paper elevation={3} sx={{ p: 3, borderRadius: '12px' }}>
+        <Grid container spacing={2} sx={{ mb: 3, borderBottom: '1px solid #eee', pb: 2 }}>
           <Grid item xs={6}>
-            <Typography variant="subtitle1">Sản phẩm</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Sản phẩm</Typography>
           </Grid>
           <Grid item xs={2}>
-            <Typography variant="subtitle1">Đơn giá</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Đơn giá</Typography>
           </Grid>
           <Grid item xs={1}>
-            <Typography variant="subtitle1">Số lượng</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Số lượng</Typography>
           </Grid>
           <Grid item xs={1}>
-            <Typography variant="subtitle1">Khuyến mãi</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Khuyến mãi</Typography>
           </Grid>
           <Grid item xs={2}>
-            <Typography variant="subtitle1">Thành tiền</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Thành tiền</Typography>
           </Grid>
         </Grid>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, backgroundColor: '#f8f9fa', p: 2, borderRadius: '8px' }}>
           <FavoriteIcon color="error" sx={{ mr: 1 }} />
-          <Typography variant="subtitle1">Phụ Kiện - Đồ Dùng - Siêu Rẻ</Typography>
-          <Button startIcon={<ChatIcon />} variant="outlined" size="small" sx={{ ml: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Phụ Kiện - Đồ Dùng - Siêu Rẻ</Typography>
+          <Button 
+            startIcon={<ChatIcon />} 
+            variant="outlined" 
+            size="small" 
+            sx={{ ml: 2, borderRadius: '20px' }}
+          >
             Chat ngay
           </Button>
         </Box>
@@ -426,37 +491,39 @@ const Pays = () => {
           const saleOffPercent = productInfo?.sale_off?.[0]?.s_percent || 0;
           const discountedPrice = product.price * (1 - saleOffPercent/100);
           return (
-            <Grid container spacing={2} sx={{ mb: 2 }} key={product.id}>
+            <Grid container spacing={2} sx={{ mb: 2, p: 2, backgroundColor: '#fff', borderRadius: '8px' }} key={product.id}>
               <Grid item xs={6} sx={{ display: 'flex', alignItems: 'center' }}>
                 <Box
                   component="img"
                   src={getProductImage(product.id)}
                   alt={getProductName(product.id)}
-                  sx={{ width: 50, height: 50, mr: 2 }}
+                  sx={{ width: 60, height: 60, mr: 2, borderRadius: '8px' }}
                 />
                 <Box>
-                  <Typography variant="body2">{getProductName(product.id)}</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>{getProductName(product.id)}</Typography>
                 </Box>
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={2} sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography variant="body2">đ{product.price.toLocaleString()}</Typography>
               </Grid>
-              <Grid item xs={1}>
+              <Grid item xs={1} sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography variant="body2">{product.quantity}</Typography>
               </Grid>
-              <Grid item xs={1}>
-                <Typography variant="body2" color="error">
+              <Grid item xs={1} sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body2" color="error" sx={{ fontWeight: 500 }}>
                   {saleOffPercent}%
                 </Typography>
               </Grid>
-              <Grid item xs={2}>
-                <Typography variant="body2">đ{(discountedPrice * product.quantity).toLocaleString()}</Typography>
+              <Grid item xs={2} sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  đ{(discountedPrice * product.quantity).toLocaleString()}
+                </Typography>
               </Grid>
             </Grid>
           );
         })}
 
-        <Divider sx={{ my: 2 }} />
+        <Divider sx={{ my: 3 }} />
 
         <Box sx={{ mt: 2 }}>
           <TextField
@@ -466,24 +533,54 @@ const Pays = () => {
             placeholder="Lưu ý cho Người bán..."
             value={note}
             onChange={(e) => setNote(e.target.value)}
+            sx={{ 
+              '& .MuiOutlinedInput-root': { 
+                borderRadius: '8px',
+                backgroundColor: '#f8f9fa'
+              } 
+            }}
           />
         </Box>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          mt: 3,
+          p: 2,
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px'
+        }}>
           <Typography variant="body2">Đơn vị vận chuyển:</Typography>
           <Box>
-            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Nhanh</Typography>
-            <Typography variant="caption">Nhận hàng vào ngày mai</Typography>
-            <Typography variant="body2" color="primary">
+            <Typography variant="body1" sx={{ fontWeight: 600 }}>Nhanh</Typography>
+            <Typography variant="caption" sx={{ color: '#666' }}>Nhận hàng vào ngày mai</Typography>
+            <Typography variant="body2" color="primary" sx={{ fontWeight: 500 }}>
               Phí vận chuyển: đ{shippingFee.toLocaleString()}
             </Typography>
           </Box>
-          <Button variant="text" color="primary" size="small">Thay Đổi</Button>
+          <Button 
+            variant="text" 
+            color="primary" 
+            size="small"
+            sx={{ borderRadius: '20px' }}
+          >
+            Thay Đổi
+          </Button>
         </Box>
 
-        <Typography variant="body2" sx={{ mt: 1 }}>Được đồng kiểm.</Typography>
+        <Typography variant="body2" sx={{ mt: 2, color: '#666' }}>
+          Được đồng kiểm.
+        </Typography>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          mt: 3,
+          p: 2,
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px'
+        }}>
           <Typography variant="body2">Mã giảm giá:</Typography>
           {appliedVoucher ? (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -491,6 +588,7 @@ const Pays = () => {
                 label={`Mã ${appliedVoucher.s_code} - Giảm ${discount ? discount.toLocaleString() : 0}đ`}
                 onDelete={handleRemoveVoucher}
                 color="primary"
+                sx={{ borderRadius: '16px' }}
               />
             </Box>
           ) : (
@@ -499,24 +597,51 @@ const Pays = () => {
               color="primary" 
               size="small"
               onClick={() => setOpenVoucherDialog(true)}
+              sx={{ borderRadius: '20px' }}
             >
               Chọn/Nhập mã
             </Button>
           )}
         </Box>
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-          <Typography variant="subtitle1">Tổng số tiền ({cart.products.length} sản phẩm):</Typography>
-          <Typography variant="h6" color="error">đ{(calculateTotal() + shippingFee).toLocaleString()}</Typography>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          mt: 3,
+          p: 2,
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px',
+          alignItems: 'center'
+        }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Tổng số tiền ({cart.products.length} sản phẩm):
+          </Typography>
+          <Typography variant="h5" color="error" sx={{ fontWeight: 600 }}>
+            đ{(calculateTotal() + shippingFee).toLocaleString()}
+          </Typography>
         </Box>
 
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle1" gutterBottom>Phương thức thanh toán:</Typography>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            Phương thức thanh toán:
+          </Typography>
           <ToggleButtonGroup
             value={paymentMethod}
             exclusive
             onChange={handlePaymentChange}
             aria-label="payment method"
+            sx={{ 
+              '& .MuiToggleButton-root': {
+                borderRadius: '8px',
+                mx: 1,
+                p: 2,
+                '&.Mui-selected': {
+                  backgroundColor: '#e3f2fd',
+                  color: '#1976d2',
+                  fontWeight: 600
+                }
+              }
+            }}
           >
             <ToggleButton value="cod" aria-label="COD">
               Thanh toán khi nhận hàng
@@ -530,7 +655,7 @@ const Pays = () => {
           </ToggleButtonGroup>
         </Box>
 
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
           <Button 
             onClick={handlePaymentSubmit} 
             variant="contained" 
@@ -538,6 +663,10 @@ const Pays = () => {
               backgroundColor: '#FFCC33', 
               color: 'black',
               width: '250px',
+              height: '48px',
+              borderRadius: '24px',
+              fontWeight: 600,
+              fontSize: '16px',
               '&:hover': {
                 backgroundColor: '#E6B800'
               }
@@ -547,6 +676,7 @@ const Pays = () => {
           </Button>
         </Box>
       </Paper>
+      
     </Box>
   );
 };

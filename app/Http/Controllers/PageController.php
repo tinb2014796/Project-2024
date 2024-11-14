@@ -9,6 +9,7 @@ use App\Models\Brand;
 use App\Models\SaleOff;
 use App\Models\ProductS;
 use App\Models\Oders;
+use App\Models\DetailOrders;
 class PageController extends Controller
 {
     public function products()
@@ -22,11 +23,22 @@ class PageController extends Controller
 
     public function detailProduct($id)
     {
-        $product = ProductS::with('images')->find($id);
+        $product = ProductS::with(['images', 'rating.customer'])->find($id);
         $categories = Category::all();
         $brands = Brand::all();
         $saleOffs = SaleOff::all();
-        return Inertia::render('Admin/DetailProduct', compact('product', 'categories', 'brands', 'saleOffs'));
+        $detailOrders = DetailOrders::whereHas('order', function($query) {
+            $query->where('status', '=', '5');
+        })->with('order')->where('p_id', $id)->get();
+        $totalSold = $detailOrders->sum('quantity');
+        // Tính điểm đánh giá trung bình
+        $averageRating = $product->rating()->avg('ra_score') ?? 0;
+        $product->average_rating = round($averageRating, 1);
+        
+        // Lấy tất cả đánh giá kèm thông tin khách hàng
+        $ratings = $product->rating()->with(['customer:id,cus_familyname,cus_name'])->get();
+        
+        return Inertia::render('Admin/DetailProduct', compact('product', 'categories', 'brands', 'saleOffs', 'ratings', 'totalSold'));
     }
     public function dashboard()
     {

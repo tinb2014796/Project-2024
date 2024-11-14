@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Typography, Paper, Grid, Button, TextField, Divider, 
-    Chip, ToggleButtonGroup, ToggleButton, Select, MenuItem, Avatar, IconButton } from '@mui/material';
-import { Edit, Lock, VpnKey, Delete, PhotoCamera } from '@mui/icons-material';
+    Chip, ToggleButtonGroup, ToggleButton, Select, MenuItem, Avatar, IconButton,
+    Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Edit, Lock, VpnKey, Delete, PhotoCamera, CardGiftcard } from '@mui/icons-material';
 import UpdateUserInfoModal from './Update';
 import CustomerUpdate from '../../Components/CustomerUpdate';
 import { router ,usePage} from '@inertiajs/react';
@@ -9,8 +10,10 @@ import axios from 'axios';
 
 const User = () => {
   const { customer } = usePage().props;
+  console.log(customer);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [updateType, setUpdateType] = useState('');
+  const [openVoucherModal, setOpenVoucherModal] = useState(false);
   const [currentUser, setCurrentUser] = useState({
     name: customer.cus_familyname,
     nickname: customer.cus_name,
@@ -31,6 +34,45 @@ const User = () => {
   const [selectedImage, setSelectedImage] = useState(currentUser.image);
   const [previewImage, setPreviewImage] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const [vouchers, setVouchers] = useState([
+    {
+      id: 1,
+      name: 'Giảm giá 50.000đ',
+      points: 25,
+      value_max: 50000,
+      value_min: 100000,
+      description: 'Áp dụng cho đơn hàng từ 200.000đ',
+      isOwned: false
+    },
+    {
+      id: 2, 
+      name: 'Giảm giá 100.000đ',
+      points: 40,
+      value_max: 100000,
+      value_min: 1500000,
+      description: 'Áp dụng cho đơn hàng từ 1.500.000đ',
+      isOwned: false
+    },
+    {
+      id: 3,
+      name: 'Giảm giá 200.000đ',
+      points: 50,
+      value_max: 200000,
+      value_min: 1800000, 
+      description: 'Áp dụng cho đơn hàng từ 1.800.000đ',
+      isOwned: false
+    }
+  ]);
+
+  useEffect(() => {
+    if (customer.sale_offs) {
+      setVouchers(prev => prev.map(voucher => ({
+        ...voucher,
+        isOwned: customer.sale_offs.some(so => so.s_name === voucher.name)
+      })));
+    }
+  }, [customer.sale_offs]);
 
   useEffect(() => {
     const fetchProvinces = async () => {
@@ -156,6 +198,16 @@ const User = () => {
     return ward ? ward.WardName : '';
   };
  
+  const handleTradePoints = (voucher) => {
+    router.post('/user/trade-point', {
+      name: voucher.name,
+      points: voucher.points,
+      description: voucher.description,
+      value_max: voucher.value_max,
+      value_min: voucher.value_min
+    });
+    alert('Đã đổi voucher thành công!');
+  };
 
   return (
     <>
@@ -197,9 +249,30 @@ const User = () => {
                       <Typography variant="body1" sx={{ minWidth: 100, color: '#666' }}>Ngày sinh:</Typography>
                       <Typography sx={{ fontWeight: 500 }}>{formatDate(customer.cus_birthday)}</Typography>
                     </Box>
-                    <Box display="flex" alignItems="center">
+                    <Box display="flex" alignItems="center" mb={2}>
                       <Typography variant="body1" sx={{ minWidth: 100, color: '#666' }}>Giới tính:</Typography>
                       <Typography sx={{ fontWeight: 500 }}>{translateGender(customer.cus_sex)}</Typography>
+                    </Box>
+                    <Box display="flex" alignItems="center">
+                      <Typography variant="body1" sx={{ minWidth: 100, color: '#666' }}>Điểm tích lũy: </Typography>
+                      <Typography sx={{ fontWeight: 500, color: '#FF4500' }}> { customer.cus_points || 0} điểm</Typography>
+                    </Box>
+                    <Box display="flex" justifyContent="center" mt={2}>
+                      <Button
+                        variant="contained"
+                        sx={{
+                          backgroundColor: '#FF4500',
+                          color: 'white',
+                          '&:hover': {
+                            backgroundColor: '#FF6347'
+                          },
+                          borderRadius: '20px',
+                          padding: '8px 24px'
+                        }}
+                        onClick={() => setOpenVoucherModal(true)}
+                      >
+                        Kho Voucher
+                      </Button>
                     </Box>
                   </Box>
                 </Grid>
@@ -282,6 +355,83 @@ const User = () => {
           </Grid>
         </Grid>
       </Box>
+
+      <Dialog 
+        open={openVoucherModal}
+        onClose={() => setOpenVoucherModal(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ backgroundColor: '#FF4500', color: 'white' }}>
+          <Box display="flex" alignItems="center">
+            <CardGiftcard sx={{ mr: 1 }} />
+            <Typography variant="h6">Kho Voucher</Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Điểm tích lũy hiện tại: <span style={{ color: '#FF4500', fontWeight: 'bold' }}>{customer.cus_points || 0} điểm</span>
+            </Typography>
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              {vouchers.map((voucher) => (
+                <Grid item xs={12} sm={6} md={4} key={voucher.id}>
+                  <Paper 
+                    elevation={3}
+                    sx={{
+                      p: 2,
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      borderRadius: '8px',
+                      transition: '0.3s',
+                      '&:hover': {
+                        transform: 'translateY(-5px)',
+                        boxShadow: 6
+                      }
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="h6" gutterBottom sx={{ color: '#FF4500', fontWeight: 'bold' }}>
+                        {voucher.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" paragraph>
+                        {voucher.description}
+                      </Typography>
+                      <Typography variant="subtitle1" sx={{ color: '#FF4500', fontWeight: 'bold' }}>
+                        {voucher.points} điểm
+                      </Typography>
+                    </Box>
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      sx={{
+                        mt: 2,
+                        backgroundColor: voucher.isOwned ? '#888' : '#FF4500',
+                        '&:hover': {
+                          backgroundColor: voucher.isOwned ? '#888' : '#FF6347'
+                        },
+                        borderRadius: '20px'
+                      }}
+                      disabled={customer.cus_points < voucher.points || voucher.isOwned}
+                      onClick={() => handleTradePoints(voucher)}
+                    >
+                      {voucher.isOwned ? 'Đã sở hữu' : 'Đổi ngay'}
+                    </Button>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenVoucherModal(false)} color="primary">
+            Đóng
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <CustomerUpdate 
         open={openCustomerUpdate}
         onClose={() => setOpenCustomerUpdate(false)}

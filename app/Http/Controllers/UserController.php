@@ -45,7 +45,7 @@ class UserController extends Controller
         $customer = session()->get('customer');
         $product = Products::with(['images', 'saleOff', 'orderDetails.order', 'rating.customer'])->find($id);
         $detailOrders = DetailOrders::whereHas('order', function($query) {
-            $query->where('status', '=', '4');
+            $query->where('status', '=', '5');
         })->with('order')->where('p_id', $id)->get();
         $totalSold = $detailOrders->sum('quantity');
         $categories = Category::all();

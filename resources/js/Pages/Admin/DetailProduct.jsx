@@ -12,7 +12,7 @@ import { usePage, router } from "@inertiajs/react";
 import EditProductModal from '../../Components/EditProductModal';
 
 const ProductDetail = () => {
-  const { product, categories, brands, saleOffs } = usePage().props;
+  const { product, categories, brands, saleOffs, ratings, average_rating, totalSold } = usePage().props;
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [openAddImageModal, setOpenAddImageModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -119,11 +119,15 @@ const ProductDetail = () => {
               </Typography>
               
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 2 }}>
-                <Rating value={4.5} readOnly precision={0.5} size="small" />
+                <Rating value={product.average_rating} readOnly precision={0.5} size="small" />
+                <Typography variant="body2" color="text.secondary">
+                  {product.average_rating} / 5
+                </Typography>
                 <Divider orientation="vertical" flexItem />
-                <Typography variant="body2" color="text.secondary">50 Đánh Giá</Typography>
+                <Typography variant="body2" color="text.secondary">{ratings.length} Đánh Giá</Typography>
                 <Divider orientation="vertical" flexItem />
-                <Typography variant="body2" color="text.secondary">{product.p_quantity} Đã Bán</Typography>
+                <Typography variant="body2" color="text.secondary"> Còn lại {product.p_quantity}</Typography>
+                <Typography variant="body2" color="text.secondary"> Đã Bán {totalSold}</Typography>
               </Box>
 
               <Box sx={{ bgcolor: '#fafafa', p: 2, mb: 2 }}>
@@ -215,6 +219,28 @@ const ProductDetail = () => {
           <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
             {product.p_description}
           </Typography>
+        </Box>
+      </Box>
+
+      {/* Phần đánh giá sản phẩm */}
+      <Box sx={{ bgcolor: 'white', mt: 2, p: 2, borderRadius: 1 }}>
+        <Typography variant="h6" sx={{ p: 2, bgcolor: '#f5f5f5' }}>
+          ĐÁNH GIÁ SẢN PHẨM
+        </Typography>
+        <Box sx={{ p: 2 }}>
+          {ratings.map((rating, index) => (
+            <Box key={index} sx={{ mb: 2, pb: 2, borderBottom: '1px solid #f5f5f5' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <Typography variant="subtitle2">
+                  {rating.customer.cus_familyname} {rating.customer.cus_name}
+                </Typography>
+                <Rating value={rating.ra_score} readOnly size="small" />
+              </Box>
+              <Typography variant="body2" color="text.secondary">
+                {rating.ra_comment}
+              </Typography>
+            </Box>
+          ))}
         </Box>
       </Box>
 

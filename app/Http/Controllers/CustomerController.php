@@ -83,7 +83,8 @@ class CustomerController extends Controller
     public function information(Request $request)
     {
         $customer = $request->session()->get('customer');
-        $customer = Customer::find($customer->id);
+        $customer = Customer::with('saleOffs')->find($customer->id);
+    
         return Inertia::render('User/Customer', ['customer' => $customer]);
     }
 
@@ -163,5 +164,12 @@ class CustomerController extends Controller
     {
         $customer = Customer::with('orders')->find($id);
         return Inertia::render('Admin/DetailCustomer', ['customer' => $customer]);
+    }
+
+    public function tradePoint(Request $request)
+    {
+        $customer = $request->session()->get('customer');
+        $customer = Customer::find($customer->id);
+        return Inertia::render('User/TradePoint', ['customer' => $customer]);
     }
 }

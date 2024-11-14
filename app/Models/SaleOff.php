@@ -22,6 +22,7 @@ class SaleOff extends Model
         's_catalory',
         's_code',
         's_quantity',
+        'cus_id',
         'p_id'
     ];
     
@@ -29,5 +30,9 @@ class SaleOff extends Model
     {
         return $this->belongsTo(Products::class, 'p_id', 'id');
     }
-    
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'cus_id', 'id');
+    }
 }

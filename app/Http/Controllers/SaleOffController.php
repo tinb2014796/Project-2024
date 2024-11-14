@@ -132,16 +132,6 @@ class SaleOffController extends Controller
         return redirect()->route('admin.sale-off.index')->with('success', 'Cập nhật khuyến mãi thành công');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(SaleOff $saleOff)
-    {
-        $saleOff->products()->detach();
-        $saleOff->delete();
-        return redirect()->route('admin.sale-off.index')->with('success', 'Xóa khuyến mãi thành công');
-    }
-
     public function deleteSaleOff($id)
     {
         $saleOff = SaleOff::findOrFail($id);
@@ -149,4 +139,34 @@ class SaleOffController extends Controller
         $saleOff->delete();
         return redirect()->back()->with('success', 'Sản phẩm đã được xóa thành công');
     }
+
+    public function useVoucher(Request $request)
+    {
+        $customer = $request->session()->get('customer');
+        
+        // Kiểm tra điểm tích lũy của khách hàng
+        // Tạo mã voucher ngẫu nhiên
+        $voucherCode = 'VC' . uniqid();
+
+        // Tạo voucher mới
+        $saleOff = new SaleOff();
+        $saleOff->s_name = $request->name;
+        $saleOff->s_code = $voucherCode;
+        $saleOff->s_type = 'voucher';
+        $saleOff->s_percent = 0;
+        $saleOff->s_value_min = $request->value_min;
+        $saleOff->s_value_max = $request->value_max;
+        $saleOff->s_description = $request->description;
+        $saleOff->s_start = now();
+        $saleOff->s_quantity = 1;
+        $saleOff->s_end = now()->addDays(30);
+        $saleOff->cus_id = $customer->id;
+        $saleOff->save();
+
+        // Trừ điểm tích lũy của khách hàng
+        $customer->cus_points -= $request->points;
+        $customer->save();
+
+    }
+
 }

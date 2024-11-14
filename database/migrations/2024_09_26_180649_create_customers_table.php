@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('province_id')->nullable();
             $table->string('district_id')->nullable();
             $table->string('ward_code')->nullable();
+            // $table->string('cus_note')->nullable();
             $table->integer('cus_points'); // Thêm cột cus_points kiểu integer
             $table->string('cus_sex'); // Thêm cột cus_sex kiểu string
             $table->string('cus_birthday'); // Thêm cột cus_image kiểu string

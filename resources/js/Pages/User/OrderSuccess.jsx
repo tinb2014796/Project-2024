@@ -176,6 +176,7 @@ const OrderSuccess = () => {
           >
             <Tab label="Chờ xử lý" />
             <Tab label="Đã xác nhận" />
+            <Tab label="Đã giao bên vận chuyển" />
             <Tab label="Đang giao" />
             <Tab label="Đã giao" />
             <Tab label="Đã hủy" />
@@ -210,7 +211,7 @@ const OrderSuccess = () => {
                     >
                       Chi tiết
                     </Button>
-                    {tabValue === 3 && (
+                    {tabValue === 4 && (
                       <Button
                         variant="contained"
                         color="success"

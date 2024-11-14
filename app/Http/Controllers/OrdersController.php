@@ -271,6 +271,10 @@ class OrdersController extends Controller
                 break;
             case '5':
                 $currentStatus['5'] = 'Đã giao';
+                // Cộng điểm cho khách hàng khi đơn hàng đã giao
+                $customer = $order->customer;
+                $customer->cus_points += floor($order->or_total / 100000); // Cộng 1 điểm cho mỗi 100k
+                $customer->save();
                 break;
             case '6':
                 $currentStatus['6'] = 'Chưa xác nhận';
