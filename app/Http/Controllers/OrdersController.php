@@ -13,6 +13,7 @@ use App\Models\Products;
 
 class OrdersController extends Controller
 {
+
     /**
      * Tạo đơn hàng mới.
      */
@@ -21,10 +22,12 @@ class OrdersController extends Controller
         $paymentMethod = $request->paymentMethod;
         $customer_id = $request->customer_id;
         $products = $request->products;
-
+        $voucher_code = $request->voucher_code;
+        $discount = $request->discount;
+        
         $totalPrice = $this->calculateTotalPrice($products);
         
-        $order = $this->createNewOrder($customer_id, $paymentMethod, $totalPrice, $request->note, $products);
+        $order = $this->createNewOrder($customer_id, $paymentMethod, $totalPrice, $request->note, $products, $voucher_code, $discount);
         if ($order->id) {
             $this->createOrderDetails($order->id, $products);
             
@@ -64,7 +67,7 @@ class OrdersController extends Controller
     /**
      * Tạo đơn hàng mới.
      */
-    private function createNewOrder($customer_id, $paymentMethod, $totalPrice, $note, $products)
+    private function createNewOrder($customer_id, $paymentMethod, $totalPrice, $note, $products, $voucher_code, $discount)
     {
         $order = new Oders();
         $order->cus_id = $customer_id;
@@ -74,6 +77,8 @@ class OrdersController extends Controller
         $order->or_ship = '';
         $order->or_date = now();
         $order->or_note = $note ?? 'Không có ghi chú';
+        $order->voucher_code = $voucher_code;
+        $order->or_discount = $discount;
         $order->save();
         
         return $order;

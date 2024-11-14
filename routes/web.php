@@ -113,6 +113,9 @@ Route::middleware(UserAuthMiddleware::class)->prefix('user')->group(function () 
     Route::get('/customer/update/{id}', [CustomerController::class, 'getCustomer']);
     Route::post('/customer/update/{id}', [CustomerController::class, 'updateCustomer']);
     Route::post('/customer/update/image/{id}', [CustomerController::class, 'updateImageCustomer']);
+
+
+    Route::post('/check-voucher', [OrdersController::class, 'checkVoucher']);
     
 });
 

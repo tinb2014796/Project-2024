@@ -14,7 +14,7 @@ class Oders extends Model
 {
     use HasFactory;
     protected $table = 'orders';
-    protected $fillable = ['or_date', 'or_total', 'or_status' , 'or_ship', 'or_note', 'cus_id', 'pa_id'];
+    protected $fillable = ['or_date', 'or_total', 'or_status' , 'or_ship', 'or_note', 'cus_id', 'pa_id', 'voucher_code', 'or_discount'];
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'cus_id', 'id');

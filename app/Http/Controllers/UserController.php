@@ -67,10 +67,11 @@ class UserController extends Controller
         $customer = $request->customer_id;
         $customer = Customer::find($customer);
         $cart = $request->all();
+        $saleOffs = SaleOff::where('s_end', '>', now())->get();
         $products = Products::with('images')->with(['saleOff' => function($query) {
             $query->where('s_end', '>', now());
         }])->get();
-        return Inertia::render('User/Pay', compact('cart', 'products','customer'));
+        return Inertia::render('User/Pay', compact('cart', 'products','customer','saleOffs'));
 
     }
     public function user()

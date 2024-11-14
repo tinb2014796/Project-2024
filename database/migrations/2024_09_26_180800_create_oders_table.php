@@ -17,7 +17,9 @@ return new class extends Migration
             $table->decimal('or_total', 15, 0); // Thêm cột or_total kiểu decimal
             $table->string('or_status');
             $table->string('or_ship')->nullable();
-            $table->string('or_note'); // Thêm cột or_status kiểu string
+            $table->string('or_note');
+            $table->string('or_discount')->nullable();
+            $table->string('voucher_code')->nullable();
             $table->timestamps();
             
             $table->foreignId('cus_id')->constrained('customers')->onDelete('cascade');

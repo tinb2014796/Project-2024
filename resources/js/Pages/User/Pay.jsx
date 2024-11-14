@@ -8,7 +8,8 @@ import { usePage, router } from "@inertiajs/react";
 import axios from 'axios';
 
 const Pays = () => {
-    const { cart, products, customer } = usePage().props;
+    const { cart, products, customer, saleOffs } = usePage().props;
+
     const [paymentMethod, setPaymentMethod] = React.useState('cod');
     const [openAddressDialog, setOpenAddressDialog] = useState(false);
     const [address, setAddress] = useState('');
@@ -24,6 +25,10 @@ const Pays = () => {
     const [shopInfo, setShopInfo] = useState(null);
     const [cusAddressId, setCusAddressId] = useState(null);
     const [discount, setDiscount] = useState(0);
+    const [voucherCode, setVoucherCode] = useState('');
+    const [openVoucherDialog, setOpenVoucherDialog] = useState(false);
+    const [appliedVoucher, setAppliedVoucher] = useState(null);
+
 
     useEffect(() => {
         if (!customer || !customer.cus_address || !customer.cus_sdt) {
@@ -32,6 +37,36 @@ const Pays = () => {
         fetchProvinces();
         fetchShopInfo();
     }, []);
+
+    const handleApplyVoucher = async () => {
+        try {
+            if (!saleOffs) {
+                console.error('saleOffs is undefined');
+                return;
+            }
+
+            const saleOff = saleOffs.find(so => so.s_code === voucherCode);
+            if (saleOff) {
+                if (saleOff.s_catalory === '1') {
+                    setDiscount(saleOff.s_percent / 100 * calculateTotal());
+                } else {
+                    setDiscount(saleOff.s_value_max);
+                }
+                setAppliedVoucher(saleOff);
+                setOpenVoucherDialog(false);
+            } else {
+                alert('Mã giảm giá không hợp lệ hoặc đã hết hạn');
+            }
+        } catch (error) {
+            console.error('Lỗi khi áp dụng voucher:', error);
+        }
+    };
+
+    const handleRemoveVoucher = () => {
+        setDiscount(0);
+        setAppliedVoucher(null);
+        setVoucherCode('');
+    };
 
     const fetchShopInfo = async () => {
         try {
@@ -176,12 +211,13 @@ const Pays = () => {
     };
 
     const calculateTotal = () => {
-      return cart.products.reduce((total, product) => {
+      const subtotal = cart.products.reduce((total, product) => {
         const productInfo = products.find(p => p.id === product.id);
         const saleOffPercent = productInfo?.sale_off?.[0]?.s_percent || 0;
         const discountedPrice = product.price * (1 - saleOffPercent/100);
         return total + discountedPrice * product.quantity;
       }, 0);
+      return subtotal - discount;
     };
 
     const getProductImage = (productId) => {
@@ -230,7 +266,8 @@ const Pays = () => {
         note: note,
         shippingFee: shippingFee,
         cus_address_id: cusAddressId,
-        total: calculateTotal() + shippingFee,
+        voucher_code: appliedVoucher?.code,
+        discount: discount,
       }
       router.post('/user/create-order', data);
     };
@@ -261,8 +298,6 @@ const Pays = () => {
             </Typography>
         )}
       </Paper>
-
-      {/* Phần còn lại của component giữ nguyên */}
 
       <Dialog open={openAddressDialog} onClose={() => setOpenAddressDialog(false)} fullWidth maxWidth="sm">
         <DialogTitle>Thêm Địa Chỉ Mới</DialogTitle>
@@ -341,6 +376,24 @@ const Pays = () => {
           <Button onClick={handleAddressSubmit} variant="contained" color="primary">Lưu</Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog open={openVoucherDialog} onClose={() => setOpenVoucherDialog(false)} fullWidth maxWidth="xs">
+        <DialogTitle>Nhập Mã Giảm Giá</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Mã giảm giá"
+            value={voucherCode}
+            onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenVoucherDialog(false)}>Hủy</Button>
+          <Button onClick={handleApplyVoucher} variant="contained" color="primary">Áp dụng</Button>
+        </DialogActions>
+      </Dialog>
+
       <Paper elevation={3} sx={{ p: 2 }}>
         <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid item xs={6}>
@@ -420,7 +473,7 @@ const Pays = () => {
           <Typography variant="body2">Đơn vị vận chuyển:</Typography>
           <Box>
             <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Nhanh</Typography>
-            <Typography variant="caption">Nhan hang vao ngay</Typography>
+            <Typography variant="caption">Nhận hàng vào ngày mai</Typography>
             <Typography variant="body2" color="primary">
               Phí vận chuyển: đ{shippingFee.toLocaleString()}
             </Typography>
@@ -429,6 +482,28 @@ const Pays = () => {
         </Box>
 
         <Typography variant="body2" sx={{ mt: 1 }}>Được đồng kiểm.</Typography>
+
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+          <Typography variant="body2">Mã giảm giá:</Typography>
+          {appliedVoucher ? (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Chip 
+                label={`Mã ${appliedVoucher.s_code} - Giảm ${discount ? discount.toLocaleString() : 0}đ`}
+                onDelete={handleRemoveVoucher}
+                color="primary"
+              />
+            </Box>
+          ) : (
+            <Button 
+              variant="outlined" 
+              color="primary" 
+              size="small"
+              onClick={() => setOpenVoucherDialog(true)}
+            >
+              Chọn/Nhập mã
+            </Button>
+          )}
+        </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
           <Typography variant="subtitle1">Tổng số tiền ({cart.products.length} sản phẩm):</Typography>
@@ -455,12 +530,25 @@ const Pays = () => {
           </ToggleButtonGroup>
         </Box>
 
-        <Button onClick={handlePaymentSubmit} variant="contained" sx={{ backgroundColor: '#FFCC33', color: 'black', marginLeft: 130, width: '250px', mt: 2 }}> Thanh Toán</Button>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+          <Button 
+            onClick={handlePaymentSubmit} 
+            variant="contained" 
+            sx={{ 
+              backgroundColor: '#FFCC33', 
+              color: 'black',
+              width: '250px',
+              '&:hover': {
+                backgroundColor: '#E6B800'
+              }
+            }}
+          >
+            Thanh Toán
+          </Button>
+        </Box>
       </Paper>
     </Box>
-    
   );
-  
 };
 
 export default Pays;
