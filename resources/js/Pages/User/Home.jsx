@@ -121,7 +121,7 @@ function Home() {
     <Box sx={{ p: 4 }}>
       <Typography 
       textAlign="center"
-      color="#FFCC33"
+      color="red"
       variant="h3" gutterBottom sx={{ fontWeight: 'bold', fontFamily: 'Roboto', mb: 4 }}>
         Nghệ Shop 
       </Typography>

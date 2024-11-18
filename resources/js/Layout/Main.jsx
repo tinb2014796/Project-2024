@@ -10,7 +10,7 @@ const menuItems = [
     { text: 'Sản phẩm', icon: <ShoppingCartIcon />, link: '/admin/products', active: false },
     { text: 'Đơn hàng', icon: <ReceiptIcon />, link: '/admin/orders', active: false },
     { text: 'Khách hàng', icon: <PersonIcon />, link: '/admin/customers', active: false },
-    { text: 'Đơn giao hàng', icon: <DeliveryDiningIcon />, link: '/admin/delivery', active: false },
+    // { text: 'Đơn giao hàng', icon: <DeliveryDiningIcon />, link: '/admin/delivery', active: false },
     { text: 'Khuyến mãi', icon: <DiscountIcon />, link: '/admin/sale-off', active: false },
     { text: 'Nhập hàng', icon: <ReceiptIcon />, link: '/admin/goods-receipt', active: false },
 ];

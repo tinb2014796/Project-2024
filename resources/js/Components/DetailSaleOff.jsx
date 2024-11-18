@@ -1,9 +1,12 @@
 import React from 'react';
-import { Modal, Box, Typography, Button } from '@mui/material';
+import { Modal, Box, Typography, Button, Divider } from '@mui/material';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import ShoppingBasketIcon from '@mui/icons-material/ShoppingBasket';
+import PercentIcon from '@mui/icons-material/Percent';
 
 export default function DetailSaleOff({ open, handleClose, saleOff, products }) {
-    const productName = products ? products.find(product => product.id === saleOff.p_id)?.p_name || 'Không xác định' : 'Không xác định';
-
+    const productName = saleOff?.products?.p_name || 'Không xác định';
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
     };
@@ -25,47 +28,85 @@ export default function DetailSaleOff({ open, handleClose, saleOff, products }) 
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: 400,
+                width: 450,
                 bgcolor: 'background.paper',
                 boxShadow: 24,
                 p: 4,
-                borderRadius: 2
+                borderRadius: 3,
+                maxHeight: '90vh',
+                overflowY: 'auto'
             }}>
                 {saleOff ? (
                     <>
-                        <Typography id="modal-title" variant="h6" component="h2">
-                            {saleOff.s_name}
-                        </Typography>
-                        <Typography sx={{ mt: 1 }}>
-                            Loại khuyến mãi: Giảm giá theo phần trăm
-                        </Typography>
-                        {/* <Typography sx={{ mt: 1 }}>
-                            Tên sản phẩm: {productName}
-                        </Typography> */}
-                        <Typography id="modal-description" sx={{ mt: 2 }}>
-                            Giá trị giảm: {saleOff.s_percent}%
-                        </Typography>
-                        <Typography sx={{ mt: 1 }}>
-                            Giá trị tối thiểu: {formatCurrency(saleOff.s_value_min)}
-                        </Typography>
-                        <Typography sx={{ mt: 1 }}>
-                            Giảm tối đa: {formatCurrency(saleOff.s_value_max)}
-                        </Typography>
-                        <Typography sx={{ mt: 1 }}>
-                            Bắt đầu: {formatDate(saleOff.s_start)}
-                        </Typography>
-                        <Typography sx={{ mt: 1 }}>
-                            Kết thúc: {formatDate(saleOff.s_end)}
-                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                            <LocalOfferIcon sx={{ color: 'primary.main', mr: 1 }} />
+                            <Typography id="modal-title" variant="h5" component="h2" sx={{ fontWeight: 'bold' }}>
+                                {saleOff.s_name}
+                            </Typography>
+                        </Box>
+                        
+                        <Divider sx={{ my: 2 }} />
+
+                        <Box sx={{ bgcolor: '#f5f5f5', p: 2, borderRadius: 2, mb: 2 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 500, color: '#666' }}>
+                                Loại khuyến mãi: Giảm giá theo phần trăm
+                            </Typography>
+                        </Box>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                            <ShoppingBasketIcon sx={{ color: 'primary.main', mr: 1 }} />
+                            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                Sản phẩm: {productName}
+                            </Typography>
+                        </Box>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                            <PercentIcon sx={{ color: 'primary.main', mr: 1 }} />
+                            <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                Giá trị giảm: <span style={{ color: '#f44336' }}>{saleOff.s_percent}%</span>
+                            </Typography>
+                        </Box>
+
+                        <Box sx={{ bgcolor: '#e3f2fd', p: 2, borderRadius: 2, mb: 2 }}>
+                            <Typography sx={{ mb: 1 }}>
+                                Giá trị tối thiểu: {formatCurrency(saleOff.s_value_min)}
+                            </Typography>
+                            <Typography>
+                                Giảm tối đa: {formatCurrency(saleOff.s_value_max)}
+                            </Typography>
+                        </Box>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <CalendarTodayIcon sx={{ color: 'primary.main' }} />
+                            <Box>
+                                <Typography sx={{ color: '#666' }}>
+                                    Bắt đầu: {formatDate(saleOff.s_start)}
+                                </Typography>
+                                <Typography sx={{ color: '#666' }}>
+                                    Kết thúc: {formatDate(saleOff.s_end)}
+                                </Typography>
+                            </Box>
+                        </Box>
                     </>
                 ) : (
-                    <Typography sx={{ mt: 2 }}>
+                    <Typography sx={{ mt: 2, textAlign: 'center', color: '#666' }}>
                         Không có thông tin giảm giá.
                     </Typography>
                 )}
-                <Button onClick={handleClose} sx={{ mt: 3 }} variant="contained" color="primary">
-                    Đóng
-                </Button>
+                <Box sx={{ mt: 3, textAlign: 'right' }}>
+                    <Button 
+                        onClick={handleClose} 
+                        variant="contained" 
+                        color="primary"
+                        sx={{ 
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            px: 4
+                        }}
+                    >
+                        Đóng
+                    </Button>
+                </Box>
             </Box>
         </Modal>
     );

@@ -105,9 +105,11 @@ class SaleOffController extends Controller
     public function edit(SaleOff $saleOff)
     {
         $products = Products::all();
+        $customers = Customer::all();
         return Inertia::render('Admin/EditSaleOff', [
             'saleOff' => $saleOff->load('products'),
-            'products' => $products
+            'products' => $products,
+            'customers' => $customers
         ]);
     }
 

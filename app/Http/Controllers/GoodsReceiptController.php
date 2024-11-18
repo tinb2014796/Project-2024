@@ -11,14 +11,44 @@ use App\Models\DetailGoodsReceipt;
 
 class GoodsReceiptController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $products = Products::all();
         $brands = Brand::all();
-        $goodsReceipts = GoodsReceipt::with('goodsReceiptDetails.product', 'brand')->get();
+
+        $query = GoodsReceipt::with('goodsReceiptDetails.product', 'brand');
+
+        if ($request->has('filter_type')) {
+            $filterType = $request->filter_type;
+            $filterDate = $request->filter_date;
+
+            switch ($filterType) {
+                case 'week':
+                    if ($filterDate) {
+                        $startDate = \Carbon\Carbon::parse($filterDate)->startOfWeek();
+                        $endDate = \Carbon\Carbon::parse($filterDate)->endOfWeek();
+                        $query->whereBetween('import_date', [$startDate, $endDate]);
+                    }
+                    break;
+                case 'month':
+                    $query->whereMonth('import_date', now()->month);
+                    break;
+                case 'year':
+                    $query->whereYear('import_date', now()->year);
+                    break;
+                case 'custom':
+                    if ($filterDate) {
+                        $query->whereDate('import_date', $filterDate);
+                    }
+                    break;
+            }
+        }
+
+        $goodsReceipts = $query->get();
+
         return Inertia::render('Admin/GoodsReceipt', [
             'goodsReceipts' => $goodsReceipts,
-            'products' => $products,
+            'products' => $products, 
             'brands' => $brands
         ]);
     }

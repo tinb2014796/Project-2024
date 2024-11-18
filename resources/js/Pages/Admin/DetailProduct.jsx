@@ -8,6 +8,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import EditIcon from '@mui/icons-material/Edit';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { usePage, router } from "@inertiajs/react";
 import EditProductModal from '../../Components/EditProductModal';
 
@@ -77,6 +78,19 @@ const ProductDetail = () => {
 
   return (
     <Container maxWidth="lg" sx={{ bgcolor: '#f5f5f5', py: 2 }}>
+      <Button
+        variant="contained"
+        startIcon={<ArrowBackIcon />}
+        onClick={() => router.visit('/admin/products')}
+        sx={{
+          mb: 2,
+          bgcolor: '#00CED1',
+          '&:hover': { bgcolor: '#008B8B' }
+        }}
+      >
+        Trở về trang sản phẩm
+      </Button>
+
       <Box sx={{ bgcolor: 'white', p: 2, borderRadius: 1 }}>
         <Grid container spacing={2}>
           {/* Phần hình ảnh bên trái */}
@@ -102,8 +116,8 @@ const ProductDetail = () => {
                     height: 80,
                     objectFit: 'cover',
                     cursor: 'pointer',
-                    border: currentImageIndex === index ? '2px solid #ee4d2d' : '1px solid #e8e8e8',
-                    '&:hover': { borderColor: '#ee4d2d' },
+                    border: currentImageIndex === index ? '2px solid #00CED1' : '1px solid #e8e8e8',
+                    '&:hover': { borderColor: '#00CED1' },
                   }}
                   onClick={() => setCurrentImageIndex(index)}
                 />
@@ -131,8 +145,8 @@ const ProductDetail = () => {
               </Box>
 
               <Box sx={{ bgcolor: '#fafafa', p: 2, mb: 2 }}>
-                <Typography variant="h4" color="#ee4d2d" sx={{ fontWeight: 500 }}>
-                  {formatCurrency(product.p_purchase)}
+                <Typography variant="h4" color="#00CED1" sx={{ fontWeight: 500 }}>
+                  {formatCurrency(product.p_selling)}
                 </Typography>
               </Box>
 
@@ -177,8 +191,8 @@ const ProductDetail = () => {
                   startIcon={<EditIcon />} 
                   onClick={() => setEditModalOpen(true)}
                   sx={{ 
-                    bgcolor: '#ee4d2d',
-                    '&:hover': { bgcolor: '#d73211' },
+                    bgcolor: '#00CED1',
+                    '&:hover': { bgcolor: '#008B8B' },
                     flex: 1
                   }}
                 >
@@ -189,8 +203,8 @@ const ProductDetail = () => {
                   startIcon={<AddPhotoAlternateIcon />}
                   onClick={handleOpenAddImageModal}
                   sx={{ 
-                    bgcolor: '#ee4d2d',
-                    '&:hover': { bgcolor: '#d73211' },
+                    bgcolor: '#00CED1',
+                    '&:hover': { bgcolor: '#008B8B' },
                     flex: 1
                   }}
                 >
@@ -270,7 +284,7 @@ const ProductDetail = () => {
             onClick={handleAddImage} 
             disabled={!selectedImage} 
             fullWidth
-            sx={{ bgcolor: '#ee4d2d', '&:hover': { bgcolor: '#d73211' } }}
+            sx={{ bgcolor: '#00CED1', '&:hover': { bgcolor: '#008B8B' } }}
           >
             Thêm ảnh
           </Button>
@@ -293,7 +307,7 @@ const ProductDetail = () => {
               variant="contained" 
               color="error" 
               onClick={handleDeleteProduct}
-              sx={{ bgcolor: '#ee4d2d', '&:hover': { bgcolor: '#d73211' } }}
+              sx={{ bgcolor: '#00CED1', '&:hover': { bgcolor: '#008B8B' } }}
             >
               Xóa sản phẩm
             </Button>

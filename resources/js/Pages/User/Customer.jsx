@@ -233,7 +233,7 @@ const User = () => {
               </Button>
               <Grid container spacing={4}>
                 <Grid item xs={12} md={6}>
-                  <Typography variant="h6" gutterBottom sx={{ color: '#FF4500', fontWeight: 'bold' }}>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#00BCD4', fontWeight: 'bold' }}>
                     Thông tin cá nhân
                   </Typography>
                   <Box sx={{ backgroundColor: '#f8f9fa', p: 3, borderRadius: '8px' }}>
@@ -255,19 +255,17 @@ const User = () => {
                     </Box>
                     <Box display="flex" alignItems="center">
                       <Typography variant="body1" sx={{ minWidth: 100, color: '#666' }}>Điểm tích lũy: </Typography>
-                      <Typography sx={{ fontWeight: 500, color: '#FF4500' }}> { customer.cus_points || 0} điểm</Typography>
-                    </Box>
-                    <Box display="flex" justifyContent="center" mt={2}>
+                      <Typography sx={{ fontWeight: 500, color: '#00BCD4', marginRight: 2 }}> { customer.cus_points || 0} điểm</Typography>
                       <Button
                         variant="contained"
                         sx={{
-                          backgroundColor: '#FF4500',
+                          backgroundColor: '#00BCD4',
                           color: 'white',
                           '&:hover': {
-                            backgroundColor: '#FF6347'
+                            backgroundColor: '#00ACC1'
                           },
                           borderRadius: '20px',
-                          padding: '8px 24px'
+                          padding: '4px 16px'
                         }}
                         onClick={() => setOpenVoucherModal(true)}
                       >
@@ -327,7 +325,7 @@ const User = () => {
                   </Box>
                 </Grid>
                 <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom sx={{ color: '#FF4500', fontWeight: 'bold' }}>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#00BCD4', fontWeight: 'bold' }}>
                     Thông tin liên hệ
                   </Typography>
                   <Box sx={{ backgroundColor: '#f8f9fa', p: 3, borderRadius: '8px', mb: 3 }}>
@@ -341,7 +339,7 @@ const User = () => {
                     </Box>
                   </Box>
                   
-                  <Typography variant="h6" gutterBottom sx={{ color: '#FF4500', fontWeight: 'bold' }}>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#00BCD4', fontWeight: 'bold' }}>
                     Địa chỉ
                   </Typography>
                   <Box sx={{ backgroundColor: '#f8f9fa', p: 3, borderRadius: '8px' }}>
@@ -362,16 +360,16 @@ const User = () => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle sx={{ backgroundColor: '#FF4500', color: 'white' }}>
+        <DialogTitle sx={{ backgroundColor: '#00BCD4', color: 'white' }}>
           <Box display="flex" alignItems="center">
             <CardGiftcard sx={{ mr: 1 }} />
-            <Typography variant="h6">Kho Voucher</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Kho Voucher</Typography>
           </Box>
         </DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle1" gutterBottom>
-              Điểm tích lũy hiện tại: <span style={{ color: '#FF4500', fontWeight: 'bold' }}>{customer.cus_points || 0} điểm</span>
+              Điểm tích lũy hiện tại: <span style={{ color: '#00BCD4', fontWeight: 'bold' }}>{customer.cus_points || 0} điểm</span>
             </Typography>
             <Grid container spacing={2} sx={{ mt: 1 }}>
               {vouchers.map((voucher) => (
@@ -393,13 +391,13 @@ const User = () => {
                     }}
                   >
                     <Box>
-                      <Typography variant="h6" gutterBottom sx={{ color: '#FF4500', fontWeight: 'bold' }}>
+                      <Typography variant="h6" gutterBottom sx={{ color: '#00BCD4', fontWeight: 'bold' }}>
                         {voucher.name}
                       </Typography>
                       <Typography variant="body2" color="text.secondary" paragraph>
                         {voucher.description}
                       </Typography>
-                      <Typography variant="subtitle1" sx={{ color: '#FF4500', fontWeight: 'bold' }}>
+                      <Typography variant="subtitle1" sx={{ color: '#00BCD4', fontWeight: 'bold' }}>
                         {voucher.points} điểm
                       </Typography>
                     </Box>
@@ -408,9 +406,9 @@ const User = () => {
                       fullWidth
                       sx={{
                         mt: 2,
-                        backgroundColor: voucher.isOwned ? '#888' : '#FF4500',
+                        backgroundColor: voucher.isOwned ? '#888' : '#00BCD4',
                         '&:hover': {
-                          backgroundColor: voucher.isOwned ? '#888' : '#FF6347'
+                          backgroundColor: voucher.isOwned ? '#888' : '#00ACC1'
                         },
                         borderRadius: '20px'
                       }}

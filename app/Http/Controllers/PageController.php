@@ -58,7 +58,8 @@ class PageController extends Controller
     }
     public function saleOff()
     {
-        $saleOffs = SaleOff::all();
-        return Inertia::render('Admin/SaleOff', compact('saleOffs'));
+        $saleOffs = SaleOff::with('products')->get();
+        $products = ProductS::all();
+        return Inertia::render('Admin/SaleOff', compact('saleOffs', 'products'));
     }
 }

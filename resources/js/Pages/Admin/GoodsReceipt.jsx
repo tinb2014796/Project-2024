@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Paper, Grid, Button, TextField, Divider, 
     Dialog, DialogTitle, DialogContent, DialogActions, Select, MenuItem, FormControl, InputLabel, IconButton } from '@mui/material';
 import { usePage, router } from '@inertiajs/react';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Search as SearchIcon } from '@mui/icons-material';
 import DetailGoodsReceipt from './ChildAdmin/DetailGoodsReceipt';
 import CreateGoodsReceipt from './ChildAdmin/CreateGoodsReceipt';
 
@@ -22,6 +22,55 @@ const GoodsReceipt = () => {
     });
     const [selectedReceipt, setSelectedReceipt] = useState(null);
     const [openDetailDialog, setOpenDetailDialog] = useState(false);
+    const [filterType, setFilterType] = useState('week'); // week, month, year
+    const [filterDate, setFilterDate] = useState('');
+    const [filteredReceipts, setFilteredReceipts] = useState(goodsReceipts);
+
+    const handleFilter = () => {
+        let filtered = [...goodsReceipts];
+        
+        if (filterDate) {
+            switch(filterType) {
+                case 'week':
+                    const [yearWeek, weekNum] = filterDate.split('-W');
+                    const weekStart = new Date(yearWeek, 0, 1 + (weekNum - 1) * 7);
+                    
+                    const day = weekStart.getDay();
+                    const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1);
+                    weekStart.setDate(diff);
+                    
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 6);
+                    
+                    weekStart.setHours(0, 0, 0, 0);
+                    weekEnd.setHours(23, 59, 59, 999);
+                    
+                    filtered = filtered.filter(receipt => {
+                        const receiptDate = new Date(receipt.import_date);
+                        return receiptDate >= weekStart && receiptDate <= weekEnd;
+                    });
+                    break;
+                    
+                case 'month':
+                    const [yearMonth, monthNum] = filterDate.split('-');
+                    filtered = filtered.filter(receipt => {
+                        const receiptDate = new Date(receipt.import_date);
+                        return receiptDate.getFullYear() === parseInt(yearMonth) && 
+                               receiptDate.getMonth() + 1 === parseInt(monthNum);
+                    });
+                    break;
+                    
+                case 'year':
+                    filtered = filtered.filter(receipt => {
+                        const receiptDate = new Date(receipt.import_date);
+                        return receiptDate.getFullYear() === parseInt(filterDate);
+                    });
+                    break;
+            }
+        }
+        
+        setFilteredReceipts(filtered);
+    };
 
     const handleOpenDialog = () => {
         setOpenDialog(true);
@@ -153,25 +202,76 @@ const GoodsReceipt = () => {
                 }}>
                     Quản lý phiếu nhập hàng
                 </Typography>
-                <Button 
-                    variant="contained" 
-                    startIcon={<AddIcon />}
-                    onClick={handleOpenDialog}
-                    sx={{ 
-                        bgcolor: '#14B8B9',
-                        px: 3,
-                        py: 1.5,
-                        borderRadius: 2,
-                        boxShadow: '0 4px 6px rgba(20, 184, 185, 0.2)',
-                        '&:hover': {
-                            bgcolor: '#0e8e8f',
-                            transform: 'translateY(-2px)',
-                            transition: 'all 0.3s ease'
-                        }
-                    }}
-                >
-                    Tạo phiếu nhập
-                </Button>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                    <FormControl sx={{ minWidth: 120 }}>
+                        <Select
+                            value={filterType}
+                            onChange={(e) => setFilterType(e.target.value)}
+                            size="small"
+                            sx={{
+                                borderRadius: 2,
+                                bgcolor: '#fff'
+                            }}
+                        >
+                            <MenuItem value="week">Tuần</MenuItem>
+                            <MenuItem value="month">Tháng</MenuItem>
+                            <MenuItem value="year">Năm</MenuItem>
+                        </Select>
+                    </FormControl>
+                    
+                    <TextField
+                        type={filterType === 'week' ? 'week' : filterType === 'month' ? 'month' : 'number'}
+                        value={filterDate}
+                        onChange={(e) => setFilterDate(e.target.value)}
+                        size="small"
+                        InputProps={{
+                            inputProps: filterType === 'year' ? { min: 2000, max: 2100 } : {}
+                        }}
+                        sx={{
+                            width: filterType === 'year' ? 100 : 150,
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: 2
+                            }
+                        }}
+                    />
+
+                    <Button
+                        variant="contained"
+                        startIcon={<SearchIcon />}
+                        onClick={handleFilter}
+                        sx={{
+                            bgcolor: '#14B8B9',
+                            px: 3,
+                            py: 1,
+                            borderRadius: 2,
+                            '&:hover': {
+                                bgcolor: '#0e8e8f'
+                            }
+                        }}
+                    >
+                        Xác nhận
+                    </Button>
+
+                    <Button 
+                        variant="contained" 
+                        startIcon={<AddIcon />}
+                        onClick={handleOpenDialog}
+                        sx={{ 
+                            bgcolor: '#14B8B9',
+                            px: 3,
+                            py: 1.5,
+                            borderRadius: 2,
+                            boxShadow: '0 4px 6px rgba(20, 184, 185, 0.2)',
+                            '&:hover': {
+                                bgcolor: '#0e8e8f',
+                                transform: 'translateY(-2px)',
+                                transition: 'all 0.3s ease'
+                            }
+                        }}
+                    >
+                        Tạo phiếu nhập
+                    </Button>
+                </Box>
             </Box>
 
             <Paper sx={{ 
@@ -215,7 +315,7 @@ const GoodsReceipt = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {goodsReceipts?.map((receipt) => (
+                            {filteredReceipts?.map((receipt) => (
                                 <tr key={receipt.id} style={{ 
                                     backgroundColor: '#fff',
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.05)',

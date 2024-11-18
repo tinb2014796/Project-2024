@@ -13,10 +13,16 @@ export default function DetailOrders({
             { label: 'Đã giao', completed: false }
         ];
         
+        if (!status || Object.keys(status).length === 0) {
+            return steps;
+        }
+        
         const currentStatus = parseInt(Object.keys(status)[Object.keys(status).length - 1]);
             
-        for (let i = 0; i < currentStatus; i++) {
-            steps[i].completed = true;
+        if (!isNaN(currentStatus) && currentStatus > 0) {
+            for (let i = 0; i < currentStatus && i < steps.length; i++) {
+                steps[i].completed = true;
+            }
         }
         
         return steps;

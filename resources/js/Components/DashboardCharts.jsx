@@ -1,195 +1,107 @@
 import React, { useState } from 'react';
-import { Grid, Paper, Typography, Box, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { Grid, Paper, Typography, Box, ToggleButton, ToggleButtonGroup, TextField } from '@mui/material';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { usePage } from '@inertiajs/react';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
+import 'dayjs/locale/vi';
+dayjs.locale('vi');
 
 function DashboardCharts() {
-  const [timeRange, setTimeRange] = useState('daily');
-  const { orders, details } = usePage().props;
+  const [timeRange, setTimeRange] = useState('monthly');
+  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [selectedMonth, setSelectedMonth] = useState(dayjs());
+  const [viewType, setViewType] = useState('revenue');
+  const { orders, details, products } = usePage().props;
+  const maxTotal = Math.max(...orders.map(order => order.or_total - order.or_discount - details.map(detail => detail.discount)));
 
-  // Tìm giá trị or_total cao nhất
-  const maxTotal = Math.max(...orders.map(order => order.or_total));
+  // Thêm state cho từng biểu đồ
+  const [paymentChartDate, setPaymentChartDate] = useState({
+    year: dayjs(),
+    month: dayjs()
+  });
+  const [topProductsDate, setTopProductsDate] = useState({
+    year: dayjs(),
+    month: dayjs()
+  });
 
-  // Tính tổng doanh thu theo giờ trong ngày
-  const calculateDailyRevenue = () => {
-    const hours = Array.from({length: 24}, (_, i) => `${i}h`);
-    const dailyRevenue = {};
-    
-    // Khởi tạo giá trị 0 cho tất cả các giờ
-    hours.forEach(hour => {
-      dailyRevenue[hour] = 0;
-    });
-
-    // Cộng dồn doanh thu cho các giờ có đơn hàng
-    orders.forEach(order => {
-      const date = new Date(order.created_at);
-      const hour = `${date.getHours()}h`;
-      dailyRevenue[hour] += order.or_total;
-    });
-
-    return hours.map(hour => ({
-      name: hour,
-      Sales: dailyRevenue[hour]
-    }));
-  };
-
-  // Tính tổng doanh thu theo 7 ngày gần nhất
-  const calculateWeeklyRevenue = () => {
-    const days = Array.from({length: 7}, (_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      return d.toLocaleDateString('vi-VN', {weekday: 'short'});
-    }).reverse();
-    
-    const weeklyRevenue = {};
-    days.forEach(day => {
-      weeklyRevenue[day] = 0;
-    });
-
-    orders.forEach(order => {
-      const date = new Date(order.created_at);
-      const day = date.toLocaleDateString('vi-VN', {weekday: 'short'});
-      if (weeklyRevenue[day] !== undefined) {
-        weeklyRevenue[day] += order.or_total;
-      }
-    });
-
-    return days.map(day => ({
-      name: day,
-      Sales: weeklyRevenue[day]
-    }));
-  };
-
-  // Tính tổng doanh thu theo tuần trong tháng
+  // Tính tổng doanh thu theo tháng trong năm
   const calculateMonthlyRevenue = () => {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const weeksInMonth = [];
-    let currentWeek = 1;
-
-    // Tạo mảng các tuần trong tháng
-    const firstDay = new Date(currentDate.getFullYear(), currentMonth, 1);
-    const lastDay = new Date(currentDate.getFullYear(), currentMonth + 1, 0);
-    
-    for (let d = firstDay; d <= lastDay; d.setDate(d.getDate() + 7)) {
-      weeksInMonth.push(`Tuần ${currentWeek++}`);
-    }
-
+    const months = Array.from({length: 12}, (_, i) => dayjs().month(i).format('MMMM'));
     const monthlyRevenue = {};
-    weeksInMonth.forEach(week => {
-      monthlyRevenue[week] = 0;
+    const monthlyCost = {};
+
+    months.forEach(month => {
+      monthlyRevenue[month] = 0;
+      monthlyCost[month] = 0;
     });
 
     orders.forEach(order => {
-      const date = new Date(order.created_at);
-      if (date.getMonth() === currentMonth) {
-        const weekNumber = Math.ceil(date.getDate() / 7);
-        const weekName = `Tuần ${weekNumber}`;
-        monthlyRevenue[weekName] = (monthlyRevenue[weekName] || 0) + order.or_total;
+      const date = dayjs(order.created_at);
+      const month = date.format('MMMM');
+      if (date.year() === selectedDate.year() && date.month() === selectedMonth.month()) {
+        const orderDetails = details.filter(detail => detail.or_id === order.id);
+        const detailsDiscount = orderDetails.reduce((sum, detail) => sum + (Number(detail.discount) || 0), 0);
+        
+        const totalPurchase = orderDetails.reduce((sum, detail) => {
+          const product = products.find(p => p.id === detail.p_id);
+          return sum + (Number(product?.p_purchase || 0) * detail.quantity);
+        }, 0);
+
+        monthlyRevenue[month] = (monthlyRevenue[month] || 0) + (order.or_total - order.or_discount - detailsDiscount);
+        monthlyCost[month] = (monthlyCost[month] || 0) + totalPurchase;
       }
     });
 
-    return weeksInMonth.map(week => ({
-      name: week,
-      Sales: monthlyRevenue[week]
+    return months.map(month => ({
+      name: month,
+      Sales: monthlyRevenue[month],
+      Cost: monthlyCost[month]
+    }));
+  };
+
+  // Tính tổng doanh thu theo năm
+  const calculateYearlyRevenue = () => {
+    const currentYear = selectedDate.year();
+    const years = Array.from({length: 5}, (_, i) => currentYear - i).reverse();
+    const yearlyRevenue = {};
+    const yearlyCost = {};
+
+    years.forEach(year => {
+      yearlyRevenue[year] = 0;
+      yearlyCost[year] = 0;
+    });
+
+    orders.forEach(order => {
+      const date = dayjs(order.created_at);
+      const year = date.year();
+      if (yearlyRevenue[year] !== undefined) {
+        const orderDetails = details.filter(detail => detail.or_id === order.id);
+        const detailsDiscount = orderDetails.reduce((sum, detail) => sum + (Number(detail.discount) || 0), 0);
+        
+        const totalPurchase = orderDetails.reduce((sum, detail) => {
+          const product = products.find(p => p.id === detail.p_id);
+          return sum + (Number(product?.p_purchase || 0) * detail.quantity);
+        }, 0);
+
+        yearlyRevenue[year] += (order.or_total - order.or_discount - detailsDiscount);
+        yearlyCost[year] += totalPurchase;
+      }
+    });
+
+    return years.map(year => ({
+      name: year.toString(),
+      Sales: yearlyRevenue[year],
+      Cost: yearlyCost[year]
     }));
   };
 
   const revenueData = {
-    daily: calculateDailyRevenue(),
-    weekly: calculateWeeklyRevenue(),
-    monthly: calculateMonthlyRevenue()
-  };
-
-  const orderSummaryData = {
-    daily: (() => {
-      const hours = Array.from({length: 24}, (_, i) => `${i}h`);
-      const initialData = hours.map(hour => ({
-        name: hour,
-        Ordered: 0,
-        Delivered: 0,
-        Difference: 0
-      }));
-
-      orders.forEach(order => {
-        const date = new Date(order.created_at);
-        const hour = date.getHours();
-        const status = order.or_status;
-        
-        if (status === 'pending') initialData[hour].Ordered++;
-        if (status === 'delivered') initialData[hour].Delivered++;
-      });
-
-      initialData.forEach(data => {
-        data.Difference = data.Ordered - data.Delivered;
-      });
-
-      return initialData;
-    })(),
-    weekly: (() => {
-      const days = Array.from({length: 7}, (_, i) => {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        return d.toLocaleDateString('vi-VN', {weekday: 'short'});
-      }).reverse();
-
-      return days.map(day => {
-        const dayData = {
-          name: day,
-          Ordered: 0,
-          Delivered: 0,
-          Difference: 0
-        };
-
-        orders.forEach(order => {
-          const orderDate = new Date(order.created_at);
-          const orderDay = orderDate.toLocaleDateString('vi-VN', {weekday: 'short'});
-          if (orderDay === day) {
-            if (order.or_status === 'pending') dayData.Ordered++;
-            if (order.or_status === 'delivered') dayData.Delivered++;
-          }
-        });
-
-        dayData.Difference = dayData.Ordered - dayData.Delivered;
-        return dayData;
-      });
-    })(),
-    monthly: (() => {
-      const currentDate = new Date();
-      const currentMonth = currentDate.getMonth();
-      const weeksInMonth = [];
-      let currentWeek = 1;
-
-      const firstDay = new Date(currentDate.getFullYear(), currentMonth, 1);
-      const lastDay = new Date(currentDate.getFullYear(), currentMonth + 1, 0);
-      
-      for (let d = firstDay; d <= lastDay; d.setDate(d.getDate() + 7)) {
-        weeksInMonth.push(`Tuần ${currentWeek++}`);
-      }
-
-      return weeksInMonth.map(week => {
-        const weekData = {
-          name: week,
-          Ordered: 0,
-          Delivered: 0,
-          Difference: 0
-        };
-
-        orders.forEach(order => {
-          const orderDate = new Date(order.created_at);
-          if (orderDate.getMonth() === currentMonth) {
-            const orderWeek = `Tuần ${Math.ceil(orderDate.getDate() / 7)}`;
-            if (orderWeek === week) {
-              if (order.or_status === 'pending') weekData.Ordered++;
-              if (order.or_status === 'delivered') weekData.Delivered++;
-            }
-          }
-        });
-
-        weekData.Difference = weekData.Ordered - weekData.Delivered;
-        return weekData;
-      });
-    })()
+    monthly: calculateMonthlyRevenue(),
+    yearly: calculateYearlyRevenue()
   };
 
   const handleTimeRangeChange = (event, newTimeRange) => {
@@ -198,28 +110,133 @@ function DashboardCharts() {
     }
   };
 
+  // Thêm hàm tính toán dữ liệu cho biểu đồ tròn
+  const calculatePaymentMethods = () => {
+    const paymentSummary = {
+      cash: 0,
+      transfer: 0
+    };
+
+    orders.forEach(order => {
+      const orderDate = dayjs(order.created_at);
+      if (orderDate.year() === paymentChartDate.year.year() && 
+          orderDate.month() === paymentChartDate.month.month()) {
+        if (order.pa_id === 1) {
+          paymentSummary.cash++;
+        } else if (order.pa_id === 3) {
+          paymentSummary.transfer++;
+        }
+      }
+    });
+
+    const total = paymentSummary.cash + paymentSummary.transfer;
+    
+    return [
+      { 
+        name: 'Tiền mặt',
+        value: paymentSummary.cash,
+        count: paymentSummary.cash,
+        percentage: ((paymentSummary.cash / total) * 100).toFixed(2)
+      },
+      { 
+        name: 'Chuyển khoản',
+        value: paymentSummary.transfer,
+        count: paymentSummary.transfer,
+        percentage: ((paymentSummary.transfer / total) * 100).toFixed(2)
+      }
+    ];
+  };
+
+  const paymentData = calculatePaymentMethods();
+  const COLORS = ['#0088FE', '#FF6B6B'];
+
+  // Thêm hàm tính toán dữ liệu cho biểu đồ top sản phẩm bán chạy
+  const calculateTopProducts = () => {
+    const productSummary = {};
+    
+    details.forEach(detail => {
+      const order = orders.find(o => o.id === detail.or_id);
+      if (order) {
+        const orderDate = dayjs(order.created_at);
+        if (orderDate.year() === topProductsDate.year.year() && 
+            orderDate.month() === topProductsDate.month.month()) {
+          const product = products.find(p => p.id === detail.p_id);
+          if (product) {
+            if (!productSummary[product.p_name]) {
+              productSummary[product.p_name] = {
+                revenue: 0,
+                quantity: 0
+              };
+            }
+            productSummary[product.p_name].revenue += detail.quantity * detail.total;
+            productSummary[product.p_name].quantity += detail.quantity;
+          }
+        }
+      }
+    });
+
+    const sortedProducts = Object.entries(productSummary)
+      .map(([name, data]) => ({
+        name: name,
+        value: viewType === 'revenue' ? data.revenue : data.quantity,
+        quantity: data.quantity,
+        revenue: data.revenue.toLocaleString('vi-VN') + ' ₫'
+      }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+
+    const total = sortedProducts.reduce((sum, item) => sum + item.value, 0);
+    
+    return sortedProducts.map(item => ({
+      ...item,
+      percentage: ((item.value / total) * 100).toFixed(2)
+    }));
+  };
+
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12} md={8}>
+      <Grid item xs={12}>
         <Paper sx={{ 
           p: 3,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          borderRadius: 2,
-          background: 'linear-gradient(to right bottom, #ffffff, #f8f9fa)'
+          boxShadow: '0 8px 16px rgba(0,0,0,0.08)',
+          borderRadius: 3,
+          background: 'linear-gradient(145deg, #ffffff, #f8f9fa)'
         }}>
           <Typography variant="h6" gutterBottom sx={{ 
-            fontWeight: 'bold',
-            color: '#2c3e50',
-            borderBottom: '2px solid #e9ecef',
-            pb: 1
+            fontWeight: 600,
+            color: '#1a237e',
+            borderBottom: '2px solid #e3f2fd',
+            pb: 1,
+            mb: 3
           }}>
-            Doanh thu
+            Biểu Đồ Doanh Thu
           </Typography>
+
           <Box sx={{ 
             display: 'flex', 
-            justifyContent: 'flex-end', 
-            mb: 2 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            mb: 3
           }}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={['DatePicker', 'DatePicker']}>
+                <DatePicker
+                  label="Chọn năm"
+                  value={selectedDate}
+                  onChange={(newValue) => setSelectedDate(newValue)}
+                  views={['year']}
+                  sx={{ mr: 2 }}
+                />
+                <DatePicker
+                  label="Chọn tháng"
+                  value={selectedMonth}
+                  onChange={(newValue) => setSelectedMonth(newValue)}
+                  views={['month']}
+                  sx={{ mr: 2 }}
+                />
+              </DemoContainer>
+            </LocalizationProvider>
+
             <ToggleButtonGroup
               value={timeRange}
               exclusive
@@ -228,133 +245,249 @@ function DashboardCharts() {
               sx={{ 
                 '& .MuiToggleButton-root': { 
                   px: 3,
-                  color: '#6c757d',
+                  py: 1,
+                  color: '#455a64',
+                  fontWeight: 500,
+                  borderRadius: '8px',
                   '&.Mui-selected': {
-                    backgroundColor: '#4dabf5',
+                    background: 'linear-gradient(45deg, #2196f3, #1976d2)',
                     color: 'white',
+                    boxShadow: '0 2px 8px rgba(33, 150, 243, 0.3)',
                     '&:hover': {
-                      backgroundColor: '#3d8bd4'
+                      background: 'linear-gradient(45deg, #1976d2, #1565c0)'
                     }
                   }
                 }
               }}
             >
-              <ToggleButton value="daily" aria-label="daily">
-                Ngày
-              </ToggleButton>
-              <ToggleButton value="weekly" aria-label="weekly">
-                Tuần
-              </ToggleButton>
-              <ToggleButton value="monthly" aria-label="monthly">
-                Tháng
-              </ToggleButton>
+              <ToggleButton value="monthly">Tháng</ToggleButton>
+              <ToggleButton value="yearly">Năm</ToggleButton>
             </ToggleButtonGroup>
           </Box>
+
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={revenueData[timeRange]}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-              <XAxis dataKey="name" stroke="#6c757d" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#eceff1" />
+              <XAxis 
+                dataKey="name" 
+                stroke="#455a64"
+                tick={{ fontSize: 12 }}
+              />
               <YAxis 
-                stroke="#6c757d"
-                domain={[0, maxTotal]}
+                stroke="#455a64"
+                tick={{ fontSize: 12 }}
                 tickFormatter={(value) => {
-                  if (value === 0) return '0';
-                  if (value >= 1000000) {
-                    return `${(value / 1000000).toLocaleString('vi-VN')}M`;
-                  } else if (value >= 1000) {
-                    return `${(value / 1000).toLocaleString('vi-VN')}K`;
-                  }
-                  return value.toLocaleString('vi-VN');
+                  if (value >= 1000000) return `${(value/1000000).toFixed(1)}M`;
+                  if (value >= 1000) return `${(value/1000).toFixed(0)}K`;
+                  return value;
                 }}
               />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.98)',
                   border: 'none',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  padding: '10px'
+                  borderRadius: '12px',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                  padding: '12px'
                 }}
-                formatter={(value) => `${parseInt(value).toLocaleString('vi-VN')} VNĐ`}
+                formatter={(value) => [`${value.toLocaleString('vi-VN')} ₫`]}
               />
-              <Legend wrapperStyle={{paddingTop: '20px'}}/>
-              <Bar dataKey="Sales" fill="#ff6b6b" name="Doanh thu" radius={[4, 4, 0, 0]} />
+              <Legend 
+                wrapperStyle={{
+                  paddingTop: '20px'
+                }}
+              />
+              <Bar 
+                dataKey="Sales" 
+                name="Doanh Thu"
+                fill="#2196f3"
+                radius={[8, 8, 0, 0]}
+              />
+              <Bar 
+                dataKey="Cost" 
+                name="Chi Phí"
+                fill="#ff5722"
+                radius={[8, 8, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </Paper>
       </Grid>
-      <Grid item xs={12} md={4}>
+      <Grid item xs={12} md={6}>
         <Paper sx={{ 
           p: 3,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          borderRadius: 2,
-          background: 'linear-gradient(to right bottom, #ffffff, #f8f9fa)'
+          boxShadow: '0 8px 16px rgba(0,0,0,0.08)',
+          borderRadius: 3,
+          background: 'linear-gradient(145deg, #ffffff, #f8f9fa)'
         }}>
           <Typography variant="h6" gutterBottom sx={{
-            fontWeight: 'bold',
-            color: '#2c3e50',
-            borderBottom: '2px solid #e9ecef',
-            pb: 1
+            fontWeight: 600,
+            color: '#1a237e',
+            borderBottom: '2px solid #e3f2fd',
+            pb: 1,
+            mb: 3
           }}>
-            Tổng quan đơn hàng
+            Tổng doanh thu gồm thuế
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-            <ToggleButtonGroup
-              value={timeRange}
-              exclusive
-              onChange={handleTimeRangeChange}
-              size="small"
-              sx={{ 
-                '& .MuiToggleButton-root': { 
-                  px: 3,
-                  color: '#6c757d',
-                  '&.Mui-selected': {
-                    backgroundColor: '#4dabf5',
-                    color: 'white',
-                    '&:hover': {
-                      backgroundColor: '#3d8bd4'
+          
+          <Box sx={{ 
+            mb: 3,
+            '& .MuiTextField-root': {
+              width: '100%',
+              mb: 2
+            }
+          }}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={['DatePicker']}>
+                <DatePicker
+                  label="Chọn năm"
+                  value={paymentChartDate.year}
+                  onChange={(newValue) => setPaymentChartDate(prev => ({...prev, year: newValue}))}
+                  views={['year']}
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      '&:hover': {
+                        '& > fieldset': { borderColor: '#2196f3' }
+                      }
                     }
-                  }
-                }
-              }}
-            >
-              <ToggleButton value="daily" aria-label="daily">
-                Ngày
-              </ToggleButton>
-              <ToggleButton value="weekly" aria-label="weekly">
-                Tuần
-              </ToggleButton>
-              <ToggleButton value="monthly" aria-label="monthly">
-                Tháng
-              </ToggleButton>
-            </ToggleButtonGroup>
+                  }}
+                />
+                <DatePicker
+                  label="Chọn tháng" 
+                  value={paymentChartDate.month}
+                  onChange={(newValue) => setPaymentChartDate(prev => ({...prev, month: newValue}))}
+                  views={['month']}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      '&:hover': {
+                        '& > fieldset': { borderColor: '#2196f3' }
+                      }
+                    }
+                  }}
+                />
+              </DemoContainer>
+            </LocalizationProvider>
           </Box>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={orderSummaryData[timeRange]}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-              <XAxis dataKey="name" stroke="#6c757d" />
-              <YAxis stroke="#6c757d" />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  padding: '10px'
-                }}
-                formatter={(value, name) => {
-                  if (name === 'Difference') {
-                    return value > 0 ? `+${value}` : value;
-                  }
-                  return value;
-                }}
+            <PieChart>
+              <Pie
+                data={paymentData}
+                cx="50%"
+                cy="50%"
+                innerRadius={60}
+                outerRadius={80}
+                paddingAngle={5}
+                dataKey="value"
+              >
+                {paymentData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value, name, props) => [
+                  `${props.payload.count} đơn (${props.payload.percentage}%)`,
+                  name
+                ]}
               />
-              <Legend wrapperStyle={{paddingTop: '20px'}}/>
-              <Line type="monotone" dataKey="Ordered" stroke="#8884d8" name="Đã đặt" strokeWidth={2} dot={{r: 4}} />
-              <Line type="monotone" dataKey="Delivered" stroke="#82ca9d" name="Đã giao" strokeWidth={2} dot={{r: 4}} />
-              <Line type="monotone" dataKey="Difference" stroke="#ff6b6b" name="Chênh lệch" strokeWidth={2} dot={{r: 4}} />
-            </LineChart>
+              <Legend />
+            </PieChart>
           </ResponsiveContainer>
+          <Box sx={{ mt: 2, width: '100%' }}>
+            {paymentData.map((item, index) => (
+              <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography color="textSecondary">{item.name}</Typography>
+                <Typography fontWeight="bold">{item.count}</Typography>
+              </Box>
+            ))}
+          </Box>
+        </Paper>
+      </Grid>
+      <Grid item xs={12} md={6}>
+        <Paper sx={{ 
+          p: 3,
+          boxShadow: '0 8px 16px rgba(0,0,0,0.08)',
+          borderRadius: 3,
+          background: 'linear-gradient(145deg, #ffffff, #f8f9fa)'
+        }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" sx={{
+              fontWeight: 600,
+              color: '#1a237e',
+              borderBottom: '2px solid #e3f2fd',
+              pb: 1
+            }}>
+              MẶT HÀNG BÁN CHẠY
+            </Typography>
+            <ToggleButtonGroup
+              value={viewType}
+              exclusive
+              onChange={(e, newValue) => newValue && setViewType(newValue)}
+              size="small"
+            >
+              <ToggleButton value="revenue">Doanh Thu</ToggleButton>
+              <ToggleButton value="quantity">Số Lượng</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Box sx={{ mb: 2 }}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DemoContainer components={['DatePicker', 'DatePicker']}>
+                  <DatePicker
+                    label="Chọn năm"
+                    value={topProductsDate.year}
+                    onChange={(newValue) => setTopProductsDate(prev => ({...prev, year: newValue}))}
+                    views={['year']}
+                    sx={{ mr: 2 }}
+                  />
+                  <DatePicker
+                    label="Chọn tháng"
+                    value={topProductsDate.month}
+                    onChange={(newValue) => setTopProductsDate(prev => ({...prev, month: newValue}))}
+                    views={['month']}
+                  />
+                </DemoContainer>
+              </LocalizationProvider>
+            </Box>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={calculateTopProducts()}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  paddingAngle={5}
+                  dataKey="value"
+                  label
+                >
+                  {calculateTopProducts().map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value, name, props) => [
+                    viewType === 'revenue' 
+                      ? `${props.payload.revenue} (${props.payload.percentage}%)`
+                      : `${props.payload.quantity} sản phẩm (${props.payload.percentage}%)`,
+                    name
+                  ]}
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+            <Box sx={{ mt: 2, width: '100%' }}>
+              {calculateTopProducts().map((item, index) => (
+                <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography color="textSecondary">{item.name}</Typography>
+                  <Typography fontWeight="bold">
+                    {viewType === 'revenue' ? item.revenue : `${item.quantity} sản phẩm`}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
         </Paper>
       </Grid>
     </Grid>

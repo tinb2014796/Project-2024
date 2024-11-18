@@ -8,7 +8,7 @@ export default function CreateSaleOff({ products }) {
     
     const [saleOffData, setSaleOffData] = useState({
         s_name: '',
-        s_type: 'percent',
+        s_type: 'sale',
         s_code: '',
         s_percent: '',
         s_start: '',
@@ -141,10 +141,19 @@ export default function CreateSaleOff({ products }) {
                 </Button>
             </Box>
 
-            <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 3 }}>
-                <Tab label="Tạo khuyến mãi" />
-                <Tab label="Tạo voucher" />
-            </Tabs>
+            <Box sx={{ mb: 3 }}>
+                <FormControl fullWidth>
+                    <InputLabel>Loại khuyến mãi</InputLabel>
+                    <Select
+                        value={tabValue}
+                        onChange={(e) => setTabValue(e.target.value)}
+                        label="Loại khuyến mãi"
+                    >
+                        <MenuItem value={0}>Khuyến mãi sản phẩm</MenuItem>
+                        <MenuItem value={1}>Voucher</MenuItem>
+                    </Select>
+                </FormControl>
+            </Box>
 
             {tabValue === 0 ? (
                 // Form tạo khuyến mãi

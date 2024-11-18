@@ -9,6 +9,8 @@ use Inertia\Inertia;
 use App\Http\Controllers\UserController;
 use App\Models\Oders;
 use App\Models\Products;
+use App\Models\SaleOff;
+
 class CustomerController extends Controller
 {
     public function signin(Request $request)
@@ -169,7 +171,7 @@ class CustomerController extends Controller
     public function tradePoint(Request $request)
     {
         $customer = $request->session()->get('customer');
-        $customer = Customer::find($customer->id);
+        $customer = Customer::with('saleOffs')->find($customer->id);
         return Inertia::render('User/TradePoint', ['customer' => $customer]);
     }
 }
