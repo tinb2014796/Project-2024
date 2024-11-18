@@ -52,6 +52,7 @@ class PageController extends Controller
         }
         return Inertia::render('Admin/Orders', compact('orders'));
     }
+    
     public function customers()
     {
         return Inertia::render('Admin/Customers');

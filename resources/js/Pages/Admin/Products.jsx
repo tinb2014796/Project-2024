@@ -3,7 +3,7 @@ import {
   Box, Typography, Button, Table, TableBody, TableCell, 
   TableContainer, TableHead, TableRow, Paper, Avatar,
   Container, Pagination, Card, CardContent, Grid, IconButton,
-  InputBase
+  InputBase, ToggleButton, ToggleButtonGroup
 } from '@mui/material';
 import { router, usePage, Link } from "@inertiajs/react";
 import AddProductModal from '../../Components/AddProductModal';
@@ -19,6 +19,7 @@ export default function Products() {
   const [page, setPage] = useState(1);
   const [rowsPerPage] = useState(12);
   const [searchTerm, setSearchTerm] = useState('');
+  const [stockFilter, setStockFilter] = useState('all'); // 'all', 'low', 'out'
   const [newProduct, setNewProduct] = useState({
     p_name: '',
     p_selling: '',
@@ -46,14 +47,44 @@ export default function Products() {
     const searchValue = event.target.value.toLowerCase();
     setSearchTerm(searchValue);
     
-    const filteredProducts = initialProducts.filter(product => {
+    let filteredProducts = initialProducts.filter(product => {
       const matchName = product.p_name.toLowerCase().includes(searchValue);
       const matchPrice = product.p_selling.toString().includes(searchValue);
       return matchName || matchPrice;
     });
+
+    if (stockFilter === 'low') {
+      filteredProducts = filteredProducts.filter(product => product.p_quantity < 4 && product.p_quantity > 0);
+    } else if (stockFilter === 'out') {
+      filteredProducts = filteredProducts.filter(product => product.p_quantity === 0);
+    }
     
     setProducts(filteredProducts);
     setPage(1);
+  };
+
+  const handleFilterStock = (event, newFilter) => {
+    if (newFilter !== null) {
+      setStockFilter(newFilter);
+      let filteredProducts = [...initialProducts];
+
+      if (newFilter === 'low') {
+        filteredProducts = filteredProducts.filter(product => product.p_quantity < 4 && product.p_quantity > 0);
+      } else if (newFilter === 'out') {
+        filteredProducts = filteredProducts.filter(product => product.p_quantity === 0);
+      }
+
+      if (searchTerm) {
+        filteredProducts = filteredProducts.filter(product => {
+          const matchName = product.p_name.toLowerCase().includes(searchTerm.toLowerCase());
+          const matchPrice = product.p_selling.toString().includes(searchTerm);
+          return matchName || matchPrice;
+        });
+      }
+
+      setProducts(filteredProducts);
+      setPage(1);
+    }
   };
 
   const currentProducts = products.slice(
@@ -165,19 +196,64 @@ export default function Products() {
             Thêm sản phẩm
           </Button>
 
-          <Button
-            variant="outlined"
-            startIcon={<FilterListIcon />}
-            sx={{
-              color: '#00bcd4',
-              borderColor: '#00bcd4',
-              '&:hover': {
-                borderColor: '#00acc1'
-              }
-            }}
+          <ToggleButtonGroup
+            value={stockFilter}
+            exclusive
+            onChange={handleFilterStock}
+            aria-label="stock filter"
           >
-            Lọc
-          </Button>
+            <ToggleButton 
+              value="all" 
+              aria-label="all products"
+              sx={{
+                color: stockFilter === 'all' ? 'white' : '#00bcd4',
+                bgcolor: stockFilter === 'all' ? '#00bcd4' : 'transparent',
+                '&.Mui-selected': {
+                  bgcolor: '#00bcd4',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: '#00acc1'
+                  }
+                }
+              }}
+            >
+              Tất cả
+            </ToggleButton>
+            <ToggleButton 
+              value="low" 
+              aria-label="low stock"
+              sx={{
+                color: stockFilter === 'low' ? 'white' : '#00bcd4',
+                bgcolor: stockFilter === 'low' ? '#00bcd4' : 'transparent',
+                '&.Mui-selected': {
+                  bgcolor: '#00bcd4',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: '#00acc1'
+                  }
+                }
+              }}
+            >
+              Sắp hết hàng
+            </ToggleButton>
+            <ToggleButton 
+              value="out" 
+              aria-label="out of stock"
+              sx={{
+                color: stockFilter === 'out' ? 'white' : '#00bcd4',
+                bgcolor: stockFilter === 'out' ? '#00bcd4' : 'transparent',
+                '&.Mui-selected': {
+                  bgcolor: '#00bcd4',
+                  color: 'white',
+                  '&:hover': {
+                    bgcolor: '#00acc1'
+                  }
+                }
+              }}
+            >
+              Hết hàng
+            </ToggleButton>
+          </ToggleButtonGroup>
         </Box>
 
         <Grid container spacing={2}>
@@ -229,10 +305,10 @@ export default function Products() {
                   </Typography>
                   <Typography 
                     variant="body2" 
-                    color="text.secondary"
+                    color={product.p_quantity === 0 ? 'error' : (product.p_quantity < 4 ? 'warning.main' : 'text.secondary')}
                     sx={{ mt: 1 }}
                   >
-                    Còn lại: {product.p_quantity}
+                    {product.p_quantity === 0 ? 'Hết hàng' : `Còn lại: ${product.p_quantity}`}
                   </Typography>
                 </CardContent>
               </Card>

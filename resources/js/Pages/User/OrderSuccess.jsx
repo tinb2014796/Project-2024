@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab, FormControl, InputLabel, Select, MenuItem, TablePagination, Stepper, Step, StepLabel, Rating, Avatar, Checkbox } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import RateReviewIcon from '@mui/icons-material/RateReview';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { usePage, router } from '@inertiajs/react';
 import axios from 'axios';
 import DetailOrders from './ChildPage/DetailOrders';
@@ -13,6 +14,8 @@ const OrderSuccess = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [openDetailDialog, setOpenDetailDialog] = useState(false);
   const [openReviewDialog, setOpenReviewDialog] = useState(false);
+  const [openCancelDialog, setOpenCancelDialog] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -103,7 +106,11 @@ const OrderSuccess = () => {
 
   const filterOrdersByStatus = (status) => {
     return donHangGoc.filter(order => {
+      if (!order.status) return false;
+      
       const orderStatus = Object.entries(order.status);
+      if (!orderStatus.length) return false;
+      
       const latestStatus = orderStatus[orderStatus.length - 1];
       return latestStatus[0] === status.toString();
     });
@@ -130,6 +137,25 @@ const OrderSuccess = () => {
     setRating(5);
     setComment('');
     setSelectedProducts([]);
+  };
+
+  const handleOpenCancelDialog = (order) => {
+    setSelectedOrder(order);
+    setOpenCancelDialog(true);
+  };
+
+  const handleCloseCancelDialog = () => {
+    setOpenCancelDialog(false);
+    setSelectedOrder(null);
+    setCancelReason('');
+  };
+
+  const handleCancelOrder = () => {
+    router.post(`/user/order/${selectedOrder.id}`, {
+      or_note: cancelReason,
+      or_status: 7
+    });
+    handleCloseCancelDialog();
   };
 
   const handleProductSelect = (productId) => {
@@ -217,9 +243,20 @@ const OrderSuccess = () => {
                         color="success"
                         startIcon={<RateReviewIcon />}
                         onClick={() => handleOpenReviewDialog(order)}
-                        sx={{ borderRadius: 2 }}
+                        sx={{ borderRadius: 2, mr: 1 }}
                       >
                         Đánh giá
+                      </Button>
+                    )}
+                    {(tabValue === 0 || tabValue === 1) && (
+                      <Button
+                        variant="contained"
+                        color="error"
+                        startIcon={<CancelIcon />}
+                        onClick={() => handleOpenCancelDialog(order)}
+                        sx={{ borderRadius: 2 }}
+                      >
+                        Hủy đơn
                       </Button>
                     )}
                   </TableCell>
@@ -240,6 +277,7 @@ const OrderSuccess = () => {
         wardList={wardList}
         selectedAddress={selectedAddress}
       />
+
       <Dialog
         open={openReviewDialog}
         onClose={handleCloseReviewDialog}
@@ -314,6 +352,51 @@ const OrderSuccess = () => {
             disabled={selectedProducts.length === 0 || !rating || !comment}
           >
             Gửi đánh giá
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={openCancelDialog}
+        onClose={handleCloseCancelDialog}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 2 }
+        }}
+      >
+        <DialogTitle sx={{ bgcolor: '#f5f5f5', py: 2 }}>
+          <Typography variant="h6">Hủy đơn hàng #{selectedOrder?.id}</Typography>
+        </DialogTitle>
+        <DialogContent sx={{ mt: 2 }}>
+          <TextField
+            label="Lý do hủy đơn"
+            multiline
+            rows={4}
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            fullWidth
+            variant="outlined"
+            placeholder="Vui lòng cho chúng tôi biết lý do bạn hủy đơn hàng này"
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ p: 3, gap: 2 }}>
+          <Button
+            onClick={handleCloseCancelDialog}
+            variant="outlined"
+            sx={{ borderRadius: 2, px: 3 }}
+          >
+            Đóng
+          </Button>
+          <Button
+            onClick={handleCancelOrder}
+            variant="contained"
+            color="error"
+            sx={{ borderRadius: 2, px: 3 }}
+            disabled={!cancelReason}
+          >
+            Xác nhận hủy
           </Button>
         </DialogActions>
       </Dialog>

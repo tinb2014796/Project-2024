@@ -15,6 +15,8 @@ const DonHang = () => {
   const [provinceList, setProvinceList] = useState([]);
   const [districtList, setDistrictList] = useState([]);
   const [wardList, setWardList] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
   const [selectedAddress, setSelectedAddress] = useState({
     province: null,
     district: null,
@@ -138,11 +140,28 @@ const DonHang = () => {
   };
 
   const filterOrdersByStatus = (status) => {
-    return donHangGoc.filter(order => {
+    let filteredOrders = donHangGoc.filter(order => {
       const orderStatus = Object.entries(order.status);
       const latestStatus = orderStatus[orderStatus.length - 1];
       return latestStatus[0] === status.toString();
     });
+
+    // Lọc theo tháng và năm nếu được chọn
+    if (selectedMonth) {
+      filteredOrders = filteredOrders.filter(order => {
+        const orderDate = new Date(order.ngayDat);
+        return (orderDate.getMonth() + 1) === parseInt(selectedMonth);
+      });
+    }
+
+    if (selectedYear) {
+      filteredOrders = filteredOrders.filter(order => {
+        const orderDate = new Date(order.ngayDat);
+        return orderDate.getFullYear() === parseInt(selectedYear);
+      });
+    }
+
+    return filteredOrders;
   };
 
   const handleOpenDialog = (order) => {
@@ -211,6 +230,37 @@ const DonHang = () => {
         <Typography variant="h4" sx={{ mb: 3, color: '#1976d2', fontWeight: 'bold' }}>
           Quản lý đơn hàng
         </Typography>
+
+        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel>Tháng</InputLabel>
+            <Select
+              value={selectedMonth}
+              label="Tháng"
+              onChange={(e) => setSelectedMonth(e.target.value)}
+            >
+              <MenuItem value="">Tất cả</MenuItem>
+              {[...Array(12)].map((_, i) => (
+                <MenuItem key={i + 1} value={i + 1}>Tháng {i + 1}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel>Năm</InputLabel>
+            <Select
+              value={selectedYear}
+              label="Năm"
+              onChange={(e) => setSelectedYear(e.target.value)}
+            >
+              <MenuItem value="">Tất cả</MenuItem>
+              {[...Array(5)].map((_, i) => {
+                const year = new Date().getFullYear() - i;
+                return <MenuItem key={year} value={year}>{year}</MenuItem>;
+              })}
+            </Select>
+          </FormControl>
+        </Box>
 
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
           <Tabs 

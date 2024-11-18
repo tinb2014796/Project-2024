@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 use App\Models\Products;
 use App\Models\ImageProduct;
+use App\Models\Brand;
 
 class CategoryController extends Controller
 {
@@ -47,15 +48,31 @@ class CategoryController extends Controller
             
         ]);
     }
-    public function categoryProduct($id)
+    public function categoryProduct($id, Request $request)
     {
-        
-        $products = Products::with('category', 'images')->when($id, function ($query, $id) {
-            return $query->where('c_id', $id);
-        })->get();
+        $query = Products::with('category', 'images')
+            ->when($id, function ($query, $id) {
+                return $query->where('c_id', $id);
+            });
+
+        if ($request->has('brand')) {
+            $query->where('b_id', $request->brand);
+        }
+
+        $products = $query->get();
         $category = Category::find($id);
-        return Inertia::render('User/CategoryProduct', ['products' => $products, 'category' => $category]);
-    
+        
+        // Lấy danh sách brand_id từ các sản phẩm trong category
+        $brandIds = $products->pluck('b_id')->unique();
+        
+        // Lấy thông tin brands dựa trên brand_id
+        $brands = Brand::whereIn('id', $brandIds)->get();
+        
+        return Inertia::render('User/CategoryProduct', [
+            'products' => $products, 
+            'category' => $category,
+            'brands' => $brands
+        ]);
     }
     /**
      * Store a newly created resource in storage.

@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePage } from '@inertiajs/react';
-import { Box, Typography, Grid, Card, CardMedia, CardContent, Button, Container } from '@mui/material';
+import { Box, Typography, Grid, Card, CardMedia, CardContent, Button, Container, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { Link } from '@inertiajs/react';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
 function CategoryProduct() {
-    const { products = [], category = {} } = usePage().props;
-    
+    const { products: initialProducts = [], category = {}, brands = [] } = usePage().props;
+    const [products, setProducts] = useState(initialProducts);
+    const [sortOrder, setSortOrder] = useState('none');
+    const [selectedBrand, setSelectedBrand] = useState(null);
+    console.log(products);
+    console.log(brands);
     if (!category || !products) {
         return <Typography>Đang tải...</Typography>;
     }
@@ -15,6 +21,31 @@ function CategoryProduct() {
             style: 'currency',
             currency: 'VND'
         }).format(price);
+    };
+
+    const handleSort = (event, newSort) => {
+        if (newSort !== null) {
+            setSortOrder(newSort);
+            let sortedProducts = [...products];
+            
+            if (newSort === 'asc') {
+                sortedProducts.sort((a, b) => a.p_selling - b.p_selling);
+            } else if (newSort === 'desc') {
+                sortedProducts.sort((a, b) => b.p_selling - a.p_selling);
+            }
+            
+            setProducts(sortedProducts);
+        }
+    };
+
+    const handleBrandFilter = (brandId) => {
+        setSelectedBrand(brandId);
+        if (brandId === null) {
+            setProducts(initialProducts);
+        } else {
+            const filteredProducts = initialProducts.filter(product => product.b_id === brandId);
+            setProducts(filteredProducts);
+        }
     };
 
     return (
@@ -32,6 +63,74 @@ function CategoryProduct() {
             >
                {category.c_name}
             </Typography>
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                        variant={selectedBrand === null ? "contained" : "outlined"}
+                        onClick={() => handleBrandFilter(null)}
+                        sx={{
+                            color: selectedBrand === null ? '#fff' : '#00838f',
+                            bgcolor: selectedBrand === null ? '#00838f' : 'transparent',
+                            '&:hover': {
+                                bgcolor: selectedBrand === null ? '#006064' : '#e0f7fa'
+                            }
+                        }}
+                    >
+                        Tất cả
+                    </Button>
+                    {brands.map((brand) => (
+                        <Button
+                            key={brand.id}
+                            variant={selectedBrand === brand.id ? "contained" : "outlined"}
+                            onClick={() => handleBrandFilter(brand.id)}
+                            sx={{
+                                color: selectedBrand === brand.id ? '#fff' : '#00838f',
+                                bgcolor: selectedBrand === brand.id ? '#00838f' : 'transparent',
+                                '&:hover': {
+                                    bgcolor: selectedBrand === brand.id ? '#006064' : '#e0f7fa'
+                                }
+                            }}
+                        >
+                            {brand.b_name}
+                        </Button>
+                    ))}
+                </Box>
+
+                <ToggleButtonGroup
+                    value={sortOrder}
+                    exclusive
+                    onChange={handleSort}
+                    aria-label="price sorting"
+                >
+                    <ToggleButton 
+                        value="asc" 
+                        aria-label="sort ascending"
+                        sx={{
+                            color: '#00838f',
+                            '&.Mui-selected': {
+                                bgcolor: '#b2ebf2',
+                                color: '#00838f',
+                            }
+                        }}
+                    >
+                        <ArrowUpwardIcon sx={{ mr: 1 }} /> Giá thấp đến cao
+                    </ToggleButton>
+                    <ToggleButton 
+                        value="desc" 
+                        aria-label="sort descending"
+                        sx={{
+                            color: '#00838f',
+                            '&.Mui-selected': {
+                                bgcolor: '#b2ebf2',
+                                color: '#00838f',
+                            }
+                        }}
+                    >
+                        <ArrowDownwardIcon sx={{ mr: 1 }} /> Giá cao đến thấp
+                    </ToggleButton>
+                </ToggleButtonGroup>
+            </Box>
             
             <Grid container spacing={3}>
                 {products.map((product) => (
