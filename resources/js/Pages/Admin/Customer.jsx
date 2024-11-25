@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Container } from '@mui/material';
 import { usePage, router } from '@inertiajs/react';
 import { Person, Email, Phone, Cake, LocationOn, Stars } from '@mui/icons-material';
+import ChartCustomer from './ChildAdmin/ChartCustomer';
 
 export default function Customer() {
     const { customers } = usePage().props;
@@ -44,8 +45,7 @@ export default function Customer() {
                             <TableHead>
                                 <TableRow sx={{ backgroundColor: '#1976d2' }}>
                                     <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>ID</TableCell>
-                                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Họ</TableCell>
-                                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Tên</TableCell>
+                                    <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Họ và tên</TableCell>
                                     <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                             <Email fontSize="small" />
@@ -96,8 +96,7 @@ export default function Customer() {
                                         }}
                                     >
                                         <TableCell>{customer.id}</TableCell>
-                                        <TableCell>{customer.cus_familyname}</TableCell>
-                                        <TableCell>{customer.cus_name}</TableCell>
+                                        <TableCell>{`${customer.cus_familyname} ${customer.cus_name}`}</TableCell>
                                         <TableCell>{customer.cus_email}</TableCell>
                                         <TableCell>{customer.cus_sdt}</TableCell>
                                         <TableCell>{formatGender(customer.cus_sex)}</TableCell>

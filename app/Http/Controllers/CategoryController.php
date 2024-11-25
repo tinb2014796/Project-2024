@@ -11,6 +11,8 @@ use App\Models\Products;
 use App\Models\ImageProduct;
 use App\Models\Brand;
 
+
+
 class CategoryController extends Controller
 {
     /**
@@ -114,4 +116,20 @@ class CategoryController extends Controller
         $category->delete();
         return redirect()->back();
     }
+    //API
+    public function apiCategories(Request $request)
+    {
+
+        $categories = Category::all();
+        return response()->json($categories);
+        
+    }  
+    public function apiCategoryProducts($id)
+    {
+        $products = Products::with('images','category','saleOff')
+                    ->where('c_id', $id)
+                    ->get();
+        return response()->json($products);
+    }
+
 }

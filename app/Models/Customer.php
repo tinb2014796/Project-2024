@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\HasApiTokens;   
 
 
 class Customer extends Model
 {
-    use HasFactory;
+    use HasFactory, HasApiTokens;
     protected $table = 'customers';
     protected $fillable = [
         'cus_name',
@@ -33,4 +35,5 @@ class Customer extends Model
     {
         return $this->hasMany(SaleOff::class, 'cus_id', 'id');
     }
+    
 }

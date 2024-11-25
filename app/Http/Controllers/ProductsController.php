@@ -8,6 +8,9 @@ use App\Http\Requests\ProductsRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use App\Models\ImageProduct;
+use App\Models\Category;
+use App\Models\SaleOff;
+
 
 class ProductsController extends Controller
 {
@@ -150,5 +153,33 @@ class ProductsController extends Controller
         $product = Products::findOrFail($id);
         $product->delete();
         return redirect()->back()->with('success', 'Sản phẩm đã được xóa thành công');
+    }
+    //API
+
+    public function apiIndex(Request $request)
+    {
+        $products = Products::with('images','category','saleOff')->get();
+        return response()->json([
+            'products' => $products,
+        ]);
+    }
+
+    public function apiCategoryProducts($id)
+    {
+        $products = Products::with('images','category','saleOff')->where('c_id', $id)->get();
+        return response()->json($products);
+    }
+    public function apiDetailProduct($id)
+    {
+        $product = Products::with(['images', 'category', 'saleOff', 'rating' => function($query) {
+            $query->latest()->take(5);
+        }])->find($id);
+
+        $averageRating = $product->rating()->avg('ra_score');
+        
+        $product = $product->toArray();
+        $product['average_rating'] = round($averageRating, 1);
+
+        return response()->json($product);
     }
 }

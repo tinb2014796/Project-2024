@@ -289,4 +289,65 @@ class OrdersController extends Controller
         $order->save();
         return redirect()->back();
     }
+    //API
+    public function apiOrders()
+    {
+        $orders = Oders::with(['customer', 'payment', 'orderDetails.product'])->get();
+        $detailOrders = DetailOrders::with('product')->get();
+        return response()->json(['orders' => $orders, 'detailOrders' => $detailOrders]);
+    }
+    public function apiCreateOrder(Request $request)
+    {  
+        try {
+            $paymentMethod = $request->paymentMethod;
+            $customer_id = $request->customer_id;
+            $products = $request->products;
+            $voucher_code = $request->voucher_code ?? null;
+            $discount = $request->discount ?? 0;
+            $shippingFee = $request->shippingFee;
+            $note = $request->note ?? '';
+            
+            $totalPrice = 0;
+            foreach ($products as $product) {
+                $totalPrice += $product['selling_price'] * $product['quantity'];
+            }
+            $totalPrice += $shippingFee;
+            
+            // Tạo đơn hàng mới
+            $order = new Oders();
+            $order->cus_id = $customer_id;
+            $order->pa_id = $paymentMethod === 'cod' ? 1 : 2; // 1: COD, 2: Online
+            $order->or_total = $totalPrice;
+            $order->or_note = $note;
+            $order->voucher_code = $voucher_code;
+            $order->or_discount = $discount;
+            $order->or_ship = $shippingFee;
+            $order->or_date = now();
+            $order->or_status = json_encode(['1' => 'Đang chờ xử lý']);
+            $order->save();
+
+            // Tạo chi tiết đơn hàng
+            foreach ($products as $product) {
+                $detail = new DetailOrders();
+                $detail->or_id = $order->id;
+                $detail->p_id = $product['id'];
+                $detail->quantity = $product['quantity'];
+                $detail->total = $product['selling_price'] * $product['quantity'];
+                $detail->discount = $product['discount'] ?? 0;
+                $detail->save();
+            }
+            
+            $orders = Oders::with(['customer', 'payment', 'orderDetails'])->find($order->id);
+
+            foreach ($orders->orderDetails as $detail) {
+                $product = Products::with('images')->find($detail->p_id);
+                $detail->images = $product->images;
+            }
+            
+            return response()->json(['orders' => $orders, 'message' => 'Đặt hàng thành công']);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

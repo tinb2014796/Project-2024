@@ -74,6 +74,7 @@ Route::middleware(AdminMiddleware::class)->prefix('admin')->group(function () {
 
     Route::get('/customers', [CustomerController::class, 'ListCustomers']);
     Route::get('/customers/{id}', [CustomerController::class, 'DetailCustomer']);
+    Route::get('/customer-chart', [CustomerController::class, 'customerChart']);
     
     Route::get('/goods-receipt', [GoodsReceiptController::class, 'index']);
     Route::post('/goods-receipt/create', [GoodsReceiptController::class, 'createGoodsReceipt']);

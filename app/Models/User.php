@@ -11,9 +11,11 @@ use Illuminate\Support\Facades\Hash;
 
 
 
+
+
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -48,4 +50,20 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function setPasswordAttribute($password)
+    {
+        $this->attributes['password'] = Hash::make($password);
+    }
+    
+    /**
+     * Tạo token mới cho user
+     * 
+     * @param string $name Tên của token
+     * @return string Token được tạo
+     */
+    // public function createToken(string $name = 'auth_token')
+    // {
+    //     return $this->createToken($name)->plainTextToken;
+    // }
 }

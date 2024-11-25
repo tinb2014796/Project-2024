@@ -19,8 +19,11 @@ class HomeController extends Controller
         $customers = Customer::all(); 
         $products = Products::all();
 
+        // Lọc đơn hàng có status = 5
+        $completedOrders = $orders->where('status', 5);
+
         // Tính doanh thu theo ngày
-        $dailyRevenue = $orders->groupBy(function($order) {
+        $dailyRevenue = $completedOrders->groupBy(function($order) {
             return \Carbon\Carbon::parse($order->created_at)->format('Y-m-d');
         })->map(function($dayOrders) use ($details) {
             return $dayOrders->sum(function($order) use ($details) {
@@ -31,7 +34,7 @@ class HomeController extends Controller
         });
 
         // Tính doanh thu theo tuần
-        $weeklyRevenue = $orders->groupBy(function($order) {
+        $weeklyRevenue = $completedOrders->groupBy(function($order) {
             return \Carbon\Carbon::parse($order->created_at)->format('W');
         })->map(function($weekOrders) use ($details) {
             return $weekOrders->sum(function($order) use ($details) {
@@ -42,7 +45,7 @@ class HomeController extends Controller
         });
 
         // Tính doanh thu theo tháng
-        $monthlyRevenue = $orders->groupBy(function($order) {
+        $monthlyRevenue = $completedOrders->groupBy(function($order) {
             return \Carbon\Carbon::parse($order->created_at)->format('m');
         })->map(function($monthOrders) use ($details) {
             return $monthOrders->sum(function($order) use ($details) {
@@ -53,7 +56,7 @@ class HomeController extends Controller
         });
 
         // Tính doanh thu theo năm
-        $yearlyRevenue = $orders->groupBy(function($order) {
+        $yearlyRevenue = $completedOrders->groupBy(function($order) {
             return \Carbon\Carbon::parse($order->created_at)->format('Y');
         })->map(function($yearOrders) use ($details) {
             return $yearOrders->sum(function($order) use ($details) {

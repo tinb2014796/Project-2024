@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Models\Oders;
 use App\Models\Products;
 use App\Models\SaleOff;
+use App\Models\DetailOrders;
 
 class CustomerController extends Controller
 {
@@ -158,8 +159,34 @@ class CustomerController extends Controller
     {
         $customers = Customer::all();
         $customers = Customer::with('orders')->get();
+        
         return Inertia::render('Admin/Customer', ['customers' => $customers]);
 
+    }
+
+    public function customerChart()
+    {
+        $customers = Customer::with(['orders' => function($query) {
+            $query->where('status', 5) // Chỉ lấy đơn hàng đã hoàn thành
+                  ->with('orderDetails');
+        }])->get();
+        $customers = $customers->map(function($customer) {
+            $totalSpent = $customer->orders->sum(function($order) {
+                $orderDetails = $order->orderDetails;
+                $detailsDiscount = $orderDetails->sum('discount');
+                return $order->or_total - $order->or_discount - $detailsDiscount;
+            });
+            
+            return [
+                'id' => $customer->id,
+                'name' => $customer->cus_name,
+                'total_spent' => $totalSpent,
+            ];
+        });
+        
+        return Inertia::render('Admin/ChildAdmin/ChartCustomer', [
+            'customers' => $customers
+        ]);
     }
 
     public function DetailCustomer($id)

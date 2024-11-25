@@ -16,7 +16,7 @@ function DashboardCharts() {
   const [selectedMonth, setSelectedMonth] = useState(dayjs());
   const [viewType, setViewType] = useState('revenue');
   const { orders, details, products } = usePage().props;
-  const maxTotal = Math.max(...orders.map(order => order.or_total - order.or_discount - details.map(detail => detail.discount)));
+  const maxTotal = Math.max(...orders.filter(order => order.status == 5).map(order => order.or_total - order.or_discount - details.map(detail => detail.discount)));
 
   // Thêm state cho từng biểu đồ
   const [paymentChartDate, setPaymentChartDate] = useState({
@@ -39,7 +39,7 @@ function DashboardCharts() {
       monthlyCost[month] = 0;
     });
 
-    orders.forEach(order => {
+    orders.filter(order => order.status == 5).forEach(order => {
       const date = dayjs(order.created_at);
       const month = date.format('MMMM');
       if (date.year() === selectedDate.year() && date.month() === selectedMonth.month()) {
@@ -75,7 +75,7 @@ function DashboardCharts() {
       yearlyCost[year] = 0;
     });
 
-    orders.forEach(order => {
+    orders.filter(order => order.status == 5).forEach(order => {
       const date = dayjs(order.created_at);
       const year = date.year();
       if (yearlyRevenue[year] !== undefined) {
@@ -117,7 +117,7 @@ function DashboardCharts() {
       transfer: 0
     };
 
-    orders.forEach(order => {
+    orders.filter(order => order.status == 5).forEach(order => {
       const orderDate = dayjs(order.created_at);
       if (orderDate.year() === paymentChartDate.year.year() && 
           orderDate.month() === paymentChartDate.month.month()) {
@@ -155,7 +155,7 @@ function DashboardCharts() {
     const productSummary = {};
     
     details.forEach(detail => {
-      const order = orders.find(o => o.id === detail.or_id);
+      const order = orders.find(o => o.id === detail.or_id && o.status == 5);
       if (order) {
         const orderDate = dayjs(order.created_at);
         if (orderDate.year() === topProductsDate.year.year() && 
@@ -192,6 +192,8 @@ function DashboardCharts() {
       percentage: ((item.value / total) * 100).toFixed(2)
     }));
   };
+
+  const PRODUCT_COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD'];
 
   return (
     <Grid container spacing={3}>
@@ -463,7 +465,7 @@ function DashboardCharts() {
                   label
                 >
                   {calculateTopProducts().map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell key={`cell-${index}`} fill={PRODUCT_COLORS[index]} />
                   ))}
                 </Pie>
                 <Tooltip
@@ -480,7 +482,9 @@ function DashboardCharts() {
             <Box sx={{ mt: 2, width: '100%' }}>
               {calculateTopProducts().map((item, index) => (
                 <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography color="textSecondary">{item.name}</Typography>
+                  <Typography color="textSecondary" sx={{ color: PRODUCT_COLORS[index] }}>
+                    {item.name}
+                  </Typography>
                   <Typography fontWeight="bold">
                     {viewType === 'revenue' ? item.revenue : `${item.quantity} sản phẩm`}
                   </Typography>
