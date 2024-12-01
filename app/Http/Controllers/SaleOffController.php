@@ -6,7 +6,7 @@ use App\Models\SaleOff;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Products;
-
+use App\Models\Customer;
 class SaleOffController extends Controller
 {
     /**
@@ -169,6 +169,68 @@ class SaleOffController extends Controller
         $customer->cus_points -= $request->points;
         $customer->save();
 
+    }
+
+    //API
+    public function apiCreateRedeemPoint(Request $request)
+    {
+            $validated = $request->all();
+
+            $customer = Customer::find($request->cus_id);
+            if(!$customer){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Khách hàng không tồn tại',
+                ]);
+            }   
+            if($customer->cus_points < $request->cus_points){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Điểm tích lũy không đủ',
+                ]);
+            }
+
+            $customer->cus_points -= $request->cus_points;
+            $customer->save();
+
+            $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            $code = '';
+            for ($i = 0; $i < 8; $i++) {
+                $code .= $characters[rand(0, strlen($characters) - 1)];
+            }
+
+            $saleOff = SaleOff::create([
+                's_name' => $request->name,
+                's_code' => $code,
+                's_type' => 'voucher',
+                's_percent' => 0,
+                's_value_min' => $request->value_min,
+                's_value_max' => $request->value_max,
+                's_description' => $request->description,
+                's_catalory' => '1',
+                's_start' => now(),
+                's_quantity' => 1,
+                's_end' => now()->addDays(30),
+                'cus_id' => $request->cus_id
+            ]);
+
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đổi điểm thành công',
+                'data' => $saleOff
+            ]);
+    }
+    public function apiGetPromotionByCustomerId($id)
+    {
+        $saleOffs = SaleOff::where('cus_id', $id)
+                          ->whereNotNull('s_code')
+                          ->get();
+        return response()->json([
+            'success' => true,
+            'message' => 'Lấy danh sách khuyến mãi thành công',
+            'data' => $saleOffs
+        ]);
     }
 
 }

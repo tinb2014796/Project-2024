@@ -13,7 +13,7 @@ const TradePoint = () => {
         <Box display="flex" alignItems="center" mb={3}>
           <Stars sx={{ color: '#FFD700', mr: 1, fontSize: 40 }} />
           <Typography variant="h5" fontWeight="bold">
-            Điểm tích lũy của bạn: {customer.cus_points || 0} điểm
+            Điểm tích lũy của bạn: { customer.cus_points || 0} điểm
           </Typography>
         </Box>
         

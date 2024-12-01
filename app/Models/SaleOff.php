@@ -11,7 +11,6 @@ class SaleOff extends Model
     use HasFactory;
     protected $table = 'sale_offs';
     protected $fillable = [
-        'id',
         's_name',
         's_percent',
         's_value_min',

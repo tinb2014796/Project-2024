@@ -4,6 +4,7 @@ import { Box, Typography, Grid, Card, CardMedia, CardContent, Button, Container,
 import { Link } from '@inertiajs/react';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 
 function CategoryProduct() {
     const { products: initialProducts = [], category = {}, brands = [] } = usePage().props;
@@ -50,19 +51,33 @@ function CategoryProduct() {
 
     return (
         <Container maxWidth="lg" sx={{ py: 4, bgcolor: '#e0f7fa', minHeight: '100vh' }}>
-            <Typography 
-                variant="h4" 
-                gutterBottom 
-                sx={{ 
-                    textAlign: 'center',
-                    mb: 4,
-                    color: '#00838f',
-                    fontWeight: 600,
-                    textTransform: 'uppercase'
-                }}
-            >
-               {category.c_name}
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+                <Link href="/user/home" style={{ textDecoration: 'none' }}>
+                    <Button
+                        variant="contained"
+                        startIcon={<KeyboardBackspaceIcon />}
+                        sx={{
+                            bgcolor: '#00838f',
+                            '&:hover': {
+                                bgcolor: '#006064'
+                            }
+                        }}
+                    >
+                        Trở về trang chủ
+                    </Button>
+                </Link>
+                <Typography 
+                    variant="h4" 
+                    sx={{ 
+                        color: '#00838f',
+                        fontWeight: 600,
+                        textTransform: 'uppercase'
+                    }}
+                >
+                   {category.c_name}
+                </Typography>
+                <Box sx={{ width: '150px' }}></Box>
+            </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                 <Box sx={{ display: 'flex', gap: 1 }}>

@@ -4,6 +4,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { usePage, router } from "@inertiajs/react";
 
 const ProductDetail = () => {
@@ -80,6 +81,10 @@ const ProductDetail = () => {
     router.post('/pay', cart);
   };
 
+  const handleBack = () => {
+    router.get(`/category-product/${product.c_id}`);
+  };
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -118,6 +123,21 @@ const ProductDetail = () => {
 
   return (
     <Container maxWidth="lg" sx={{ backgroundColor: '#f5f5f5', py: 2, marginBottom: 6, marginTop: 6 }}>
+      <Button
+        variant="contained"
+        startIcon={<KeyboardBackspaceIcon />}
+        onClick={handleBack}
+        sx={{
+          mb: 2,
+          bgcolor: '#00bcd4',
+          '&:hover': {
+            bgcolor: '#00acc1'
+          }
+        }}
+      >
+        Trở về
+      </Button>
+
       <Box sx={{ backgroundColor: '#fff', p: 2, borderRadius: 1 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={5}>

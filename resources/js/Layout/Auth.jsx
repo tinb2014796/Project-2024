@@ -119,7 +119,7 @@ export default function Main({ children }) {
                         </Box>
                         <Box sx={{ display: 'flex', gap: 2 }}>
                             {auth ? (
-                                <Typography variant="body2" sx={{ color: 'black' }}>Xin chào, {auth.cus_name}</Typography>
+                                <Typography variant="body2" sx={{ color: 'black' }}>Xin chào bạn đến với Nghệ Shop, {auth.cus_name}</Typography>
                             ) : (
                                 <>
                                     <Link href="/signin" style={{ textDecoration: 'none', color: 'black' }}>
@@ -204,9 +204,9 @@ export default function Main({ children }) {
                             <Button 
                                 sx={{ color: 'black', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
                                 component={Link} 
-                                href="/lien-he"
+                                href="/user/trade-point"
                             >
-                                Liên hệ
+                                Voucher
                             </Button>
 
                             <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -305,14 +305,6 @@ export default function Main({ children }) {
                                         Đăng xuất
                                     </MenuItem>
                                 </Menu>
-
-                                <IconButton 
-                                    sx={{ color: 'black', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
-                                >
-                                    <Badge badgeContent={0} color="error">
-                                        <FavoriteIcon />
-                                    </Badge>
-                                </IconButton>
 
                                 <IconButton 
                                     component={Link} 

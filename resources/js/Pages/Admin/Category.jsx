@@ -33,6 +33,12 @@ export default function Category({ categories }) {
   const handleBack = () => {
     router.visit('/admin/products');
   };
+  const handleDelete = (id) => {
+    if (confirm('Bạn có chắc chắn muốn xóa danh mục này không?')) {
+      router.delete(`/admin/categories/delete/${id}`);
+    }
+    alert('Xóa danh mục thành công');
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -84,7 +90,7 @@ export default function Category({ categories }) {
                   }}
                   secondaryAction={
                     <Box>
-                      <IconButton edge="end" sx={{ color: '#f44336' }}>
+                      <IconButton edge="end" sx={{ color: '#f44336' }} onClick={() => handleDelete(category.id)}> 
                         <DeleteIcon />
                       </IconButton>
                     </Box>

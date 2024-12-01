@@ -141,9 +141,16 @@ const DonHang = () => {
 
   const filterOrdersByStatus = (status) => {
     let filteredOrders = donHangGoc.filter(order => {
+      if (!order.status) return false;
+      
       const orderStatus = Object.entries(order.status);
+      if (!orderStatus.length) return false;
+      
       const latestStatus = orderStatus[orderStatus.length - 1];
-      return latestStatus[0] === status.toString();
+      if (status === 6) {
+        return latestStatus[0] === '-1';
+      }
+      return latestStatus[0] == status.toString();
     });
 
     // Lọc theo tháng và năm nếu được chọn
@@ -206,7 +213,7 @@ const DonHang = () => {
   const canUpdateStatus = (order) => {
     const orderStatus = Object.entries(order.status);
     const latestStatus = orderStatus[orderStatus.length - 1];
-    return latestStatus[0] !== '5';
+    return latestStatus[0] !== '5' && latestStatus[0] !== '-1';
   };
 
   const getProvinceName = (provinceId) => {
@@ -312,7 +319,7 @@ const DonHang = () => {
                       display: 'inline-block'
                     }}>
                       {Object.entries(order.status)
-                        .filter(([key]) => key === (tabValue + 1).toString())
+                        .filter(([key]) => key === (tabValue === 5 ? '-1' : (tabValue + 1).toString()))
                         .map(([key, value]) => {
                           if (key === '3') {
                             return 'Đã giao cho đơn vị vận chuyển';
@@ -320,6 +327,8 @@ const DonHang = () => {
                             return 'Đang giao';
                           } else if (key === '5') {
                             return 'Đã giao';
+                          } else if (key === '-1') {
+                            return 'Đã hủy';
                           }
                           return value;
                         })}

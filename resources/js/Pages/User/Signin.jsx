@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, Link, Paper } from '@mui/material';
+import { Box, Typography, TextField, Button, Link, Paper, Snackbar } from '@mui/material';
 import { styled } from '@mui/system';
 import { router } from '@inertiajs/react';
+import MuiAlert from '@mui/material/Alert';
 
 const StyledPaper = styled(Paper)({
   maxWidth: 400,
@@ -35,14 +36,31 @@ const StyledButton = styled(Button)({
   textTransform: 'none',
 });
 
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 const Signin = () => {
   const [cus_email, setCusEmail] = useState('');
   const [cus_password, setCusPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const response = router.post('/signin', { cus_email, cus_password });
-    console.log(response);
+    router.post('/signin', { cus_email, cus_password }, {
+      onError: (errors) => {
+        if (errors.error) {
+          if (errors.error === 'Email không tồn tại') {
+            setEmailError('Email không tồn tại');
+            setPasswordError('');
+          } else if (errors.error === 'Mật khẩu không đúng') {
+            setPasswordError('Mật khẩu không đúng');
+            setEmailError('');
+          }
+        }
+      }
+    });
   };
 
   return (
@@ -62,7 +80,12 @@ const Signin = () => {
             required
             placeholder="Nhập địa chỉ email của bạn"
             value={cus_email}
-            onChange={(e) => setCusEmail(e.target.value)}
+            onChange={(e) => {
+              setCusEmail(e.target.value);
+              setEmailError('');
+            }}
+            error={!!emailError}
+            helperText={emailError}
           />
           <StyledTextField
             label="Mật khẩu" 
@@ -72,7 +95,12 @@ const Signin = () => {
             required
             placeholder="Nhập mật khẩu của bạn"
             value={cus_password}
-            onChange={(e) => setCusPassword(e.target.value)}
+            onChange={(e) => {
+              setCusPassword(e.target.value);
+              setPasswordError('');
+            }}
+            error={!!passwordError}
+            helperText={passwordError}
           />
           <Typography variant="body2" align="left" gutterBottom sx={{ mb: 3 }}>
             Quên mật khẩu? <Link href="/forgot-password" sx={{ color: '#00CED1', textDecoration: 'none', fontWeight: 'bold' }}>Nhấn vào đây</Link>

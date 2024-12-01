@@ -2,19 +2,36 @@ import { useState } from 'react';
 import { Box, Paper, Typography, Grid, Button } from '@mui/material';
 import { usePage, Link } from '@inertiajs/react';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { useEffect } from 'react';
 
 const OrderInform = () => {
-    const { orders } = usePage().props
+    const { orders, vnp_Url } = usePage().props
     console.log(orders);
     const calculateTotal = () => {
         const subtotal = orders.order_details?.reduce((total, item) => {
             return total + (item.quantity * parseInt(item.total/item.quantity));
         }, 0) || 0;
         
-        const totalDiscount = 76000 + 52000;
-        
-        return subtotal - totalDiscount - (orders.or_discount || 0);
+        return subtotal ;
     };
+    useEffect(() => {
+        if(vnp_Url) {
+            window.location.href = vnp_Url;
+        }
+        else {
+            console.log('Không có vnp_Url');
+        }
+    }, [vnp_Url]);
+    
+    const formatVND = (amount) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount);
+    };
+    const totaldiscount = orders.order_details?.reduce((total, item) => {
+        return total + (item.discount || 0);
+    }, 0) || 0;
     
     return (
         <Box sx={{ bgcolor: '#f5f5f5', minHeight: '90vh', py: 4 }}>
@@ -78,12 +95,11 @@ const OrderInform = () => {
                                 <Box sx={{ flex: 1 }}>
                                     <Typography variant='subtitle1' sx={{ mb: 1 }}>{item.product?.p_name}</Typography>
                                     <Typography variant='body2' sx={{ color: '#757575' }}>Số lượng: x{item.quantity}</Typography>
-                                    <Typography variant='body2' sx={{ color: '#ee4d2d' }}>{parseInt(item.total/item.quantity).toLocaleString()}đ</Typography>
-                                    {item.discount > 0 && (
+                                    <Typography variant='body2' sx={{ color: '#ee4d2d' }}>{formatVND(parseInt(item.total/item.quantity))}</Typography>
+                                    
                                         <Typography variant='body2' sx={{ color: '#00C853' }}>
-                                            Giảm giá: -{parseInt(item.discount).toLocaleString()}đ
-                                        </Typography>
-                                    )}
+                                            Giảm giá: -{formatVND(parseInt(totaldiscount))}
+                                    </Typography>
                                 </Box>
                             </Box>
                         ))}
@@ -95,18 +111,29 @@ const OrderInform = () => {
                             textAlign: 'right' 
                         }}>
                             <Typography variant='body1' sx={{ mb: 1 }}>
-                                Tổng tiền hàng: {(1280000).toLocaleString()}đ
+                                Tổng tiền hàng: {formatVND(calculateTotal())}
                             </Typography>
-                            <Typography variant='body1' sx={{ color: '#00C853', mb: 1 }}>
-                                Giảm giá: -{(128000).toLocaleString()}đ
-                            </Typography>
+                            {orders.order_details?.map((item) => (
+                                item.discount > 0 && (
+                                    <Typography variant='body2' sx={{ color: '#00C853' }}>
+                                        Giảm giá: -{formatVND(parseInt(item.discount))}
+                                    </Typography>
+                                )
+                            ))}
                             {orders.or_discount > 0 && (
-                                <Typography variant='body1' sx={{ color: '#00C853', mb: 1 }}>
-                                    Voucher: -{parseInt(orders.or_discount).toLocaleString()}đ
+                                <>
+                                    <Typography variant='body1' sx={{ color: '#00C853', mb: 1 }}>
+                                        Voucher: -{formatVND(parseInt(orders.or_discount))}
+                                    </Typography>
+                                </>
+                            )}
+                            {orders.or_ship > 0 && (
+                                <Typography variant='body1' sx={{ mb: 1 }}>
+                                    Phí vận chuyển: {formatVND(parseInt(orders.or_ship))}
                                 </Typography>
                             )}
                             <Typography variant='h6' sx={{ color: '#ee4d2d' }}>
-                                Thành tiền: {calculateTotal().toLocaleString()}đ
+                                Thành tiền: {formatVND(calculateTotal() - parseInt(orders.or_discount) - parseInt(totaldiscount) + parseInt(orders.or_ship))}
                             </Typography>
                         </Box>
                     </Paper>

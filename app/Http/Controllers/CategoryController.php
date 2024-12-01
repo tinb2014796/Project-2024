@@ -111,8 +111,9 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function deleteCategory(Category $category)
+    public function deleteCategory($id)
     {
+        $category = Category::find($id);
         $category->delete();
         return redirect()->back();
     }

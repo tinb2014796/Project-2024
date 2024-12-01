@@ -43,6 +43,13 @@ export default function DetailOrders({
         return ward ? ward.WardName : '';
     };
 
+    const formatVND = (amount) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount);
+    };
+
     return (
         <Dialog 
             open={openDetailDialog} 
@@ -81,10 +88,7 @@ export default function DetailOrders({
                                     <strong>Tên:</strong> {selectedOrder.customer?.cus_name} {selectedOrder.customer?.cus_familyname}
                                 </Typography>
                                 <Typography sx={{ mb: 1 }}>
-                                    <strong>Địa chỉ:</strong> {selectedOrder.customer?.cus_address}, {' '}
-                                    {getWardName(selectedOrder.customer?.ward_code)}, {' '}
-                                    {getDistrictName(selectedOrder.customer?.district_id)}, {' '}
-                                    {getProvinceName(selectedOrder.customer?.province_id)}
+                                    <strong>Địa chỉ:</strong> {selectedOrder.customer?.cus_address} {' '}
                                 </Typography>
                                 <Typography sx={{ mb: 1 }}>
                                     <strong>Số điện thoại:</strong> {selectedOrder.customer?.cus_sdt}
@@ -107,7 +111,7 @@ export default function DetailOrders({
                                     <strong>Phương thức thanh toán:</strong> {selectedOrder.payment?.pa_type}
                                 </Typography>
                                 <Typography>
-                                    <strong>Ghi chú:</strong> {selectedOrder.ghiChu || 'Không có'}
+                                    <strong>{parseInt(Object.keys(selectedOrder.status)[Object.keys(selectedOrder.status).length - 1]) === 6 ? 'Lý do hủy:' : 'Ghi chú:'}</strong> {selectedOrder.ghiChu || 'Không có'}
                                 </Typography>
                             </Box>
                         </Paper>
@@ -131,26 +135,32 @@ export default function DetailOrders({
                                             <TableRow key={index} hover>
                                                 <TableCell>{detail.p_name}</TableCell>
                                                 <TableCell align="right">{detail.quantity}</TableCell>
-                                                <TableCell align="right">{parseInt(detail.p_selling).toLocaleString('vi-VN')}đ</TableCell>
-                                                <TableCell align="right">{parseInt(detail.total).toLocaleString('vi-VN')}đ</TableCell>
+                                                <TableCell align="right">{formatVND(parseInt(detail.p_selling))}</TableCell>
+                                                <TableCell align="right">{formatVND(parseInt(detail.total))}</TableCell>
                                             </TableRow>
                                         ))}
                                         <TableRow>
                                             <TableCell colSpan={3} align="right" sx={{ fontWeight: 'bold' }}>Giảm giá sản phẩm:</TableCell>
                                             <TableCell align="right" sx={{ fontWeight: 'bold', color: '#d32f2f' }}>
-                                                -{parseInt(selectedOrder.totalDetailDiscount)?.toLocaleString('vi-VN')}đ
+                                                -{formatVND(parseInt(selectedOrder.totalDetailDiscount))}
                                             </TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell colSpan={3} align="right" sx={{ fontWeight: 'bold' }}>Giảm giá đơn hàng:</TableCell>
                                             <TableCell align="right" sx={{ fontWeight: 'bold', color: '#d32f2f' }}>
-                                                -{selectedOrder.orderDiscount?.toLocaleString('vi-VN')}đ
+                                                -{formatVND(parseInt(selectedOrder.orderDiscount))}
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell colSpan={3} align="right" sx={{ fontWeight: 'bold' }}>Phí vận chuyển:</TableCell>
+                                            <TableCell align="right" sx={{ fontWeight: 'bold', color: '#d32f2f' }}>
+                                                {formatVND(parseInt(selectedOrder.shippingFee))}
                                             </TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell colSpan={3} align="right" sx={{ fontWeight: 'bold' }}>Tổng cộng:</TableCell>
                                             <TableCell align="right" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-                                                {parseInt(selectedOrder.tongTien).toLocaleString('vi-VN')}đ
+                                                {formatVND(parseInt(selectedOrder.tongTien))}
                                             </TableCell>
                                         </TableRow>
                                     </TableBody>
@@ -172,3 +182,8 @@ export default function DetailOrders({
         </Dialog>
     );
 }
+
+
+// {getWardName(selectedOrder.customer?.ward_code)}, {' '}
+// {getDistrictName(selectedOrder.customer?.district_id)}, {' '}
+// {getProvinceName(selectedOrder.customer?.province_id)}

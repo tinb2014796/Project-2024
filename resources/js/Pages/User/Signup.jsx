@@ -57,6 +57,7 @@ const SignUp = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -67,21 +68,33 @@ const SignUp = () => {
     if (name === 'cus_email') {
       setEmailError('');
     }
+    if (name === 'cus_sdt') {
+      setPhoneError('');
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     try {
-      await router.post('/signup', formData);
-    } catch (error) {
-      if (error.response && error.response.status === 422) {
-        if (error.response.data.errors && error.response.data.errors.cus_email) {
-          setEmailError('Email đã tồn tại. Vui lòng sử dụng email khác.');
-        } else {
-          setErrorMessage('Có lỗi xảy ra. Vui lòng thử lại.');
+      await router.post('/signup', formData, {
+        onError: (errors) => {
+          if (errors.cus_email) {
+            setEmailError('Email này đã được sử dụng');
+          }
+          if (errors.cus_sdt) {
+            setPhoneError('Số điện thoại này đã được sử dụng');
+          }
+          setErrorMessage('Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.');
           setOpenSnackbar(true);
+        },
+        onSuccess: () => {
+          router.visit('/signin');
         }
-      }
+      });
+    } catch (error) {
+      setErrorMessage('Có lỗi xảy ra. Vui lòng thử lại sau.');
+      setOpenSnackbar(true);
     }
   };
 
@@ -132,6 +145,8 @@ const SignUp = () => {
             name="cus_sdt"
             value={formData.cus_sdt}
             onChange={handleChange}
+            error={!!phoneError}
+            helperText={phoneError}
           />
 
           <StyledTextField

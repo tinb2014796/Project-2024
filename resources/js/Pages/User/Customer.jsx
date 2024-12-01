@@ -344,7 +344,7 @@ const User = () => {
                   </Typography>
                   <Box sx={{ backgroundColor: '#f8f9fa', p: 3, borderRadius: '8px' }}>
                     <Typography variant="body1" sx={{ fontWeight: 500, lineHeight: 1.6 }}>
-                      {customer.cus_address}, {getWardName(customer.ward_code)}, {getDistrictName(customer.district_id)}, {getProvinceName(customer.province_id)}
+                      {customer.cus_address} 
                     </Typography>
                   </Box>
                 </Grid>

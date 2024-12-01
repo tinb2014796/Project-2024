@@ -7,7 +7,7 @@ import { Category as CategoryIcon, ShoppingCart as ShoppingCartIcon, Receipt as 
 const drawerWidth = 240;
 
 const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, link: '/admin/home', active: true },
+    { text: 'Doanh thu', icon: <DashboardIcon />, link: '/admin/home', active: true },
     { text: 'Sản phẩm', icon: <ShoppingCartIcon />, link: '/admin/products', active: false },
     { text: 'Đơn hàng', icon: <ReceiptIcon />, link: '/admin/orders', active: false },
     {

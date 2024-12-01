@@ -207,6 +207,7 @@ const Pays = () => {
 
     const handlePaymentChange = (event, newPaymentMethod) => {
       if (newPaymentMethod !== null) {
+        
         setPaymentMethod(newPaymentMethod);
       }
     };
@@ -254,6 +255,7 @@ const Pays = () => {
     const handlePaymentSubmit = () => {
       const data = {
         paymentMethod: paymentMethod,
+        // payment_id: paymentMethod == 'vnpay' ? '1' : '2',
         customer_id: customer.id,
         products: cart.products.map(product => {
           const productInfo = products.find(p => p.id === product.id);

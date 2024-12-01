@@ -33,5 +33,8 @@ Route::get('/sale-offs', [SaleOffController::class, 'apiSaleOffs']);
 Route::get('/orders', [OrdersController::class, 'apiOrders']);
 
 Route::post('/create-order', [OrdersController::class, 'apiCreateOrder']);
+Route::get('/orders/customer/{id}', [OrdersController::class, 'apiOrdersByCustomerId']);
+Route::get('/orders/{id}', [OrdersController::class,'apiDetailOrders']);
 
-
+Route::post('/promotions/redeem-point', [SaleOffController::class, 'apiCreateRedeemPoint']);
+Route::get('/promotions/customer/{id}', [SaleOffController::class, 'apiGetPromotionByCustomerId']);

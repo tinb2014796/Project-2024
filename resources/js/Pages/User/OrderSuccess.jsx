@@ -15,7 +15,7 @@ const OrderSuccess = () => {
   const [openDetailDialog, setOpenDetailDialog] = useState(false);
   const [openReviewDialog, setOpenReviewDialog] = useState(false);
   const [openCancelDialog, setOpenCancelDialog] = useState(false);
-  const [cancelReason, setCancelReason] = useState('');
+  const [cancelReason, setCancelReason] = useState(''); 
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -28,17 +28,18 @@ const OrderSuccess = () => {
     district: null,
     ward: null
   });
-
+  console.log(orders);
   const donHangGoc = orders.map(order => {
     // Tính tổng discount từ order details
-    const totalDetailDiscount = order.order_details?.reduce((sum, detail) => sum + (parseInt(detail.discount) || 0), 0);
+    const totalDetailDiscount = order.order_details?.reduce((sum, detail) => 
+      sum + (parseInt(detail.discount) || 0), 0);
     
     return {
       id: order.id,
       ngayDat: order.or_date,
       customer: order.customer,
       payment: order.payment,   
-      tongTien: order.or_total - totalDetailDiscount - (order.or_discount || 0),
+      tongTien: parseInt(order.or_total) - totalDetailDiscount - (parseInt(order.or_discount) || 0) + parseInt(order.or_ship || 0),
       ghiChu: order.or_note,
       status: order.or_status,
       orderDetails: order.order_details?.map(detail => ({
@@ -46,10 +47,11 @@ const OrderSuccess = () => {
         p_name: detail.product?.p_name,
         quantity: detail.quantity,
         p_selling: detail.product?.p_selling,
-        total: detail.total - (detail.discount || 0)
+        total: parseInt(detail.total)
       })),
       totalDetailDiscount: totalDetailDiscount,
-      orderDiscount: order.or_discount || 0
+      orderDiscount: parseInt(order.or_discount) || 0,
+      shippingFee: parseInt(order.or_ship) || 0
     }
   });
 
@@ -108,11 +110,14 @@ const OrderSuccess = () => {
     return donHangGoc.filter(order => {
       if (!order.status) return false;
       
+      // Kiểm tra nếu status là -1 (đã hủy)
+      if (status === 6 && order.status === -1) return true;
+      
       const orderStatus = Object.entries(order.status);
       if (!orderStatus.length) return false;
       
       const latestStatus = orderStatus[orderStatus.length - 1];
-      return latestStatus[0] === status.toString();
+      return latestStatus[0] === (status).toString();
     });
   };
 
@@ -153,7 +158,7 @@ const OrderSuccess = () => {
   const handleCancelOrder = () => {
     router.post(`/user/order/${selectedOrder.id}`, {
       or_note: cancelReason,
-      or_status: 7
+      status: -1
     });
     handleCloseCancelDialog();
   };

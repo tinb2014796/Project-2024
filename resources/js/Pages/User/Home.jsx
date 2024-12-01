@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Typography, Grid, Paper, Box, Card, CardMedia, CardContent, Chip, Icon } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Typography, Grid, Paper, Box, Card, CardMedia, CardContent, Chip, Icon, Button } from '@mui/material';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import VerifiedIcon from '@mui/icons-material/Verified';
@@ -112,6 +112,7 @@ function InfoItem({ icon, title, description }) {
 function Home() {
   const { products, categories } = usePage().props;
   const currentDate = new Date();
+  const [currentImage, setCurrentImage] = useState(0);
 
   const featuredProducts = products.filter(product => 
     product.sale_off && product.sale_off.some(sale => new Date(sale.s_end) > currentDate)
@@ -127,17 +128,57 @@ function Home() {
       </Typography>
       
       {/* Hình ảnh banner lớn */}
-      <Box sx={{ mb: 4, width: '100%', height: '400px', overflow: 'hidden' }}>
-        <img 
-          src="/images/sunhouse-mama-shd5353w_0118(1).jpg" 
-          alt="Banner sản phẩm" 
-          style={{ 
-            width: '100%', 
-            height: '100%', 
-            objectFit: 'cover',
-            objectPosition: 'center'
-          }} 
-        />
+      <Box sx={{ mb: 4, width: '100%', height: '900px', overflow: 'hidden', position: 'relative' }}>
+        <Box sx={{ 
+          display: 'flex', 
+          width: '200%', 
+          transition: 'transform 0.5s',
+          transform: `translateX(-${currentImage * 50}%)`
+        }}>
+          <img 
+            src="/images/sunhouse-mama-shd5353w_0118(1).jpg"
+            alt="Banner sản phẩm 1"
+            style={{
+              width: '50%',
+              height: '900px',
+              objectFit: 'cover',
+              objectPosition: 'center'
+            }}
+          />
+          <img 
+            src="/images/bia_comet.jpg"
+            alt="Banner sản phẩm 2" 
+            style={{
+              width: '50%', 
+              height: '900px',
+              objectFit: 'cover',
+              objectPosition: 'center'
+            }}
+          />
+        </Box>
+        <Box sx={{
+          position: 'absolute',
+          bottom: 20,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          gap: 2
+        }}>
+          <Button 
+            variant="contained"
+            onClick={() => setCurrentImage(0)}
+            sx={{ bgcolor: currentImage === 0 ? 'primary.main' : 'grey.500' }}
+          >
+            Trước
+          </Button>
+          <Button
+            variant="contained" 
+            onClick={() => setCurrentImage(1)}
+            sx={{ bgcolor: currentImage === 1 ? 'primary.main' : 'grey.500' }}
+          >
+            Sau
+          </Button>
+        </Box>
       </Box>
       
       <Grid container spacing={2} sx={{ mb: 6 }}>

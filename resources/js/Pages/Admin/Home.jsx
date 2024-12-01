@@ -57,20 +57,20 @@ function Home({ title }) {
             const orderDate = new Date(order.created_at);
             switch(timeRange) {
                 case 'today':
-                    return orderDate.toDateString() === today.toDateString();
+                    return orderDate.toDateString() === today.toDateString() && order.status == 5;
                 case 'yesterday':
-                    return orderDate.toDateString() === yesterday.toDateString();
+                    return orderDate.toDateString() === yesterday.toDateString() && order.status == 5;
                 case 'month':
                     return orderDate.getMonth() === today.getMonth() && 
-                           orderDate.getFullYear() === today.getFullYear();
+                           orderDate.getFullYear() === today.getFullYear() && order.status == 5;
                 case 'year':
-                    return orderDate.getFullYear() === today.getFullYear();
+                    return orderDate.getFullYear() === today.getFullYear() && order.status == 5;
                 case 'custom':
-                    if (!customDate) return true;
+                    if (!customDate) return order.status == 5;
                     const selectedDate = new Date(customDate);
-                    return orderDate.toDateString() === selectedDate.toDateString();
+                    return orderDate.toDateString() === selectedDate.toDateString() && order.status == 5;
                 default:
-                    return true;
+                    return order.status == 5;
             }
         });
     };

@@ -88,7 +88,7 @@ const Cart = () => {
       <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'white' }}>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box display="flex" alignItems="center">
-            <ShoppingCartIcon sx={{ color: '#ee4d2d', fontSize: 32, marginRight: 2 }} />
+            <ShoppingCartIcon sx={{ color: '#33CCFF', fontSize: 32, marginRight: 2 }} />
             <Typography variant="h6" sx={{ color: '#222', fontWeight: 500 }}>Giỏ Hàng</Typography>
           </Box>
           <Box display="flex" alignItems="center" sx={{ width: '30%' }}>
@@ -110,7 +110,7 @@ const Cart = () => {
               }}
               InputProps={{
                 endAdornment: (
-                  <IconButton sx={{ color: '#ee4d2d' }}>
+                  <IconButton sx={{ color: '#33CCFF' }}>
                     <SearchIcon />
                   </IconButton>
                 ),
@@ -123,7 +123,7 @@ const Cart = () => {
       <Paper elevation={0} sx={{ bgcolor: 'white' }}>
         <Box sx={{ p: 2, borderBottom: '1px solid #f5f5f5' }}>
           <Grid container alignItems="center">
-            <Grid item xs={1}><Checkbox sx={{ color: '#ee4d2d', '&.Mui-checked': { color: '#ee4d2d' } }}/></Grid>
+            <Grid item xs={1}><Checkbox sx={{ color: '#33CCFF', '&.Mui-checked': { color: '#33CCFF' } }}/></Grid>
             <Grid item xs={4}><Typography sx={{ color: '#222' }}>Sản Phẩm</Typography></Grid>
             <Grid item xs={1}><Typography sx={{ color: '#222' }}>Đơn Giá</Typography></Grid>
             <Grid item xs={1}><Typography sx={{ color: '#222' }}>Giảm Giá</Typography></Grid>
@@ -140,7 +140,7 @@ const Cart = () => {
                 <Checkbox 
                   checked={selectedItems[item.id] || false} 
                   onChange={() => handleCheckboxChange(item.id)}
-                  sx={{ color: '#ee4d2d', '&.Mui-checked': { color: '#ee4d2d' } }}
+                  sx={{ color: '#33CCFF', '&.Mui-checked': { color: '#33CCFF' } }}
                 />
               </Grid>
               <Grid item xs={4}>
@@ -220,7 +220,7 @@ const Cart = () => {
         <Box sx={{ position: 'sticky', bottom: 0, bgcolor: 'white', borderTop: '1px solid #f5f5f5', p: 2 }}>
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Box display="flex" alignItems="center">
-              <Checkbox sx={{ color: '#ee4d2d', '&.Mui-checked': { color: '#ee4d2d' } }}/>
+              <Checkbox sx={{ color: '#33CCFF', '&.Mui-checked': { color: '#33CCFF' } }}/>
               <Typography sx={{ color: '#222', mr: 2 }}>Chọn Tất Cả</Typography>
               <Button 
                 onClick={deleteCart}
@@ -240,7 +240,7 @@ const Cart = () => {
                 <Typography sx={{ color: '#222' }}>
                   Tổng thanh toán ({Object.keys(selectedItems).filter(id => selectedItems[id]).length} sản phẩm):
                   <Typography component="span" sx={{ color: '#ee4d2d', fontSize: '20px', ml: 1, fontWeight: 500 }}>
-                    ₫{calculateTotalPrice().toLocaleString()}
+                    {calculateTotalPrice().toLocaleString()}₫
                   </Typography>
                 </Typography>
               </Box>
@@ -248,9 +248,9 @@ const Cart = () => {
                 variant="contained" 
                 onClick={handleBuySelected}
                 sx={{
-                  bgcolor: '#ee4d2d',
+                  bgcolor: '#00FFFF',
                   '&:hover': {
-                    bgcolor: '#d73211'
+                    bgcolor: '#ffffff'
                   },
                   px: 4
                 }}

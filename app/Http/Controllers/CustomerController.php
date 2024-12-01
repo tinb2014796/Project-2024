@@ -16,14 +16,18 @@ class CustomerController extends Controller
 {
     public function signin(Request $request)
     {
-    
         $customer = Customer::where('cus_email', $request->cus_email)->first();
-        if ($customer && $customer->cus_password === $request->cus_password) {
-            $request->session()->put('customer', $customer);
-           return redirect()->route('user.home')->with('success', 'Đăng nhập thành công');
-        } 
-        return  Inertia::render('User/Signin',['error' => 'Email hoặc mật khẩu không đúng']);
         
+        if (!$customer) {
+            return redirect()->back()->withErrors(['error' => 'Email không tồn tại']);
+        }
+
+        if (!password_verify($request->cus_password, $customer->cus_password)) {
+            return redirect()->back()->withErrors(['error' => 'Mật khẩu không đúng']);
+        }
+        
+        $request->session()->put('customer', $customer);
+        return redirect()->route('user.home')->with('success', 'Đăng nhập thành công');
     }
 
     public function logout(Request $request)
@@ -45,7 +49,21 @@ class CustomerController extends Controller
             return redirect()->back()->withErrors(['cus_email' => 'Email đã tồn tại']);
         }
 
-        // Nếu email chưa tồn tại, tạo khách hàng mới
+        // Kiểm tra xem số điện thoại đã tồn tại chưa
+        $existingPhone = Customer::where('cus_sdt', $request->cus_sdt)->first();
+
+        if ($existingPhone) {
+            // Nếu số điện thoại đã tồn tại, không cho tạo tài khoản mới
+            return redirect()->back()->withErrors(['cus_sdt' => 'Số điện thoại đã tồn tại']);
+        }
+
+        // Mã hóa mật khẩu trước khi lưu
+        $hashedPassword = bcrypt($request->cus_password);
+
+        // Tạo token ngẫu nhiên
+        $token = bin2hex(random_bytes(32));
+
+        // Nếu email và số điện thoại chưa tồn tại, tạo khách hàng mới
         $customers = Customer::create([
             'cus_familyname' => $request->cus_familyname ?? '',
             'cus_name' => $request->cus_name ?? '',
@@ -53,13 +71,14 @@ class CustomerController extends Controller
             'cus_email' => $request->cus_email ?? '',
             'cus_sex' => $request->cus_sex ?? '',
             'cus_birthday' => $request->cus_birthday ?? '',
-            'cus_password' => $request->cus_password ?? '',
+            'cus_password' => $hashedPassword,
             'cus_address' => $request->cus_address ?? '',
             'province_id' => $request->province_id ?? '',
             'district_id' => $request->district_id ?? '',
             'ward_code' => $request->ward_code ?? '',
             'cus_image' => $request->cus_image ?? '',
             'cus_points' => $request->cus_points ?? 0,
+            'remember_token' => $token
         ]);
 
         return Inertia::render('User/Signin');
@@ -171,6 +190,7 @@ class CustomerController extends Controller
                   ->with('orderDetails');
         }])->get();
         $customers = $customers->map(function($customer) {
+            $order = $customer->orders;
             $totalSpent = $customer->orders->sum(function($order) {
                 $orderDetails = $order->orderDetails;
                 $detailsDiscount = $orderDetails->sum('discount');
@@ -181,6 +201,7 @@ class CustomerController extends Controller
                 'id' => $customer->id,
                 'name' => $customer->cus_name,
                 'total_spent' => $totalSpent,
+                'orders' => $customer->orders // Thêm số lượng đơn hàng
             ];
         });
         

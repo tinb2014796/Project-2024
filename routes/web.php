@@ -99,6 +99,7 @@ Route::middleware(UserAuthMiddleware::class)->prefix('user')->group(function () 
 
     Route::post('/pay', [UserController::class, 'pay']);
     Route::get('/pay', [UserController::class, 'pay']);
+    Route::get('/return-vnpay', [OrdersController::class, 'returnVnpay']);
 
     Route::post('/create-order', [OrdersController::class, 'createOrder']);
     Route::get('/create-order', [OrdersController::class, 'createOrder']);
@@ -131,5 +132,4 @@ Route::middleware(UserAuthMiddleware::class)->prefix('user')->group(function () 
     Route::post('/trade-point', [SaleOffController::class, 'useVoucher']);
 });
 
-//http://localhost:8000/return-vnpay?vnp_Amount=280000000&vnp_BankCode=NCB&vnp_BankTranNo=VNP14620894&vnp_CardType=ATM&vnp_OrderInfo=Thanh+to%C3%A1n+h%C3%B3a+%C4%91%C6%A1n+ph%C3%AD+d%E1%BB%8Bch+v%E1%BB%A5&vnp_PayDate=20241018230639&vnp_ResponseCode=00&vnp_TmnCode=3DR25O0Z&vnp_TransactionNo=14620894&vnp_TransactionStatus=00&vnp_TxnRef=61&vnp_SecureHash=b37a2c8d3b7401c6577b601016bda39265765fcc38433943ba1c5faebe770ba565f86ea395db55de570cef1b4d569cbd7e65111e32dbb06ed7d656b3816a76dd
- Route::get('/return-vnpay', [OrdersController::class, 'returnVnpay']);
+//http://localhost:8000/user/return-vnpay?vnp_Amount=280000000&vnp_BankCode=NCB&vnp_BankTranNo=VNP14620894&vnp_CardType=ATM&vnp_OrderInfo=Thanh+to%C3%A1n+h%C3%B3a+%C4%91%C6%A1n+ph%C3%AD+d%E1%BB%8Bch+v%E1%BB%A5&vnp_PayDate=20241018230639&vnp_ResponseCode=00&vnp_TmnCode=3DR25O0Z&vnp_TransactionNo=14620894&vnp_TransactionStatus=00&vnp_TxnRef=61&vnp_SecureHash=b37a2c8d3b7401c6577b601016bda39265765fcc38433943ba1c5faebe770ba565f86ea395db55de570cef1b4d569cbd7e65111e32dbb06ed7d656b3816a76dd
