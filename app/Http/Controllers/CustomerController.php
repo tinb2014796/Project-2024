@@ -219,7 +219,9 @@ class CustomerController extends Controller
     public function tradePoint(Request $request)
     {
         $customer = $request->session()->get('customer');
-        $customer = Customer::with('saleOffs')->find($customer->id);
+        $customer = Customer::with(['saleOffs' => function($query) {
+            $query->whereDoesntHave('order'); // Chỉ lấy những voucher chưa được sử dụng trong đơn hàng nào
+        }])->find($customer->id);
         return Inertia::render('User/TradePoint', ['customer' => $customer]);
     }
 }

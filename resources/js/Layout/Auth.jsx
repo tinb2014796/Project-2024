@@ -21,7 +21,7 @@ export default function Main({ children }) {
     const [searchResult, setSearchResult] = useState([]);
     const [searchValue, setSearchValue] = useState('');
     const [auth, setAuth] = useState(null);
-    
+
     useEffect(() => {
         const user = localStorage.getItem('customer');
         if(user){
@@ -31,7 +31,7 @@ export default function Main({ children }) {
             localStorage.setItem('customer', JSON.stringify(customer));
             setAuth(customer);
         }
-    }, []);
+    }, [customer]);
 
     const handleProductClick = (event) => {
         setProductAnchorEl(event.currentTarget);
@@ -54,6 +54,7 @@ export default function Main({ children }) {
     };
 
     const handleLogout = () => {
+        setAuth(null);
         localStorage.removeItem('customer');
         router.post('/user/logout');
         window.location.reload();

@@ -108,10 +108,16 @@ class GoodsReceiptController extends Controller
 
             // Cập nhật số lượng và giá nhập sản phẩm
             $productModel = Products::find($product['product_id']);
+            
             if ($oldDetail) {
+                // Nếu sản phẩm đã tồn tại trong phiếu nhập cũ
                 $quantityDiff = $product['p_quantity'] - $oldDetail->quantity_import;
                 $productModel->p_quantity += $quantityDiff;
+            } else {
+                // Nếu là sản phẩm mới thêm vào
+                $productModel->p_quantity += $product['p_quantity'];
             }
+            
             $productModel->p_purchase = $product['p_purchase'];
             $productModel->save();
         }

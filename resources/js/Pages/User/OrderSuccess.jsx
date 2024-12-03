@@ -9,7 +9,7 @@ import DetailOrders from './ChildPage/DetailOrders';
 import { getAddressDetails, getProvinces, getDistricts, getWards } from './Function';
 
 const OrderSuccess = () => {
-  const { orders } = usePage().props;
+  const { orders, user } = usePage().props;
   const [tabValue, setTabValue] = useState(0);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [openDetailDialog, setOpenDetailDialog] = useState(false);
@@ -28,7 +28,8 @@ const OrderSuccess = () => {
     district: null,
     ward: null
   });
-  console.log(orders);
+
+
   const donHangGoc = orders.map(order => {
     // Tính tổng discount từ order details
     const totalDetailDiscount = order.order_details?.reduce((sum, detail) => 
@@ -43,11 +44,13 @@ const OrderSuccess = () => {
       ghiChu: order.or_note,
       status: order.or_status,
       orderDetails: order.order_details?.map(detail => ({
+        id: detail.id,
         p_id: detail.product?.id,
         p_name: detail.product?.p_name,
         quantity: detail.quantity,
         p_selling: detail.product?.p_selling,
-        total: parseInt(detail.total)
+        total: parseInt(detail.total),
+        is_rated: detail.is_rated
       })),
       totalDetailDiscount: totalDetailDiscount,
       orderDiscount: parseInt(order.or_discount) || 0,
@@ -163,21 +166,24 @@ const OrderSuccess = () => {
     handleCloseCancelDialog();
   };
 
-  const handleProductSelect = (productId) => {
+  const handleProductSelect = (productId, detailId) => {
     setSelectedProducts(prev => {
-      if (prev.includes(productId)) {
-        return prev.filter(p => p !== productId);
+      const existingProduct = prev.find(p => p.p_id === productId);
+      if (existingProduct) {
+        return prev.filter(p => p.p_id !== productId);
       } else {
-        return [...prev, productId];
+        return [...prev, {p_id: productId, detail_id: detailId}];
       }
     });
   };
 
   const handleSubmitReview = () => {
     const data = {
-      productIds: selectedProducts,
+      customer_id: user.id,
+      productIds: selectedProducts.map(p => p.p_id),
       ra_score: rating,
       ra_comment: comment,
+      order_detail_id: selectedProducts.map(p => p.detail_id)
     };
     console.log(data);
     router.post('/user/rating', data);
@@ -242,7 +248,7 @@ const OrderSuccess = () => {
                     >
                       Chi tiết
                     </Button>
-                    {tabValue === 4 && (
+                    {tabValue === 4 && order.orderDetails.some(detail => !detail.is_rated) && (
                       <Button
                         variant="contained"
                         color="success"
@@ -305,11 +311,11 @@ const OrderSuccess = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <FormControl fullWidth variant="outlined" sx={{ fontWeight: 'bold', mt: 2 }}>
               <Typography variant="subtitle1" sx={{ mb: 1 }}>Chọn sản phẩm cần đánh giá</Typography>
-              {selectedOrder?.orderDetails?.map((detail, index) => (
+              {selectedOrder?.orderDetails?.filter(detail => !detail.is_rated).map((detail, index) => (
                 <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1, p: 1, border: '1px solid #e0e0e0', borderRadius: 1 }}>
                   <Checkbox
-                    checked={selectedProducts.includes(detail.p_id)}
-                    onChange={() => handleProductSelect(detail.p_id)}
+                    checked={selectedProducts.some(p => p.p_id === detail.p_id)}
+                    onChange={() => handleProductSelect(detail.p_id, detail.id)}
                   />
                   <Avatar variant="rounded" sx={{ bgcolor: '#e3f2fd' }}>
                     {detail.p_name[0]}

@@ -32,6 +32,7 @@ const DonHang = () => {
     ghiChu: order.or_note,
     status: order.or_status,
     or_discount: order.or_discount,
+    shipping_fee: order.or_ship,
     orderDetails: order.order_details?.map(detail => ({
       p_name: detail.product?.p_name,
       quantity: detail.quantity,
@@ -309,7 +310,7 @@ const DonHang = () => {
                   <TableCell>#{order.id}</TableCell>
                   <TableCell>{order.customer?.cus_name}</TableCell>
                   <TableCell>{new Date(order.ngayDat).toLocaleDateString()}</TableCell>
-                  <TableCell>{(order.orderDetails?.reduce((total, detail) => total + (detail.quantity * detail.p_selling - detail.discount), 0) - order.or_discount).toLocaleString('vi-VN')}đ</TableCell>
+                  <TableCell>{(order.orderDetails?.reduce((total, detail) => total + (detail.quantity * detail.p_selling - detail.discount), 0) - order.or_discount + parseInt(order.shipping_fee)).toLocaleString('vi-VN')}đ</TableCell>
                   <TableCell>
                     <Box sx={{ 
                       bgcolor: '#e3f2fd',
@@ -417,13 +418,10 @@ const DonHang = () => {
                 </Typography>
                 <Box sx={{ pl: 2 }}>
                   <Typography sx={{ mb: 1 }}>
-                    <strong>Tên:</strong> {selectedOrder.customer?.cus_name} {selectedOrder.customer?.cus_familyname}
+                    <strong>Tên:</strong> {selectedOrder.customer?.cus_familyname} {selectedOrder.customer?.cus_name} 
                   </Typography>
                   <Typography sx={{ mb: 1 }}>
-                    <strong>Địa chỉ:</strong> {selectedOrder.customer?.cus_address}, {' '}
-                    {getWardName(selectedOrder.customer?.ward_code)}, {' '}
-                    {getDistrictName(selectedOrder.customer?.district_id)}, {' '}
-                    {getProvinceName(selectedOrder.customer?.province_id)}
+                    <strong>Địa chỉ:</strong> {selectedOrder.customer?.cus_address} {' '}
                   </Typography>
                   <Typography sx={{ mb: 1 }}>
                     <strong>Số điện thoại:</strong> {selectedOrder.customer?.cus_sdt}
@@ -491,9 +489,15 @@ const DonHang = () => {
                         </TableCell>
                       </TableRow>
                       <TableRow>
+                        <TableCell colSpan={3} align="right" sx={{ fontWeight: 'bold' }}>Phí vận chuyển:</TableCell>
+                        <TableCell colSpan={2} align="right" sx={{ fontWeight: 'bold' }}>
+                          {parseInt(selectedOrder.shipping_fee).toLocaleString('vi-VN')}đ
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
                         <TableCell colSpan={3} align="right" sx={{ fontWeight: 'bold', color: '#1976d2' }}>Tổng cộng:</TableCell>
                         <TableCell colSpan={2} align="right" sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-                          {(selectedOrder.orderDetails?.reduce((total, detail) => total + (detail.quantity * detail.p_selling - detail.discount), 0) - selectedOrder.or_discount).toLocaleString('vi-VN')}đ
+                          {(selectedOrder.orderDetails?.reduce((total, detail) => total + (detail.quantity * detail.p_selling - detail.discount), 0) - selectedOrder.or_discount + parseInt(selectedOrder.shipping_fee)).toLocaleString('vi-VN')}đ
                         </TableCell>
                       </TableRow>
                     </TableBody>
@@ -518,3 +522,7 @@ const DonHang = () => {
 };
 
 export default DonHang;
+
+// {getWardName(selectedOrder.customer?.ward_code)}, {' '}
+//                     {getDistrictName(selectedOrder.customer?.district_id)}, {' '}
+//                     {getProvinceName(selectedOrder.customer?.province_id)}

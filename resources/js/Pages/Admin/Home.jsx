@@ -30,13 +30,13 @@ function StatCard({ bgcolor, icon, value, label }) {
                     <Typography variant="h4" fontWeight="bold">{value}</Typography>
                     <Typography variant="body2">{label}</Typography>
                 </Box>
-                <Button 
+                {/* <Button 
                     variant="text" 
                     sx={{ color: 'white', p: 0, textTransform: 'none', justifyContent: 'flex-start' }}
                     endIcon={<ArrowForwardIcon />}
                 >
                     Xem thêm
-                </Button>
+                </Button> */}
             </Paper>
         </Grid>
     );
@@ -54,7 +54,7 @@ function Home({ title }) {
         yesterday.setDate(yesterday.getDate() - 1);
         
         return orders.filter(order => {
-            const orderDate = new Date(order.created_at);
+            const orderDate = new Date(order.updated_at);
             switch(timeRange) {
                 case 'today':
                     return orderDate.toDateString() === today.toDateString() && order.status == 5;

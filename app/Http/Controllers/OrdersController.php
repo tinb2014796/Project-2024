@@ -229,7 +229,7 @@ class OrdersController extends Controller
             $order->or_status = json_decode($order->or_status);
             return $order;
         });
-        return Inertia::render('User/OrderSuccess', compact('orders'));
+        return Inertia::render('User/OrderSuccess', compact('orders', 'user'));
     }
 
     public function followOrder()

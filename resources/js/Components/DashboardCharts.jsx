@@ -17,7 +17,7 @@ function DashboardCharts() {
   const [viewType, setViewType] = useState('revenue');
   const { orders, details, products } = usePage().props;
   const maxTotal = Math.max(...orders.filter(order => order.status == 5).map(order => order.or_total - order.or_discount - details.map(detail => detail.discount)));
-
+ console.log(orders,details)
   // Thêm state cho từng biểu đồ
   const [paymentChartDate, setPaymentChartDate] = useState({
     year: dayjs(),
@@ -40,7 +40,7 @@ function DashboardCharts() {
     });
 
     orders.filter(order => order.status == 5).forEach(order => {
-      const date = dayjs(order.created_at);
+      const date = dayjs(order.updated_at);
       const month = date.format('MMMM');
       if (date.year() === selectedDate.year() && date.month() === selectedMonth.month()) {
         const orderDetails = details.filter(detail => detail.or_id === order.id);
@@ -76,7 +76,7 @@ function DashboardCharts() {
     });
 
     orders.filter(order => order.status == 5).forEach(order => {
-      const date = dayjs(order.created_at);
+      const date = dayjs(order.updated_at);
       const year = date.year();
       if (yearlyRevenue[year] !== undefined) {
         const orderDetails = details.filter(detail => detail.or_id === order.id);
@@ -87,7 +87,7 @@ function DashboardCharts() {
           return sum + (Number(product?.p_purchase || 0) * detail.quantity);
         }, 0);
 
-        yearlyRevenue[year] += (order.or_total - order.or_discount - detailsDiscount);
+        yearlyRevenue[year] += (order.or_total - order.or_discount - detailsDiscount );
         yearlyCost[year] += totalPurchase;
       }
     });
@@ -113,36 +113,44 @@ function DashboardCharts() {
   // Thêm hàm tính toán dữ liệu cho biểu đồ tròn
   const calculatePaymentMethods = () => {
     const paymentSummary = {
-      cash: 0,
-      transfer: 0
+      cash: { count: 0, total: 0 },
+      transfer: { count: 0, total: 0 }
     };
 
     orders.filter(order => order.status == 5).forEach(order => {
-      const orderDate = dayjs(order.created_at);
+      const orderDate = dayjs(order.updated_at);
       if (orderDate.year() === paymentChartDate.year.year() && 
           orderDate.month() === paymentChartDate.month.month()) {
-        if (order.pa_id === 1) {
-          paymentSummary.cash++;
-        } else if (order.pa_id === 3) {
-          paymentSummary.transfer++;
+        const orderDetails = details.filter(detail => detail.or_id === order.id);
+        const detailsDiscount = orderDetails.reduce((sum, detail) => sum + (Number(detail.discount) || 0), 0);
+        const total = order.or_total - order.or_discount - detailsDiscount;
+
+        if (order.pa_id === 2) {
+          paymentSummary.transfer.count++;
+          paymentSummary.transfer.total += total;
+        } else if (order.pa_id === 1) {
+          paymentSummary.cash.count++;
+          paymentSummary.cash.total += total;
         }
       }
     });
 
-    const total = paymentSummary.cash + paymentSummary.transfer;
+    const totalCount = paymentSummary.cash.count + paymentSummary.transfer.count;
     
     return [
       { 
         name: 'Tiền mặt',
-        value: paymentSummary.cash,
-        count: paymentSummary.cash,
-        percentage: ((paymentSummary.cash / total) * 100).toFixed(2)
+        value: paymentSummary.cash.count,
+        count: paymentSummary.cash.count,
+        total: paymentSummary.cash.total,
+        percentage: ((paymentSummary.cash.count / totalCount) * 100).toFixed(2)
       },
       { 
         name: 'Chuyển khoản',
-        value: paymentSummary.transfer,
-        count: paymentSummary.transfer,
-        percentage: ((paymentSummary.transfer / total) * 100).toFixed(2)
+        value: paymentSummary.transfer.count,
+        count: paymentSummary.transfer.count,
+        total: paymentSummary.transfer.total,
+        percentage: ((paymentSummary.transfer.count / totalCount) * 100).toFixed(2)
       }
     ];
   };
@@ -154,12 +162,13 @@ function DashboardCharts() {
   const calculateTopProducts = () => {
     const productSummary = {};
     
-    details.forEach(detail => {
-      const order = orders.find(o => o.id === detail.or_id && o.status == 5);
-      if (order) {
-        const orderDate = dayjs(order.created_at);
-        if (orderDate.year() === topProductsDate.year.year() && 
-            orderDate.month() === topProductsDate.month.month()) {
+    orders.filter(order => order.status == 5 && order.status !== -1).forEach(order => {
+      const orderDetails = details.filter(detail => detail.or_id === order.id);
+      const orderDate = dayjs(order.updated_at);
+      
+      if (orderDate.year() === topProductsDate.year.year() && 
+          orderDate.month() === topProductsDate.month.month()) {
+        orderDetails.forEach(detail => {
           const product = products.find(p => p.id === detail.p_id);
           if (product) {
             if (!productSummary[product.p_name]) {
@@ -168,10 +177,10 @@ function DashboardCharts() {
                 quantity: 0
               };
             }
-            productSummary[product.p_name].revenue += detail.quantity * detail.total;
+            productSummary[product.p_name].revenue += (detail.total - detail.discount);
             productSummary[product.p_name].quantity += detail.quantity;
           }
-        }
+        });
       }
     });
 
@@ -329,7 +338,7 @@ function DashboardCharts() {
             pb: 1,
             mb: 3
           }}>
-            Tổng doanh thu gồm thuế
+            Tổng doanh thu theo phương thức thanh toán
           </Typography>
           
           <Box sx={{ 
@@ -400,7 +409,11 @@ function DashboardCharts() {
             {paymentData.map((item, index) => (
               <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography color="textSecondary">{item.name}</Typography>
-                <Typography fontWeight="bold">{item.count}</Typography>
+                <Box>
+                  <Typography fontWeight="bold">
+                    {item.count} đơn ({item.total.toLocaleString('vi-VN')} ₫)
+                  </Typography>
+                </Box>
               </Box>
             ))}
           </Box>

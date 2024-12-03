@@ -6,6 +6,8 @@ import VerifiedIcon from '@mui/icons-material/Verified';
 import PhoneIcon from '@mui/icons-material/Phone';
 import { usePage } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 function CategoryItem({ category }) {
   return (
@@ -167,16 +169,28 @@ function Home() {
           <Button 
             variant="contained"
             onClick={() => setCurrentImage(0)}
-            sx={{ bgcolor: currentImage === 0 ? 'primary.main' : 'grey.500' }}
+            sx={{ 
+              bgcolor: currentImage === 0 ? 'primary.main' : 'grey.500',
+              minWidth: '40px',
+              width: '40px',
+              height: '40px',
+              padding: 0
+            }}
           >
-            Trước
+            <ArrowBackIcon />
           </Button>
           <Button
             variant="contained" 
             onClick={() => setCurrentImage(1)}
-            sx={{ bgcolor: currentImage === 1 ? 'primary.main' : 'grey.500' }}
+            sx={{ 
+              bgcolor: currentImage === 1 ? 'primary.main' : 'grey.500',
+              minWidth: '40px',
+              width: '40px', 
+              height: '40px',
+              padding: 0
+            }}
           >
-            Sau
+            <ArrowForwardIcon />
           </Button>
         </Box>
       </Box>

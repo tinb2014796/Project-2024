@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Customer;
 use App\Models\Order;
+use App\Models\DetailOrders;
 use Inertia\Inertia;
 
 class RatingController extends Controller
@@ -28,9 +29,10 @@ class RatingController extends Controller
         $rating = $request->ra_score;
         $comment = $request->ra_comment;
         $productIds = $request->productIds;
+        $orderDetailIds = $request->order_detail_id;
         
         // Lấy customer_id của user hiện tại (giả sử đã có auth)
-        $customerId = auth()->user()->id;
+        $customerId = $request->customer_id;
         
         // Tạo rating cho từng sản phẩm
         foreach ($productIds as $productId) {
@@ -38,9 +40,15 @@ class RatingController extends Controller
                 'ra_score' => $rating,
                 'ra_comment' => $comment,
                 'p_id' => $productId,
-                'cus_id' => $customerId
+                'cus_id' => $customerId,
             ]);
         }
+
+        foreach ($orderDetailIds as $orderDetailId) {
+            DetailOrders::where('id', $orderDetailId)->update(['is_rated' => true]);
+        }
+
+        return redirect()->back()->with('success', 'Đánh giá đã được gửi thành công!');
     }
 
     /**

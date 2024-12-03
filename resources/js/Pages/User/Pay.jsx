@@ -434,7 +434,7 @@ const Pays = () => {
             fullWidth
             label="Mã giảm giá"
             value={voucherCode}
-            onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+            onChange={(e) => setVoucherCode(e.target.value)}
             sx={{ '& .MuiOutlinedInput-root': { borderRadius: '8px' } }}
           />
         </DialogContent>
@@ -477,15 +477,7 @@ const Pays = () => {
 
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, backgroundColor: '#f8f9fa', p: 2, borderRadius: '8px' }}>
           <FavoriteIcon color="error" sx={{ mr: 1 }} />
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Phụ Kiện - Đồ Dùng - Siêu Rẻ</Typography>
-          <Button 
-            startIcon={<ChatIcon />} 
-            variant="outlined" 
-            size="small" 
-            sx={{ ml: 2, borderRadius: '20px' }}
-          >
-            Chat ngay
-          </Button>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Thiết bị gia dụng - Chất lượng</Typography>
         </Box>
 
         {cart.products.map((product) => {
@@ -506,7 +498,7 @@ const Pays = () => {
                 </Box>
               </Grid>
               <Grid item xs={2} sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="body2">đ{product.price.toLocaleString()}</Typography>
+                <Typography variant="body2">{product.price.toLocaleString()} đ</Typography>
               </Grid>
               <Grid item xs={1} sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography variant="body2">{product.quantity}</Typography>
@@ -518,7 +510,7 @@ const Pays = () => {
               </Grid>
               <Grid item xs={2} sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  đ{(discountedPrice * product.quantity).toLocaleString()}
+                  {(discountedPrice * product.quantity).toLocaleString()} đ
                 </Typography>
               </Grid>
             </Grid>
@@ -553,26 +545,14 @@ const Pays = () => {
           borderRadius: '8px'
         }}>
           <Typography variant="body2">Đơn vị vận chuyển:</Typography>
-          <Box>
-            <Typography variant="body1" sx={{ fontWeight: 600 }}>Nhanh</Typography>
-            <Typography variant="caption" sx={{ color: '#666' }}>Nhận hàng vào ngày mai</Typography>
+          <Box marginRight={90}>
+            <Typography variant="body1" sx={{ fontWeight: 600 }}> Giao hàng nhanh</Typography>
+            <Typography variant="caption" sx={{ color: '#666' }}>Nhận hàng trong 3 4 ngày</Typography>
             <Typography variant="body2" color="primary" sx={{ fontWeight: 500 }}>
-              Phí vận chuyển: đ{shippingFee.toLocaleString()}
+              Phí vận chuyển: {shippingFee.toLocaleString()} đ
             </Typography>
           </Box>
-          <Button 
-            variant="text" 
-            color="primary" 
-            size="small"
-            sx={{ borderRadius: '20px' }}
-          >
-            Thay Đổi
-          </Button>
         </Box>
-
-        <Typography variant="body2" sx={{ mt: 2, color: '#666' }}>
-          Được đồng kiểm.
-        </Typography>
 
         <Box sx={{ 
           display: 'flex', 
@@ -583,11 +563,11 @@ const Pays = () => {
           backgroundColor: '#f8f9fa',
           borderRadius: '8px'
         }}>
-          <Typography variant="body2">Mã giảm giá:</Typography>
+          <Typography variant="body2">Mã giảm giá của bạn:</Typography>
           {appliedVoucher ? (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Chip 
-                label={`Mã ${appliedVoucher.s_code} - Giảm ${discount ? discount.toLocaleString() : 0}đ`}
+                label={`Mã ${appliedVoucher.s_code} - Giảm ${discount ? discount.toLocaleString() : 0} đ`}
                 onDelete={handleRemoveVoucher}
                 color="primary"
                 sx={{ borderRadius: '16px' }}
@@ -619,7 +599,7 @@ const Pays = () => {
             Tổng số tiền ({cart.products.length} sản phẩm):
           </Typography>
           <Typography variant="h5" color="error" sx={{ fontWeight: 600 }}>
-            đ{(calculateTotal() + shippingFee).toLocaleString()}
+            {(calculateTotal() + shippingFee).toLocaleString()} đ
           </Typography>
         </Box>
 

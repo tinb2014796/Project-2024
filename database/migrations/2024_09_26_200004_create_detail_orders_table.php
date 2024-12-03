@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('quantity');
             $table->decimal('total', 15, 0);
             $table->string('discount')->nullable();
+            $table->boolean('is_rated')->default(false);
             $table->timestamps();
 
             $table->foreignId('or_id')->constrained('orders')->onDelete('cascade');

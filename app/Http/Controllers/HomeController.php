@@ -19,12 +19,12 @@ class HomeController extends Controller
         $customers = Customer::all(); 
         $products = Products::all();
 
-        // Lọc đơn hàng có status = 5
-        $completedOrders = $orders->where('status', 5);
+        // Lọc đơn hàng có status = 5 và loại bỏ status = -1
+        $completedOrders = $orders->where('status', 5)->where('status', '!=', -1);
 
         // Tính doanh thu theo ngày
         $dailyRevenue = $completedOrders->groupBy(function($order) {
-            return \Carbon\Carbon::parse($order->created_at)->format('Y-m-d');
+            return \Carbon\Carbon::parse($order->updated_at)->format('Y-m-d');
         })->map(function($dayOrders) use ($details) {
             return $dayOrders->sum(function($order) use ($details) {
                 $orderDetails = $details->where('or_id', $order->id);
@@ -35,7 +35,7 @@ class HomeController extends Controller
 
         // Tính doanh thu theo tuần
         $weeklyRevenue = $completedOrders->groupBy(function($order) {
-            return \Carbon\Carbon::parse($order->created_at)->format('W');
+            return \Carbon\Carbon::parse($order->updated_at)->format('W');
         })->map(function($weekOrders) use ($details) {
             return $weekOrders->sum(function($order) use ($details) {
                 $orderDetails = $details->where('or_id', $order->id);
@@ -46,7 +46,7 @@ class HomeController extends Controller
 
         // Tính doanh thu theo tháng
         $monthlyRevenue = $completedOrders->groupBy(function($order) {
-            return \Carbon\Carbon::parse($order->created_at)->format('m');
+            return \Carbon\Carbon::parse($order->updated_at)->format('m');
         })->map(function($monthOrders) use ($details) {
             return $monthOrders->sum(function($order) use ($details) {
                 $orderDetails = $details->where('or_id', $order->id);
@@ -57,7 +57,7 @@ class HomeController extends Controller
 
         // Tính doanh thu theo năm
         $yearlyRevenue = $completedOrders->groupBy(function($order) {
-            return \Carbon\Carbon::parse($order->created_at)->format('Y');
+            return \Carbon\Carbon::parse($order->updated_at)->format('Y');
         })->map(function($yearOrders) use ($details) {
             return $yearOrders->sum(function($order) use ($details) {
                 $orderDetails = $details->where('or_id', $order->id);

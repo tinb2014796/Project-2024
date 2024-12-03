@@ -32,4 +32,5 @@ class Rating extends Model
     {
         return $this->belongsTo(Customer::class, 'cus_id');
     }
+    
 }

@@ -479,7 +479,7 @@ const GoodsReceipt = () => {
                                                     }
                                                 }}
                                             >
-                                                {products?.map((p) => (
+                                                {products?.filter(p => p.b_id === formData.brand_id).map((p) => (
                                                     <MenuItem key={p.id} value={p.id}>{p.p_name}</MenuItem>
                                                 ))}
                                             </Select>

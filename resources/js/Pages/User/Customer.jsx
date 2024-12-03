@@ -42,8 +42,7 @@ const User = () => {
       points: 25,
       value_max: 50000,
       value_min: 100000,
-      description: 'Áp dụng cho đơn hàng từ 200.000đ',
-      isOwned: false
+      description: 'Áp dụng cho đơn hàng từ 200.000đ'
     },
     {
       id: 2, 
@@ -51,8 +50,7 @@ const User = () => {
       points: 40,
       value_max: 100000,
       value_min: 1500000,
-      description: 'Áp dụng cho đơn hàng từ 1.500.000đ',
-      isOwned: false
+      description: 'Áp dụng cho đơn hàng từ 1.500.000đ'
     },
     {
       id: 3,
@@ -60,16 +58,14 @@ const User = () => {
       points: 50,
       value_max: 200000,
       value_min: 1800000, 
-      description: 'Áp dụng cho đơn hàng từ 1.800.000đ',
-      isOwned: false
+      description: 'Áp dụng cho đơn hàng từ 1.800.000đ'
     }
   ]);
 
   useEffect(() => {
     if (customer.sale_offs) {
       setVouchers(prev => prev.map(voucher => ({
-        ...voucher,
-        isOwned: customer.sale_offs.some(so => so.s_name === voucher.name)
+        ...voucher
       })));
     }
   }, [customer.sale_offs]);
@@ -406,16 +402,16 @@ const User = () => {
                       fullWidth
                       sx={{
                         mt: 2,
-                        backgroundColor: voucher.isOwned ? '#888' : '#00BCD4',
+                        backgroundColor: '#00BCD4',
                         '&:hover': {
-                          backgroundColor: voucher.isOwned ? '#888' : '#00ACC1'
+                          backgroundColor: '#00ACC1'
                         },
                         borderRadius: '20px'
                       }}
-                      disabled={customer.cus_points < voucher.points || voucher.isOwned}
+                      disabled={customer.cus_points < voucher.points}
                       onClick={() => handleTradePoints(voucher)}
                     >
-                      {voucher.isOwned ? 'Đã sở hữu' : 'Đổi ngay'}
+                      {'Đổi ngay'}
                     </Button>
                   </Paper>
                 </Grid>

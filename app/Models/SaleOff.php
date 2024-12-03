@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Products;
+use App\Models\Oders;
+use App\Models\Customer;
 
 class SaleOff extends Model
 {
@@ -33,5 +35,9 @@ class SaleOff extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'cus_id', 'id');
+    }
+    public function order()
+    {
+        return $this->hasMany(Oders::class, 'voucher_code', 's_code');
     }
 }
