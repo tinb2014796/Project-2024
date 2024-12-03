@@ -172,7 +172,7 @@ class ProductsController extends Controller
     public function apiDetailProduct($id)
     {
         $product = Products::with(['images', 'category', 'saleOff', 'rating' => function($query) {
-            $query->latest()->take(5);
+            $query->with('customer')->latest()->take(5);
         }])->find($id);
 
         $averageRating = $product->rating()->avg('ra_score');
